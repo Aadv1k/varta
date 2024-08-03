@@ -1,5 +1,4 @@
 if [ -n $VIRTUAL_ENV ]; then 
-    exit 0
+    pip3 freeze > ./server/requirements.txt
 fi
 
-pip3 freeze > ./server/requirements.txt
