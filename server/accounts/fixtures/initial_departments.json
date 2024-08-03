@@ -1,0 +1,5 @@
+[
+    {"model": "accounts.department", "pk": 0, "fields": {"department_name": "mathematics"}},
+    {"model": "accounts.department", "pk": 1, "fields": {"department_name": "english"}},
+    {"model": "accounts.department", "pk": 1, "fields": {"department_name": "science"}}
+]

@@ -39,7 +39,6 @@ To login, a user specifies their school, along with `phone_number` an SMS is sen
 
 > this is a measure to reduce/spread the cost of user login. a certain percent of the time email will be sent, else the number will be used. This is done since sending emails is much cheaper than sending OTPs
 
-
 - When a user first logs in they are assigned an access and refresh token
 - the access token stays valid **for a day** and can be renewed through a refresh token which stays valid for a week
 
@@ -90,7 +89,7 @@ All information for a school, is organized in the following way
     - to promote a student they must be explicitly re-admitted to the school
 - teachers much also go through a re-assignemnt process for their deparment and class
 
-- all announcements are created under an academic year     
+- all announcements are created under an academic year
 - when a user requests an announcement set, they receive the paginated set for that academic particular year
 
 ### Announcements
@@ -195,8 +194,6 @@ the primary contacts will be used by default, unless they fail. In which case th
 
 #### Teacher
 
-- 
-
 > A teacher is assigned to multiple departments (mathematics, social_studies, english) this means they teach multiple subjects
 > a teacher needs to be assigned to a class, and it needs to be specificed about the subject taught (TeacherClass: class, subject, teacher, `is_class_teacher`)
 
@@ -265,6 +262,15 @@ The reference table is pre-defined in accordance with this logic (hence their is
 }
 ```
 ### Resource
+
+### admin
+
+> NOT IMPLEMENTED
+> Currently, it is assumed to create any new users the django-admin panel will be used
+
+### accounts
+
+`POST /v1/me/login`
 
 ### announcements
 
