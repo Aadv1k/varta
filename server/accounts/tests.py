@@ -1,24 +1,43 @@
-from django.test import TestCase
+from rest_framework.test import APITestCase
+from django.urls import reverse
 
-class UserCreateTests(TestCase):
-    def admin_can_create_user(self):
+class UserActionTest(APITestCase):
+    def setUp(self):
         pass
 
-    def admin_can_delete_user(self):
+    def test_user_can_login_with_email(self):
+        response = self.client.post(reverse("user_login"), {
+            "input_format": "email",
+            "input_data": "aadv1k@outlook.com",
+        }, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.data.get("data"))
+
+
+    def test_user_cant_login_with_invalid_email(self):
+        response = self.client.post(reverse("user_login"), {
+            "input_format": "email",
+            "input_data": "aadv1k.foo",
+        }, format="json")
+
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.post(reverse("user_login"), {
+            "input_format": "email",
+            "input_data": "foo@bar.com",
+        }, format="json")
+
+        self.assertEqual(response.status_code, 400)
+
+    def user_can_login_with_phone(self):
         pass
 
-    def admin_can_update_user(self):
+    def user_can_verify_self_with_otp_(self):
         pass
 
-    def admin_can_batch_create_users(self):
+    def user_can_renew_access_token(self):
         pass
 
-    def admin_can_batch_delete_users(self):
+    def user_can_request_their_details(self):
         pass
-
-    def admin_can_batch_update_users(self):
-        pass
-
-
-class UserLoginTests(TestCase):
-    pass
