@@ -40,7 +40,7 @@ To login, a user specifies their school, along with `phone_number` an SMS is sen
 > this is a measure to reduce/spread the cost of user login. a certain percent of the time email will be sent, else the number will be used. This is done since sending emails is much cheaper than sending OTPs
 
 - When a user first logs in they are assigned an access and refresh token
-- the access token stays valid **for a day** and can be renewed through a refresh token which stays valid for a week
+- the access token stays valid **for a week** and can be renewed through a refresh token which stays valid **for a month**
 
 the user jwt token encodes the following information
 
@@ -263,16 +263,63 @@ The reference table is pre-defined in accordance with this logic (hence their is
 ```
 ### Resource
 
-### admin
+### Authentication and Authorization
 
-> NOT IMPLEMENTED
-> Currently, it is assumed to create any new users the django-admin panel will be used
+`GET /v1/me`
 
-### accounts
+- role
+- first_name
+- middle_name
+- last_name
+
+IF STUDENT
+
+- classroom
+    - standard
+    - division
+
+IF TEACHER / ADMIN
+
+- `is_subject_teacher`
+- classroom
+    - standard
+    - division
+- `teaches_classrooms` (teaches in classrooms)
+  - standard
+  - division
+- departments (array)
+    - id
+    - name
 
 `POST /v1/me/login`
 
-### announcements
+- input_format: email or phone
+- input_data
+
+- data
+  - `otp_sent_to`: format
+
+`POST /v1/me/verify`
+
+- input_format
+- input_data 
+- otp
+
+OUTPUT
+
+- data
+  - access token
+  - refresh token
+
+`GET /v1/me/refresh`
+
+OUTPUT
+
+- data
+  - access token
+
+
+### Create, View, Update, Delete Announcements
 
 - `POST /v1/announcements`
 - `GET /v1/announcements`
@@ -308,6 +355,30 @@ The reference table is pre-defined in accordance with this logic (hence their is
     - `date_from=`
     - `posted_by=`
     - `q=`
+
+```
+{
+    /* ... */
+
+    data: [
+        announcements: {
+            title: "Announcement title",
+            body: "Announcement body",
+            posted_by: "Jane Doe",
+            high_priority: true,
+            scope: [
+                { scope_type: "students", scope_filter_type: "stu_standard_division", scope_filter_content: "9A" },
+                { scope_type: "students", scope_filter_type: "stu_standard_division", scope_filter_content: "9B" },
+                { scope_type: "students", scope_filter_type: "stu_standard_division", scope_filter_content: "9C" }
+            ]
+        }
+    ]
+    metadata: {
+        results: foo
+    }
+    /* ... */
+}
+```
 
 ### teachers
 
