@@ -3,21 +3,7 @@ from schools.models import School
 import uuid
 import re
 
-class ClassroomManager(models.Manager):
-    def get_by_std_div_or_none(s: str):
-        if Classroom.validate_std_div_str(s):
-            standard = s[:-1]
-            division = s[-1]
-            try:
-                return Classroom.objects.get(standard=standard, division=division)
-            except Classroom.DoesNotExist:
-                return None
-        return None
-
-# NOTE: this is a reference table data at ./fixtures/initial_classrooms.json
 class Classroom(models.Model):
-    objects = ClassroomManager()
-
     STANDARD_CHOICES = [(str(i), str(i)) for i in range(1, 13)]
     DIVISION_CHOICES = [(chr(i), chr(i)) for i in range(ord('A'), ord('J') + 1)]
 
@@ -27,6 +13,17 @@ class Classroom(models.Model):
     @staticmethod
     def validate_std_div_str(s: str) -> bool:
         return bool(re.match(r'^(1[0-2]|[1-9])[A-J]$', s))
+
+    @staticmethod
+    def get_by_std_div_or_none(s: str):
+        if Classroom.validate_std_div_str(s):
+            standard = s[:-1]
+            division = s[-1]
+            try:
+                return Classroom.objects.get(standard=standard, division=division)
+            except Classroom.DoesNotExist:
+                return None
+        return None
 
     def __str__(self):
         return f"{self.standard}{self.division}"

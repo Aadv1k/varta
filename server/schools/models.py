@@ -12,7 +12,6 @@ class School(models.Model):
     def __str__(self):
         return self.name
     
-
 class AcademicYear(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
