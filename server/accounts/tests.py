@@ -43,27 +43,27 @@ class UserActionTest(APITestCase):
             contact_data="+919123456789"
         )
 
-    def test_user_cant_login_with_invalid_email(self):
+    def test_user_cannot_login_with_invalid_school_id(self):
         response = self.client.post(reverse("user_login"), {
             "school_id": 12,
             "input_format": "email",
             "input_data": "aadv1k.foo",
         }, format="json")
 
-        
-        print(response.data)
-        self.assertEqual(response.status_code, 400)
+        self.assertTrue(any(error['field'] == 'school_id' for error in response.data.get("errors")))
 
     def test_user_cant_login_with_non_existent_email(self):
         response = self.client.post(reverse("user_login"), {
+            "school_id": self.school.id,
             "input_format": "email",
             "input_data": "foo@bar.com",
         }, format="json")
 
-        self.assertEqual(response.status_code, 400)
+        self.assertTrue(any(error['field'] == 'input_data' for error in response.data.get("errors")))
 
     def test_user_can_login_with_email(self):
         response = self.client.post(reverse("user_login"), {
+            "school_id": self.school.id,
             "input_format": "email",
             "input_data": self.primary_contact_email.contact_data,
         }, format="json")

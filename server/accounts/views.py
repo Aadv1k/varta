@@ -18,12 +18,23 @@ def user_login(request):
                 .build()
 
 
-    UserContact.objects.get(
+    user_contact_query = UserContact.objects.filter(
         user__school=serializer.validated_data.get("school_id"),
         contact_type=serializer.validated_data.get("input_format"),
         contact_data=serializer.validated_data.get("input_data")
     )
 
+    # either the user odesn't exist or the contact doesn't exist
+    if not user_contact_query.exists():
+        return ErrorResponseBuilder() \
+                .set_code(400)        \
+                .set_message("user doesnt exist") \
+                .set_details([{"field": "input_data", "error": "Couldn't find the user in the system"}]) \
+                .build()
+
+    user_contact = user_contact_query.first()
+
+    print(f"{user_contact.contact_type} OTP SEND TO {user_contact.contact_data}")
     
     return SuccessResponseBuilder().set_data({
         "access_token": "",
