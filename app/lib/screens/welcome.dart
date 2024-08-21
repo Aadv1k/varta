@@ -1,5 +1,7 @@
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/screens/phone_login.dart';
+import 'package:app/widgets/button.dart';
 import 'package:flutter/material.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -14,7 +16,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   String? selectedOrganizationID;
   bool shouldAllowSelection = true;
 
-  void getListOfOrganizations() {}
+  // TODO: send the user to phone login screen by default
+  void handleButtonPress() {}
 
   @override
   void initState() {
@@ -86,18 +89,20 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 disabled: !shouldAllowSelection,
               ),
               const SizedBox(height: Spacing.sm),
-              Container(
-                constraints: const BoxConstraints(maxWidth: 460.0),
-                height: 80,
-                width: double.infinity,
-                child: ElevatedButton(
-                    onPressed: () {},
-                    style: Theme.of(context).elevatedButtonTheme.style,
-                    child: const Text("Get Started",
-                        style: TextStyle(
-                            color: TWColor.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: FontSizes.textBase))),
+              PrimaryButton(
+                text: "Get Started",
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PhoneLogin(
+                                schoolSelection: (
+                                  selectedOrganizationID!,
+                                  organizations[selectedOrganizationID]!
+                                ),
+                              )));
+                },
+                isLight: true,
               )
             ],
           )),

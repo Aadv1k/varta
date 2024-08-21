@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/screens/email_login.dart';
+import 'package:app/screens/phone_login.dart';
 import 'package:app/screens/welcome.dart';
 import 'package:flutter/material.dart';
 
@@ -33,9 +35,17 @@ class MyApp extends StatelessWidget {
                 height: 1.5,
                 fontWeight: FontWeight.w900,
                 color: AppColors.heading),
+            displaySmall: TextStyle(
+                fontSize: FontSizes.textBase,
+                fontWeight: FontWeight.bold,
+                color: AppColors.heading),
             headlineMedium: TextStyle(
                 fontSize: FontSizes.textLg,
                 fontWeight: FontWeight.bold,
+                color: AppColors.heading),
+            headlineLarge: TextStyle(
+                fontSize: FontSizes.text2xl,
+                fontWeight: FontWeight.w900,
                 color: AppColors.heading),
             bodyLarge: TextStyle(
                 fontSize: FontSizes.textLg,
