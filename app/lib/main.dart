@@ -17,13 +17,34 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Varta',
       theme: ThemeData(
+        elevatedButtonTheme: const ElevatedButtonThemeData(
+            style: ButtonStyle(
+                backgroundColor:
+                    WidgetStatePropertyAll(AppColors.darkPrimaryColor),
+                textStyle: WidgetStatePropertyAll(TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold)))),
         textTheme: const TextTheme(
-          displayLarge: TextStyle(fontSize: FontSizes.xxxl, height: 1.5, fontWeight: FontWeight.w900, color: Colors.white),
-          bodyLarge: TextStyle(fontSize: FontSizes.lg,  fontWeight: FontWeight.normal, color: AppColors.body),
-          bodyMedium: TextStyle(fontSize: FontSizes.md,  fontWeight: FontWeight.normal, color: AppColors.body)
-        ),
+            labelMedium:
+                TextStyle(fontSize: FontSizes.textBase, color: Colors.black),
+            displayLarge: TextStyle(
+                fontSize: FontSizes.text4xl,
+                height: 1.5,
+                fontWeight: FontWeight.w900,
+                color: AppColors.heading),
+            headlineMedium: TextStyle(
+                fontSize: FontSizes.textXl,
+                fontWeight: FontWeight.bold,
+                color: AppColors.heading),
+            bodyLarge: TextStyle(
+                fontSize: FontSizes.textLg,
+                fontWeight: FontWeight.normal,
+                color: AppColors.body),
+            bodyMedium: TextStyle(
+                fontSize: FontSizes.textBase,
+                fontWeight: FontWeight.normal,
+                color: AppColors.body)),
         useMaterial3: true,
       ),
       home: const InitialScreen(),
@@ -44,10 +65,10 @@ At the time of initialization we do the following
 */
 
 class AuthTokenPair {
-  final String accessToken; 
-  final String refreshToken; 
+  final String accessToken;
+  final String refreshToken;
 
-  AuthTokenPair({ required this.accessToken, required this.refreshToken });
+  AuthTokenPair({required this.accessToken, required this.refreshToken});
 }
 
 class InitialScreen extends StatelessWidget {
@@ -67,7 +88,7 @@ class InitialScreen extends StatelessWidget {
 
   AuthTokenPair? _tryAndRenewAuthTokenPair() {
     return null;
-  }  
+  }
 
   @override
   Widget build(BuildContext context) {
