@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
                 fontWeight: FontWeight.w900,
                 color: AppColors.heading),
             headlineMedium: TextStyle(
-                fontSize: FontSizes.textXl,
+                fontSize: FontSizes.textLg,
                 fontWeight: FontWeight.bold,
                 color: AppColors.heading),
             bodyLarge: TextStyle(
