@@ -1,10 +1,7 @@
-import 'dart:collection';
-import 'dart:io';
-
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/screens/email_login.dart';
-import 'package:app/screens/phone_login.dart';
+import 'package:app/models/user.dart';
+import 'package:app/screens/otp_verification.dart';
 import 'package:app/screens/welcome.dart';
 import 'package:flutter/material.dart';
 

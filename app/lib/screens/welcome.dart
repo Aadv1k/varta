@@ -1,5 +1,6 @@
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/models/user.dart';
 import 'package:app/screens/phone_login.dart';
 import 'package:app/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -24,16 +25,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     // TODO: GET /api/v1/orgs
 
     setState(() {
-      organizations = {
-        "sri-chaitanya-techno-school-hyderabad":
-            "Sri Chaitanya Techno School, Hyderabad",
-        "dav-public-school-delhi": "DAV Public School, Delhi",
-        "holy-cross-school-mumbai": "Holy Cross School, Mumbai",
-        "st-josephs-convent-school-bangalore":
-            "St. Joseph's Convent School, Bangalore",
-        "kendriya-vidyalaya-chanakyapuri-delhi":
-            "Kendriya Vidyalaya Chanakyapuri, Delhi",
-      };
+      organizations = schoolData;
 
       selectedOrganizationID =
           organizations.isNotEmpty ? organizations.keys.first : null;
@@ -96,9 +88,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => PhoneLogin(
-                                schoolSelection: (
-                                  selectedOrganizationID!,
-                                  organizations[selectedOrganizationID]!
+                                userLoginData: UserLoginData(
+                                  schoolIDAndName: (
+                                    selectedOrganizationID!,
+                                    organizations[selectedOrganizationID]!
+                                  ),
                                 ),
                               )));
                 },

@@ -2,16 +2,17 @@ import 'dart:async';
 
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/models/user.dart';
 import 'package:app/screens/email_login.dart';
+import 'package:app/screens/otp_verification.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/phone_number_input.dart';
 import 'package:flutter/material.dart';
 
 class PhoneLogin extends StatefulWidget {
-  const PhoneLogin({Key? key, required (String, String) schoolSelection})
-      : super(key: key);
+  final UserLoginData userLoginData;
 
-  final (String, String) schoolSelection = ("", "");
+  const PhoneLogin({super.key, required UserLoginData this.userLoginData});
 
   @override
   _PhoneLoginState createState() => _PhoneLoginState();
@@ -23,20 +24,31 @@ class _PhoneLoginState extends State<PhoneLogin> {
   String? phoneNumber;
   String? errorMessage;
 
-  void handleVerificationClick() {
+  void handleVerificationClick(context) {
     setState(() {
       isLoading = true;
       hasError = false;
       errorMessage = null;
     });
 
-    Timer(const Duration(seconds: 2), () {
-      setState(() {
-        hasError = true;
-        errorMessage = "Unable to send the OTP due to an unknown error";
-        isLoading = false;
-      });
-    });
+    // TODO: next screen here
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => OTPVerification(
+                    userLoginData: widget.userLoginData.copyWith(
+                  inputData: phoneNumber,
+                  inputType: LoginType.phoneNumber,
+                ))));
+
+    // Timer(const Duration(seconds: 2), () {
+    //   setState(() {
+    //     hasError = true;
+    //     errorMessage = "Unable to send the OTP due to an unknown error";
+    //     isLoading = false;
+    //   });
+    // });
   }
 
   @override
@@ -47,7 +59,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
           child: AppBar(
               elevation: 0,
               toolbarHeight: 72,
-              title: Text("hello world",
+              title: Text(widget.userLoginData.schoolIDAndName!.$2,
                   style: Theme.of(context)
                       .textTheme
                       .displaySmall!
@@ -100,8 +112,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => EmailLogin(
-                                  schoolSelection: widget.schoolSelection,
-                                )),
+                                userLoginData: widget.userLoginData)),
                       );
                     },
                     child: Text("Use Email Instead",
@@ -109,10 +120,10 @@ class _PhoneLoginState extends State<PhoneLogin> {
                             .textTheme
                             .bodyMedium
                             ?.copyWith(color: TWColor.blue700))),
-                Spacer(),
+                const Spacer(),
                 PrimaryButton(
                   text: "Verify",
-                  onPressed: handleVerificationClick,
+                  onPressed: () => handleVerificationClick(context),
                   isDisabled: phoneNumber == null || phoneNumber!.length != 10,
                   isLoading: isLoading,
                 )

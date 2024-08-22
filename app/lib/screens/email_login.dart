@@ -2,16 +2,17 @@ import 'dart:async';
 
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/models/user.dart'; // Adjust this import based on your actual file structure
+import 'package:app/screens/otp_verification.dart';
 import 'package:app/screens/phone_login.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/email_input.dart';
 import 'package:flutter/material.dart';
 
 class EmailLogin extends StatefulWidget {
-  const EmailLogin({Key? key, required (String, String) schoolSelection})
-      : super(key: key);
+  final UserLoginData userLoginData;
 
-  final (String, String) schoolSelection = ("", "");
+  const EmailLogin({Key? key, required this.userLoginData}) : super(key: key);
 
   @override
   _EmailLoginState createState() => _EmailLoginState();
@@ -30,14 +31,26 @@ class _EmailLoginState extends State<EmailLogin> {
       errorMessage = null;
     });
 
-    // Implement your email verification logic here
-    Timer(const Duration(seconds: 2), () {
-      setState(() {
-        hasError = true;
-        errorMessage = "Unable to send the OTP due to an unknown error";
-        isLoading = false;
-      });
-    });
+    // Update user login data with email information
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => OTPVerification(
+                    userLoginData: widget.userLoginData.copyWith(
+                  inputData: email,
+                  inputType: LoginType
+                      .email, // Assuming you have an enum or similar for LoginType
+                ))));
+
+    // // Simulate a network request or verification process
+    // Timer(const Duration(seconds: 2), () {
+    //   setState(() {
+    //     hasError = true;
+    //     errorMessage = "Unable to send the OTP due to an unknown error";
+    //     isLoading = false;
+    //   });
+    // });
   }
 
   @override
@@ -48,8 +61,8 @@ class _EmailLoginState extends State<EmailLogin> {
         child: AppBar(
           elevation: 0,
           toolbarHeight: 72,
-          title: Text(widget.schoolSelection.$2,
-              style: Theme.of(context).textTheme.displayMedium),
+          title: Text(widget.userLoginData.schoolIDAndName!.$2,
+              style: Theme.of(context).textTheme.displaySmall),
           centerTitle: true,
           leading: IconButton(
             onPressed: () {
@@ -103,8 +116,10 @@ class _EmailLoginState extends State<EmailLogin> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          PhoneLogin(schoolSelection: widget.schoolSelection)),
+                    builder: (context) => PhoneLogin(
+                      userLoginData: widget.userLoginData,
+                    ),
+                  ),
                 );
               },
               child: Text(
@@ -115,7 +130,7 @@ class _EmailLoginState extends State<EmailLogin> {
                     ?.copyWith(color: TWColor.blue700),
               ),
             ),
-            Spacer(),
+            const Spacer(),
             PrimaryButton(
               text: "Verify",
               onPressed: handleVerificationClick,
