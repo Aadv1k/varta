@@ -4,6 +4,8 @@ from .serializers import UserLoginSerializer
 
 from .models import UserContact
 
+from django.conf import settings
+
 from common.response_builder import ErrorResponseBuilder, SuccessResponseBuilder
 
 @api_view(["POST"])
@@ -28,15 +30,14 @@ def user_login(request):
     if not user_contact_query.exists():
         return ErrorResponseBuilder() \
                 .set_code(400)        \
-                .set_message("user doesnt exist") \
+                .set_message("The specified user, or the user contact does not exist") \
                 .set_details([{"field": "input_data", "error": "Couldn't find the user in the system"}]) \
                 .build()
 
     user_contact = user_contact_query.first()
 
-    print(f"{user_contact.contact_type} OTP SEND TO {user_contact.contact_data}")
-    
-    return SuccessResponseBuilder().set_data({
-        "access_token": "",
-        "refresh_token": "",
-    }).build()
+    # TODO: send the OTP here
+
+    return SuccessResponseBuilder() \
+                .set_message(f"Sent an OTP to {user_contact.input_data}") \
+                .set_metadata({"otp_length": settings.otp_length, "otp_expires_in": f"{settings.otp_expiry_in_seconds / 60} mins"}).build()

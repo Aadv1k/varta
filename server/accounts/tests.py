@@ -1,5 +1,7 @@
 from rest_framework.test import APITestCase
 from django.urls import reverse
+from unittest import skip
+
 
 from .models import Student, UserContact, Classroom
 from schools.models import School
@@ -72,14 +74,22 @@ class UserActionTest(APITestCase):
         self.assertIsNotNone(response.data.get("data"))
 
 
-    def user_can_login_with_phone(self):
-        pass
+    def test_user_can_login_with_phone(self):
+        response = self.client.post(reverse("user_login"), {
+            "school_id": self.school.id,
+            "input_format": "phone_number",
+            "input_data": "+919876543210",
+        }, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.data.get("data"))
+
 
     def user_can_verify_self_with_otp_(self):
-        pass
+        self.skipTest("not implemented")
 
     def user_can_renew_access_token(self):
-        pass
+        self.skipTest("not implemented")
 
     def user_can_request_their_details(self):
-        pass
+        self.skipTest("not implemented")
