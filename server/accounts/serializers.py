@@ -9,6 +9,10 @@ import re
 email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 phone_number_regex = re.compile(r"^\+\d{10,15}$")
 
+class UserVerificationSerializer(serializers.Serializer):
+    input_data = serializers.CharField()
+    otp = serializers.CharField(min_length=6, max_length=6)
+
 class UserLoginSerializer(serializers.Serializer):
     input_format = serializers.ChoiceField(choices=UserContact.ContactType.choices)
     input_data = serializers.CharField()

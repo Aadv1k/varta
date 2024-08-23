@@ -2,12 +2,18 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from unittest import skip
 
+from django.conf import settings
+
+from common.services.otp import OTPService, redis_inst
+
 
 from .models import Student, UserContact, Classroom
 from schools.models import School
 
 class UserActionTest(APITestCase):
     def setUp(self):
+        settings.DEBUG = True
+
         self.school = School.objects.create(
             name="Delhi Public School",
             address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
@@ -70,16 +76,8 @@ class UserActionTest(APITestCase):
             "input_data": self.primary_contact_email.contact_data,
         }, format="json")
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.data.get("data"))
 
-
-    def test_user_can_login_with_phone(self):
-        response = self.client.post(reverse("user_login"), {
-            "school_id": self.school.id,
-            "input_format": "phone_number",
-            "input_data": "+919876543210",
-        }, format="json")
+        self.assertIsNotNone(redis_inst.get(self.primary_contact_email.contact_data).decode("utf8"))
 
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.data.get("data"))

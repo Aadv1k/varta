@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     "rest_framework",
 
     "schools",
-    "accounts"
+    "accounts",
+
+    "common"
 ]
 
 MIDDLEWARE = [
@@ -132,6 +134,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # == Custom Configuration == #
 # ========================== #
 
+from dotenv import load_dotenv
+load_dotenv() 
+
+import os
+
 # 5 minutes
 OTP_EXPIRY_IN_SECONDS = 300
 OTP_LENGTH = 6 
+
+
+MJ_APIKEY_PUBLIC = os.getenv("MJ_APIKEY_PUBLIC")
+MJ_APIKEY_PRIVATE = os.getenv("MJ_APIKEY_PRIVATE")
+
+if not MJ_APIKEY_PUBLIC or not MJ_APIKEY_PRIVATE:
+    raise Exception("BAD CONFIG mailjet MJ_APIKEY_PUBLIC and MJ_APIKEY_PRIVATE configuration for email required")

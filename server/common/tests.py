@@ -2,7 +2,8 @@ from django.test import TestCase
 
 from .services.otp import OTPService, redis_inst
 
-class TestServices(TestCase):
+
+class TestOTPService(TestCase):
     def setUp(self):
         self.number = "+912084422881"
 

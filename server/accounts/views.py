@@ -1,12 +1,16 @@
 from rest_framework.decorators import api_view
 
-from .serializers import UserLoginSerializer
+from .serializers import UserLoginSerializer, UserVerificationSerializer
 
 from .models import UserContact
 
 from django.conf import settings
 
 from common.response_builder import ErrorResponseBuilder, SuccessResponseBuilder
+
+from common.services.otp import OTPService
+from common.services.email import send_verification_email
+
 
 @api_view(["POST"])
 def user_login(request):
@@ -36,8 +40,58 @@ def user_login(request):
 
     user_contact = user_contact_query.first()
 
-    # TODO: send the OTP here
+    was_generated, error_message_or_otp = OTPService.create_and_store_otp(user_contact.contact_data)
+
+    if not was_generated:
+        ErrorResponseBuilder() \
+            .set_code(500)     \
+            .set_message("Failed to generate OTP due to internal error") \
+            .set_details({ "error_detail": error_message }) \
+            .build()
+
+    if user_contact.contact_type == UserContact.ContactType.EMAIL:
+        was_sent_successfully, error_message = send_verification_email(user_contact.contact_data, "Your Varta verification code", f"Your one time login code for varta is <h2>{error_message_or_otp}</h2>")
+        if not was_sent_successfully:
+            return ErrorResponseBuilder() \
+                        .set_code(500)     \
+                        .set_message("Failed to send verification email at the moment") \
+                        .set_details({ "error_detail": error_message }) \
+                        .build()
+
+    elif user_contact.contact_type == UserContact.ContactType.PHONE_NUMBER:
+        assert False, "Not Implemented"
 
     return SuccessResponseBuilder() \
-                .set_message(f"Sent an OTP to {user_contact.input_data}") \
-                .set_metadata({"otp_length": settings.otp_length, "otp_expires_in": f"{settings.otp_expiry_in_seconds / 60} mins"}).build()
+                .set_message(f"Sent an OTP to {user_contact.contact_data}") \
+                .set_metadata({"otp_length": settings.OTP_LENGTH, "otp_expires_in": f"{settings.OTP_EXPIRY_IN_SECONDS / 60} mins"}).build()
+
+
+
+@api_view(["POST"])
+def user_verify(request):
+    serializer = UserVerificationSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return ErrorResponseBuilder() \
+                .set_code(400)        \
+                .set_message(serializer.errors.get("non_field_errors") or "Unable to verify you") \
+                .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
+                .build()
+
+   
+
+    contact_data, provided_otp = serializer.validated_data["input_data"], serializer.validated_data["otp"]
+    is_otp_valid, error = OTPService.verify_otp(contact_data, provided_otp)
+
+    if not is_otp_valid:
+        return ErrorResponseBuilder() \
+                .set_code(400)        \
+                .set_message(error)   \
+                .build()
+
+    user = UserContact.objects.filter(contact_data=contact_data).first().user
+
+    return SuccessResponseBuilder() \
+                .set_message(f"Successfully logged in the user") \
+                .set_data({"access_token": None}) \
+                .build()
