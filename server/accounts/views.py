@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes
 
 from .serializers import UserLoginSerializer, UserVerificationSerializer
 
@@ -10,6 +10,9 @@ from common.response_builder import ErrorResponseBuilder, SuccessResponseBuilder
 
 from common.services.otp import OTPService
 from common.services.email import send_verification_email
+from common.services.token import TokenService, TokenPayload
+
+from .authentication import JWTAuthentication
 
 
 @api_view(["POST"])
@@ -91,7 +94,36 @@ def user_verify(request):
 
     user = UserContact.objects.filter(contact_data=contact_data).first().user
 
+    # TODO: derive the issuer from the user agent string  
+    access_token, refresh_token = TokenService.generate_token_pair(TokenPayload(sub=str(user.public_id), role=user.user_type, iss="varta.app"))
+
     return SuccessResponseBuilder() \
                 .set_message(f"Successfully logged in the user") \
-                .set_data({"access_token": None}) \
+                .set_data(dict(access_token=access_token, refresh_token=refresh_token)) \
+                .build()
+
+@api_view(["POST"])
+def user_token_refresh(request):
+    refresh_token = request.data.get("refresh_token")
+
+    if not refresh_token:
+        return ErrorResponseBuilder() \
+                .set_code(400)        \
+                .set_message("Refresh token not found") \
+                .build()
+
+    try:
+        payload = TokenService.try_decode_token(refresh_token):
+        access_token, _ = TokenService.generate_token_pair(payload)
+
+        return SuccessResponseBuilder() \
+                    .set_message(f"Token refreshed") \
+                    .set_data(dict(access_token=access_token)) \
+                    .build()
+
+    except Exception as e:
+        return ErrorResponseBuilder() \
+                .set_code(400)        \
+                .set_message("Invalid refresh token") \
+                .set_details([{"field": "refresh_token", "error": str(e)}]) \
                 .build()

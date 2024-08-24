@@ -82,12 +82,49 @@ class UserActionTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.data.get("data"))
 
+    def test_user_cannot_verify_self_with_bad_otp(self):
+        self.client.post(reverse("user_login"), {
+            "school_id": self.school.id,
+            "input_format": "email",
+            "input_data": self.primary_contact_email.contact_data,
+        }, format="json")
 
-    def user_can_verify_self_with_otp_(self):
-        self.skipTest("not implemented")
+        response = self.client.post(reverse("user_verify"), {
+            "school_id": self.school.id,
+            "input_data": self.primary_contact_email.contact_data,
+            "otp": "123456"
+        }, format="json")
 
-    def user_can_renew_access_token(self):
-        self.skipTest("not implemented")
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_can_verify_self_with_otp(self):
+        self.client.post(reverse("user_login"), {
+            "school_id": self.school.id,
+            "input_format": "email",
+            "input_data": self.primary_contact_email.contact_data,
+        }, format="json")
+
+        generated_otp = redis_inst.get(self.primary_contact_email.contact_data).decode("utf8")
+
+        response = self.client.post(reverse("user_verify"), {
+            "school_id": self.school.id,
+            "input_data": self.primary_contact_email.contact_data,
+            "otp": generated_otp
+        }, format="json")
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+
+        self.assertIn("access_token", data["data"])
+        self.assertIn("refresh_token", data["data"])
+
+    def test_user_cannot_refresh_with_bad_token(self):
+        response = self.client.post(reverse("user_refresh"), {
+            "refresh_token": 1234
+        }, format="json")
+
+        self.assertEqual(response.status_code, 400)
 
     def user_can_request_their_details(self):
         self.skipTest("not implemented")

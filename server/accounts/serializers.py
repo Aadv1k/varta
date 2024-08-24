@@ -12,6 +12,16 @@ phone_number_regex = re.compile(r"^\+\d{10,15}$")
 class UserVerificationSerializer(serializers.Serializer):
     input_data = serializers.CharField()
     otp = serializers.CharField(min_length=6, max_length=6)
+    school_id = serializers.CharField()
+
+    def validate_school_id(self, data):
+        try:
+            School.objects.get(id=data)
+        except ValueError:
+            raise serializers.ValidationError("School ID must be a valid integer.")
+        except School.DoesNotExist:
+            raise serializers.ValidationError("School with this ID does not exist.")
+        return data
 
 class UserLoginSerializer(serializers.Serializer):
     input_format = serializers.ChoiceField(choices=UserContact.ContactType.choices)
