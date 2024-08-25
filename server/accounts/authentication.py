@@ -1,4 +1,4 @@
-from common.service.token import TokenService
+from common.services.token import TokenService
 
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed

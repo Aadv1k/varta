@@ -103,7 +103,7 @@ def user_verify(request):
                 .build()
 
 @api_view(["POST"])
-def user_token_refresh(request):
+def user_refresh(request):
     refresh_token = request.data.get("refresh_token")
 
     if not refresh_token:
@@ -113,7 +113,7 @@ def user_token_refresh(request):
                 .build()
 
     try:
-        payload = TokenService.try_decode_token(refresh_token):
+        payload = TokenService.try_decode_token(refresh_token)
         access_token, _ = TokenService.generate_token_pair(payload)
 
         return SuccessResponseBuilder() \

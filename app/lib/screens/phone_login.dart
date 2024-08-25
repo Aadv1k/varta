@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/user.dart';
 import 'package:app/screens/email_login.dart';
 import 'package:app/screens/otp_verification.dart';
+import 'package:app/services/authentication.dart';
+import 'package:app/services/common.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/phone_number_input.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
 class PhoneLogin extends StatefulWidget {
   final UserLoginData userLoginData;
@@ -24,14 +28,33 @@ class _PhoneLoginState extends State<PhoneLogin> {
   String? phoneNumber;
   String? errorMessage;
 
-  void handleVerificationClick(context) {
+  Future<void> handleVerificationClick(context) async {
     setState(() {
       isLoading = true;
       hasError = false;
       errorMessage = null;
     });
 
-    // TODO: next screen here
+    final service = UserAuthenticationService();
+
+    try {
+      await service.sendOTP(widget.userLoginData
+          .copyWith(inputData: phoneNumber, inputType: LoginType.phoneNumber));
+    } on ApiException catch (exc) {
+      setState(() {
+        isLoading = false;
+        hasError = true;
+        errorMessage = exc.message;
+      });
+      return;
+    } on ClientException {
+      setState(() {
+        isLoading = false;
+        hasError = true;
+        errorMessage = "Unable to connect at this moment. Try again later";
+      });
+      return;
+    }
 
     Navigator.push(
         context,
@@ -41,14 +64,6 @@ class _PhoneLoginState extends State<PhoneLogin> {
                   inputData: phoneNumber,
                   inputType: LoginType.phoneNumber,
                 ))));
-
-    // Timer(const Duration(seconds: 2), () {
-    //   setState(() {
-    //     hasError = true;
-    //     errorMessage = "Unable to send the OTP due to an unknown error";
-    //     isLoading = false;
-    //   });
-    // });
   }
 
   @override

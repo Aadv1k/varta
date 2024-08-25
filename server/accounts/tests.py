@@ -5,6 +5,7 @@ from unittest import skip
 from django.conf import settings
 
 from common.services.otp import OTPService, redis_inst
+from common.services.token import TokenService, TokenPayload
 
 
 from .models import Student, UserContact, Classroom
@@ -121,10 +122,20 @@ class UserActionTest(APITestCase):
 
     def test_user_cannot_refresh_with_bad_token(self):
         response = self.client.post(reverse("user_refresh"), {
-            "refresh_token": 1234
+            # Malacious token whose payload has been modified
+            "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MjQ1NjkyNjAsImV4cCI6MTcyNTE3NDA2MCwiaXNzIjoidmFydGEuYXBwIiwic3ViIjoiZWE0Yzc4Y2ItYWU0MS00ZmIzLTgwNjgtNjhhMTlhNmRiMDA0Iiwicm9sZSI6InRlYWNoZXIifQ.E0zM1vC_F7WPmmauhFD1J1s1pD-Ves4tMH-SKa8c0gY"
         }, format="json")
 
         self.assertEqual(response.status_code, 400)
 
-    def user_can_request_their_details(self):
-        self.skipTest("not implemented")
+    def test_user_can_refresh_with_good_token(self):
+
+        at, rt = TokenService.generate_token_pair(TokenPayload(sub=str(self.student.public_id), role=self.student.user_type, iss="varta.app"))
+        print(at)
+
+        response = self.client.post(reverse("user_refresh"), {
+            "refresh_token": rt
+        }, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("access_token", response.data["data"])
