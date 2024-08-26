@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:app/common/colors.dart';
@@ -6,12 +7,11 @@ import 'package:app/common/sizes.dart';
 import 'package:app/models/user.dart';
 import 'package:app/screens/email_login.dart';
 import 'package:app/screens/otp_verification.dart';
-import 'package:app/services/authentication.dart';
 import 'package:app/services/common.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/phone_number_input.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 class PhoneLogin extends StatefulWidget {
   final UserLoginData userLoginData;
@@ -35,19 +35,27 @@ class _PhoneLoginState extends State<PhoneLogin> {
       errorMessage = null;
     });
 
-    final service = UserAuthenticationService();
-
     try {
-      await service.sendOTP(widget.userLoginData
-          .copyWith(inputData: phoneNumber, inputType: LoginType.phoneNumber));
-    } on ApiException catch (exc) {
-      setState(() {
-        isLoading = false;
-        hasError = true;
-        errorMessage = exc.message;
-      });
-      return;
-    } on ClientException {
+      final response = await http.post(
+          Uri.http(BASE_API_URL, apiEndpoints[ApiEndpoint.userLogin]!),
+          body: {
+            "input_format": widget.userLoginData.inputType == LoginType.email
+                ? "email"
+                : "phone_number",
+            "input_data": widget.userLoginData.inputData,
+            "school_id": int.parse(widget.userLoginData.schoolIDAndName!.$1)
+          });
+
+      final responseData = jsonDecode(response.body);
+      if (response.statusCode != 200) {
+        setState(() {
+          isLoading = false;
+          hasError = true;
+          errorMessage = responseData["message"];
+        });
+        return;
+      }
+    } on http.ClientException {
       setState(() {
         isLoading = false;
         hasError = true;

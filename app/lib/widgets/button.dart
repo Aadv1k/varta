@@ -1,5 +1,6 @@
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/common/styles.dart';
 import 'package:flutter/material.dart';
 
 class PrimaryButton extends StatelessWidget {
@@ -21,7 +22,7 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor =
-        isLight ? Colors.white : AppColors.primaryColor;
+        isLight ? AppColors.darkPrimaryColor : AppColors.primaryColor;
     final Color foregroundColor =
         isLight ? AppColors.primaryColor : Colors.white;
 
@@ -35,8 +36,8 @@ class PrimaryButton extends StatelessWidget {
         );
 
     return Container(
-      constraints: const BoxConstraints(maxWidth: 460.0),
-      height: 84,
+      constraints: const BoxConstraints(maxWidth: AppStyles.maxButtonWidth),
+      height: AppStyles.buttonHeight,
       width: double.infinity,
       child: Opacity(
         opacity: isDisabled ? 0.5 : 1.0,
@@ -46,8 +47,8 @@ class PrimaryButton extends StatelessWidget {
           child: isLoading
               ? Center(
                   child: SizedBox(
-                      width: 24,
-                      height: 24,
+                      width: AppStyles.buttonLoaderSize,
+                      height: AppStyles.buttonLoaderSize,
                       child: CircularProgressIndicator(
                           color: foregroundColor, strokeWidth: 3)))
               : Text(

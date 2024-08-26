@@ -4,13 +4,14 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const BASE_API_URL = "localhost:8000";
 
-enum ApiEndpoint { userLogin, userVerify, userRefresh, user }
+enum ApiEndpoint { userLogin, userVerify, userRefresh, user, schools }
 
 final Map<ApiEndpoint, String> apiEndpoints = {
   ApiEndpoint.userLogin: '/api/v1/me/login',
   ApiEndpoint.userVerify: '/api/v1/me/verify',
   ApiEndpoint.userRefresh: '/api/v1/me/refresh',
   ApiEndpoint.user: '/api/v1/me',
+  ApiEndpoint.schools: '/api/v1/schools',
 };
 
 class ApiFieldError {

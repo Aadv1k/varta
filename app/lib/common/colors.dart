@@ -249,7 +249,7 @@ class TWColor {
 }
 
 class AppColors {
-  static const Color primaryColor = Color(0xFF1C1C1C);
+  static const Color primaryColor = Color(0xFF191919);
 
   static const Color heading = TWColor.zinc900;
   static const Color subtitle = TWColor.zinc500;
@@ -257,8 +257,10 @@ class AppColors {
 
   static const Color darkDropdownButtonBg = TWColor.zinc800;
   static const Color darkDropdownButtonAccent = TWColor.zinc700;
+  static const Color darkDropdownTextColor = TWColor.zinc200;
+  static const Color darkDropdownDisabledTextColor = TWColor.zinc400;
 
-  static const darkPrimaryColor = TWColor.white;
+  static const darkPrimaryColor = TWColor.zinc200;
 
   static const Color darkHeading = TWColor.white;
   static const Color darkBody = TWColor.gray400;

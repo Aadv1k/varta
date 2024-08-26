@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/models/user.dart';
-import 'package:app/screens/phone_login.dart';
+import 'package:app/common/styles.dart';
+import 'package:app/services/common.dart';
 import 'package:app/widgets/button.dart';
+import 'package:app/widgets/user_login_provider.dart';
 import 'package:flutter/material.dart';
+
+import 'package:http/http.dart' as http;
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -14,92 +19,140 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   Map<String, String> organizations = {};
-  String? selectedOrganizationID;
-  bool shouldAllowSelection = true;
+  bool isLoading = true;
+  String? errorMessage;
 
-  // TODO: send the user to phone login screen by default
-  void handleButtonPress() {}
+  void fetchSchoolList() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+    try {
+      final response = await http
+          .get(Uri.http(BASE_API_URL, apiEndpoints[ApiEndpoint.schools]!));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          organizations.clear();
+          for (final dynamic schoolData in data['data'] as List) {
+            organizations[schoolData['id'].toString()] =
+                schoolData['name'] as String;
+          }
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load schools');
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Failed to load schools. Please try again later.';
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   void initState() {
-    // TODO: GET /api/v1/orgs
-
-    setState(() {
-      organizations = schoolData;
-
-      selectedOrganizationID =
-          organizations.isNotEmpty ? organizations.keys.first : null;
-
-      shouldAllowSelection = organizations.length > 1;
-    });
-
     super.initState();
+    fetchSchoolList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final userLoginService = UserLoginProvider.of(context).userLoginService;
+
     return SafeArea(
       child: Container(
-          height: MediaQuery.sizeOf(context).height,
-          width: MediaQuery.sizeOf(context).width,
-          color: AppColors.primaryColor,
-          padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.xl, vertical: Spacing.xl),
-          child: Column(
-            children: [
-              const Spacer(),
+        height: MediaQuery.sizeOf(context).height,
+        width: MediaQuery.sizeOf(context).width,
+        color: AppColors.primaryColor,
+        padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.xl, vertical: Spacing.xl),
+        child: Column(
+          children: [
+            const Spacer(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text("Varta",
+                    style: Theme.of(context)
+                        .textTheme
+                        .displayLarge
+                        ?.copyWith(color: AppColors.darkHeading)),
+                const SizedBox(height: Spacing.lg),
+                SizedBox(
+                    width: 300,
+                    child: Text(
+                        "Stay on top of what's happening in your school",
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(color: AppColors.darkBody))),
+              ],
+            ),
+            const Spacer(),
+            if (isLoading)
+              const CircularProgressIndicator()
+            else
               Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("Varta",
-                      style: Theme.of(context)
-                          .textTheme
-                          .displayLarge
-                          ?.copyWith(color: AppColors.darkHeading)),
-                  const SizedBox(height: Spacing.md),
-                  SizedBox(
-                      width: 300,
+                  ListenableBuilder(
+                      listenable: userLoginService,
+                      builder: (context, child) {
+                        return BottomSheetSelect(
+                          optionsKeyValue: organizations,
+                          selectedOptionKey:
+                              userLoginService.loginData.schoolIDAndName?.$1,
+                          onSelect: (id) {
+                            userLoginService.setLoginData(
+                                userLoginService.loginData.copyWith(
+                                    schoolIDAndName: (id, organizations[id]!)));
+                          },
+                          disabled: organizations.isEmpty ||
+                              organizations.length == 1,
+                        );
+                      }),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
                       child: Text(
-                          "Stay on top of what's happening in your school",
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.copyWith(color: AppColors.darkBody))),
+                        errorMessage!,
+                        textAlign: TextAlign.start,
+                        style: const TextStyle(
+                            color: TWColor.red600,
+                            fontSize: FontSizes.textSm,
+                            decoration: TextDecoration.none),
+                      ),
+                    ),
+                  const SizedBox(height: Spacing.sm),
+                  PrimaryButton(
+                    text: "Get Started",
+                    isDisabled: organizations.isEmpty || errorMessage != null,
+                    onPressed: organizations.isNotEmpty && errorMessage == null
+                        ? () {
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => PhoneLogin(
+                            //       userLoginData: UserLoginData(
+                            //         schoolIDAndName: (
+                            //           selectedOrganizationID!,
+                            //           organizations[selectedOrganizationID]!
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ),
+                            // );
+                          }
+                        : null,
+                    isLight: true,
+                  ),
                 ],
               ),
-              const Spacer(),
-              const SizedBox(),
-              BottomSheetSelect(
-                optionsKeyValue: organizations,
-                selectedOptionKey: selectedOrganizationID,
-                onSelect: (id) {
-                  setState(() {
-                    selectedOrganizationID = id;
-                  });
-                },
-                disabled: !shouldAllowSelection,
-              ),
-              const SizedBox(height: Spacing.sm),
-              PrimaryButton(
-                text: "Get Started",
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PhoneLogin(
-                                userLoginData: UserLoginData(
-                                  schoolIDAndName: (
-                                    selectedOrganizationID!,
-                                    organizations[selectedOrganizationID]!
-                                  ),
-                                ),
-                              )));
-                },
-                isLight: true,
-              )
-            ],
-          )),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -110,13 +163,13 @@ class BottomSheetSelect extends StatelessWidget {
     required this.onSelect,
     this.selectedOptionKey,
     required this.optionsKeyValue,
-    this.disabled = false, // Parameter to handle the disabled state
+    this.disabled = false,
   });
 
   final Function onSelect;
   final String? selectedOptionKey;
   final Map<String, String> optionsKeyValue;
-  final bool disabled; // Parameter to handle the disabled state
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
@@ -187,51 +240,50 @@ class BottomSheetSelect extends StatelessWidget {
               );
             }
           : null, // Disable tap if disabled
-      child: Container(
-        width: double.infinity,
-        height: 80.0,
-        constraints: const BoxConstraints(maxWidth: 460.0),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: disabled
-              ? AppColors.darkDropdownButtonBg.withOpacity(0.3)
-              : AppColors.darkDropdownButtonBg,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: disabled
-                ? AppColors.darkDropdownButtonAccent.withOpacity(0.5)
-                : AppColors.darkDropdownButtonAccent,
-            width: 1.0,
+      child: Opacity(
+        opacity: disabled ? 0.6 : 1.0,
+        child: Container(
+          width: double.infinity,
+          height: AppStyles.buttonHeight + 2.5,
+          constraints: const BoxConstraints(maxWidth: AppStyles.maxButtonWidth),
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+          decoration: BoxDecoration(
+            color: AppColors.darkDropdownButtonBg,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: AppColors.darkDropdownButtonAccent,
+              width: 1.0,
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                selectedOptionKey == null
-                    ? "Select a School"
-                    : optionsKeyValue[selectedOptionKey]!,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontStyle: disabled ? FontStyle.italic : FontStyle.normal,
-                  color: disabled
-                      ? TWColor.zinc300.withOpacity(0.5)
-                      : (selectedOptionKey == null
-                          ? TWColor.zinc300
-                          : TWColor.white),
-                  fontSize: FontSizes.textBase,
-                  fontWeight: FontWeight.normal,
-                  decoration: TextDecoration.none,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  selectedOptionKey == null
+                      ? "Select a School"
+                      : optionsKeyValue[selectedOptionKey]!,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontStyle: disabled ? FontStyle.italic : FontStyle.normal,
+                    color: disabled
+                        ? AppColors.darkDropdownDisabledTextColor
+                        : AppColors.darkDropdownTextColor,
+                    fontSize: FontSizes.textBase,
+                    fontWeight: FontWeight.normal,
+                    decoration: TextDecoration.none,
+                  ),
                 ),
               ),
-            ),
-            Icon(
-              Icons.arrow_drop_down,
-              size: 32,
-              color: TWColor.zinc400.withOpacity(disabled ? 0.5 : 1.0),
-            ),
-          ],
+              Icon(
+                Icons.arrow_drop_down,
+                size: 32,
+                color: disabled
+                    ? AppColors.darkDropdownDisabledTextColor
+                    : AppColors.darkDropdownTextColor,
+              ),
+            ],
+          ),
         ),
       ),
     );
