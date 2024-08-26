@@ -1,10 +1,10 @@
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/models/user.dart';
+import 'package:app/models/login_data.dart';
+import 'package:app/providers/login_provider.dart';
 import 'package:app/screens/welcome.dart';
 import 'package:app/services/auth_service.dart';
-import 'package:app/services/user_login_service.dart';
-import 'package:app/widgets/user_login_provider.dart';
+import 'package:app/state/login_state.dart';
 import 'package:flutter/material.dart';
 
 Future main() async {
@@ -71,8 +71,8 @@ class VartaApp extends StatelessWidget {
                   color: AppColors.body)),
           useMaterial3: true,
         ),
-        home: UserLoginProvider(
-            userLoginService: UserLoginService(loginData: UserLoginData()),
+        home: LoginProvider(
+            loginState: LoginState(data: LoginData()),
             child: const WelcomeScreen())
 
         // !isLoggedIn

@@ -1,14 +1,10 @@
-import 'dart:convert';
-
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
-import 'package:app/services/common.dart';
+import 'package:app/providers/login_provider.dart';
+import 'package:app/repository/school_repo.dart';
 import 'package:app/widgets/button.dart';
-import 'package:app/widgets/user_login_provider.dart';
 import 'package:flutter/material.dart';
-
-import 'package:http/http.dart' as http;
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -18,6 +14,8 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  final SchoolRepository _schoolRepository = SchoolRepository();
+
   Map<String, String> organizations = {};
   bool isLoading = true;
   String? errorMessage;
@@ -28,21 +26,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       errorMessage = null;
     });
     try {
-      final response = await http
-          .get(Uri.http(BASE_API_URL, apiEndpoints[ApiEndpoint.schools]!));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          organizations.clear();
-          for (final dynamic schoolData in data['data'] as List) {
-            organizations[schoolData['id'].toString()] =
-                schoolData['name'] as String;
-          }
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load schools');
-      }
+      final schools = await _schoolRepository.getSchools();
+      setState(() {
+        for (var school in schools) {
+          organizations[school.schoolId.toString()] = school.schoolName;
+        }
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
         errorMessage = 'Failed to load schools. Please try again later.';
@@ -59,7 +49,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userLoginService = UserLoginProvider.of(context).userLoginService;
+    final loginState = LoginProvider.of(context).loginState;
 
     return SafeArea(
       child: Container(
@@ -98,16 +88,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               Column(
                 children: [
                   ListenableBuilder(
-                      listenable: userLoginService,
+                      listenable: loginState,
                       builder: (context, child) {
                         return BottomSheetSelect(
                           optionsKeyValue: organizations,
                           selectedOptionKey:
-                              userLoginService.loginData.schoolIDAndName?.$1,
+                              loginState.data.schoolIDAndName?.$1 ??
+                                  organizations.keys.first,
                           onSelect: (id) {
-                            userLoginService.setLoginData(
-                                userLoginService.loginData.copyWith(
-                                    schoolIDAndName: (id, organizations[id]!)));
+                            loginState.setLoginData(loginState.data.copyWith(
+                                schoolIDAndName: (id, organizations[id]!)));
                           },
                           disabled: organizations.isEmpty ||
                               organizations.length == 1,

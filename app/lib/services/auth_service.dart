@@ -12,11 +12,11 @@ class AuthService {
   }
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  static late final SharedPreferences _sharedPrefs;
+  static late final SharedPreferences sharedPrefs;
   final TokenService _tokenService = TokenService();
 
   Future initSharedPrefs() async {
-    _sharedPrefs = await SharedPreferences.getInstance();
+    sharedPrefs = await SharedPreferences.getInstance();
   }
 
   Future<bool> isLoggedIn() async {
@@ -28,8 +28,20 @@ class AuthService {
     return true;
   }
 
-  Future<bool> isFirstTimeLogin() async {
-    bool? cond = _sharedPrefs.getBool("firstTimeLogin");
+  Future<String?> getAccessToken() {
+    return _secureStorage.read(key: "accessToken");
+  }
+
+  bool tokenExpired(String token) {
+    return _tokenService.tokenExpired(token);
+  }
+
+  Future renewToken() {
+    throw UnimplementedError();
+  }
+
+  bool isFirstTimeLogin() {
+    bool? cond = sharedPrefs.getBool("firstTimeLogin");
     if (cond == null) return true;
     return false;
   }

@@ -1,6 +1,15 @@
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
 class TokenService {
+  bool tokenExpired(String token) {
+    final JWT data = JWT.decode(token);
+    final int exp = int.parse(data.payload!["exp"]);
+
+    if (exp >= DateTime.now().millisecondsSinceEpoch) return false;
+
+    return true;
+  }
+
   bool tokenValid(String token) {
     final JWT? data = JWT.tryDecode(token);
 
