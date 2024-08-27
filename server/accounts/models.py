@@ -36,6 +36,10 @@ class Department(models.Model):
         return f"{self.department_name[0].upper()}{self.department_name[1:]}"
 
 class User(models.Model):
+    class UserType(models.TextChoices):
+        TEACHER = "teacher", "Teacher"
+        STUDENT = "student", "Student"
+
     school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="users")
     public_id = models.UUIDField(default=uuid.uuid4, editable=False)
 
@@ -43,8 +47,7 @@ class User(models.Model):
     middle_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255)
 
-    def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+    user_type = models.CharField(choices=UserType.choices, max_length=8, default=UserType.STUDENT)
 
     @classmethod
     def from_public_id(cls, public_id: str):
@@ -53,19 +56,12 @@ class User(models.Model):
     def is_authenticated():
         return True
 
-    @property
-    def user_type(self):
-       if isinstance(self, Student):
-           return "student"
-       elif isinstance(self, Teacher):
-           return "teacher"
-       else:
-           return "admin"
-
-class Student(User):
+class StudentDetail(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_details")
     classroom = models.OneToOneField(Classroom, on_delete=models.SET_NULL, null=True)
 
-class Teacher(User):
+class TeacherDetail(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_details")
     departments =  models.ManyToManyField(Department)
     subject_teacher_of = models.ManyToManyField(Classroom, related_name="subject_teacher_of")
     class_teacher_of = models.OneToOneField(Classroom, on_delete=models.SET_NULL, null=True, related_name="class_teacher_of")
