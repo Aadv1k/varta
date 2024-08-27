@@ -7,8 +7,7 @@ from django.conf import settings
 from common.services.otp import OTPService, redis_inst
 from common.services.token import TokenService, TokenPayload
 
-
-from .models import Student, UserContact, Classroom
+from .models import User, StudentDetail, TeacherDetail, UserContact, Classroom
 from schools.models import School
 
 class UserActionTest(APITestCase):
@@ -23,11 +22,15 @@ class UserActionTest(APITestCase):
             website="https://www.dpsrohini.com"
         )
 
-        self.student = Student.objects.create(
+        self.student = User.objects.create(
             school=self.school,
             first_name="Aarav",
             middle_name="Raj",
             last_name="Sharma",
+        )
+
+        StudentDetail.objects.create(
+            user=self.student,
             classroom=Classroom.get_by_std_div_or_none("9A"),
         )
 

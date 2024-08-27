@@ -6,7 +6,7 @@ from common.services.token import TokenService, TokenPayload
 
 
 from schools.models import School, AcademicYear
-from accounts.models import Teacher, Classroom, Student
+from accounts.models import User, Classroom, StudentDetail, TeacherDetail
 from .models import Announcement, AnnouncementScope
 
 class AnnouncementTestCase(APITestCase):
@@ -21,20 +21,27 @@ class AnnouncementTestCase(APITestCase):
             website="https://www.dpsrohini.com"
         )
 
-        self.teacher = Teacher.objects.create(
+        self.teacher = User.objects.create(
             school=self.school,
             first_name="John",
             last_name="Doe",
+        )
+        TeacherDetail.objects.create(
+            user=self.teacher,
             class_teacher_of=Classroom.get_by_std_div_or_none("10A")
         )
 
-        self.student = Student.objects.create(
+        self.student = User.objects.create(
             school=self.school,
             first_name="Aarav",
             middle_name="Raj",
             last_name="Sharma",
+        )
+        StudentDetail.objects.create(
+            user=self.student,
             classroom=Classroom.get_by_std_div_or_none("10A"),
         )
+
 
         self.stud_access_token, self.student_rt = TokenService.generate_token_pair(TokenPayload(sub=str(self.student.public_id), iss="varta.test", role=self.student.user_type))
 
