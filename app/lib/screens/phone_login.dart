@@ -1,22 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/models/user.dart';
-import 'package:app/screens/email_login.dart';
-import 'package:app/screens/otp_verification.dart';
-import 'package:app/services/common.dart';
+import 'package:app/models/login_data.dart';
+import 'package:app/providers/login_provider.dart';
+import 'package:app/services/auth_service.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/phone_number_input.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class PhoneLogin extends StatefulWidget {
-  final UserLoginData userLoginData;
-
-  const PhoneLogin({super.key, required UserLoginData this.userLoginData});
+  const PhoneLogin({super.key});
 
   @override
   _PhoneLoginState createState() => _PhoneLoginState();
@@ -25,8 +20,9 @@ class PhoneLogin extends StatefulWidget {
 class _PhoneLoginState extends State<PhoneLogin> {
   bool isLoading = false;
   bool hasError = false;
-  String? phoneNumber;
   String? errorMessage;
+
+  final AuthService _authService = AuthService();
 
   Future<void> handleVerificationClick(context) async {
     setState(() {
@@ -36,25 +32,8 @@ class _PhoneLoginState extends State<PhoneLogin> {
     });
 
     try {
-      final response = await http.post(
-          Uri.http(BASE_API_URL, apiEndpoints[ApiEndpoint.userLogin]!),
-          body: {
-            "input_format": widget.userLoginData.inputType == LoginType.email
-                ? "email"
-                : "phone_number",
-            "input_data": widget.userLoginData.inputData,
-            "school_id": int.parse(widget.userLoginData.schoolIDAndName!.$1)
-          });
-
-      final responseData = jsonDecode(response.body);
-      if (response.statusCode != 200) {
-        setState(() {
-          isLoading = false;
-          hasError = true;
-          errorMessage = responseData["message"];
-        });
-        return;
-      }
+      final loginData = LoginProvider.of(context).loginState.data;
+      _authService.sendOtp(loginData);
     } on http.ClientException {
       setState(() {
         isLoading = false;
@@ -64,29 +43,29 @@ class _PhoneLoginState extends State<PhoneLogin> {
       return;
     }
 
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => OTPVerification(
-                    userLoginData: widget.userLoginData.copyWith(
-                  inputData: phoneNumber,
-                  inputType: LoginType.phoneNumber,
-                ))));
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => OTPVerification(
+    //                 userLoginData: widget.userLoginData.copyWith(
+    //               inputData: phoneNumber,
+    //               inputType: LoginType.phoneNumber,
+    //             ))
+
+    //             ));
   }
 
   @override
   Widget build(BuildContext context) {
+    final loginState = LoginProvider.of(context).loginState;
+
     return Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(72),
           child: AppBar(
               elevation: 0,
               toolbarHeight: 72,
-              title: Text(widget.userLoginData.schoolIDAndName!.$2,
-                  style: Theme.of(context)
-                      .textTheme
-                      .displaySmall!
-                      .copyWith(color: Colors.black)),
+              title: Text(loginState.data.schoolIDAndName!.$2),
               centerTitle: true,
               leading: IconButton(
                   onPressed: () {
@@ -119,24 +98,26 @@ class _PhoneLoginState extends State<PhoneLogin> {
                       style: Theme.of(context).textTheme.bodyMedium),
                 ),
                 const SizedBox(height: Spacing.xxl),
-                PhoneNumberInput(
-                  onInput: (e) {
-                    setState(() {
-                      phoneNumber = e;
-                    });
-                  },
-                  hasError: hasError,
-                  errorMessage: errorMessage,
+                ListenableBuilder(
+                  listenable: loginState,
+                  builder: (context, child) => PhoneNumberInput(
+                    onInput: (e) {
+                      loginState.setLoginData(loginState.data.copyWith(
+                          inputType: LoginType.phoneNumber, inputData: e));
+                    },
+                    hasError: hasError,
+                    errorMessage: errorMessage,
+                  ),
                 ),
                 const SizedBox(height: Spacing.lg),
                 TextButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => EmailLogin(
-                                userLoginData: widget.userLoginData)),
-                      );
+                      // Navigator.pushReplacement(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //       builder: (context) => EmailLogin(
+                      //           userLoginData: widget.userLoginData)),
+                      // );
                     },
                     child: Text("Use Email Instead",
                         style: Theme.of(context)
@@ -144,12 +125,15 @@ class _PhoneLoginState extends State<PhoneLogin> {
                             .bodyMedium
                             ?.copyWith(color: TWColor.blue700))),
                 const Spacer(),
-                PrimaryButton(
-                  text: "Verify",
-                  onPressed: () => handleVerificationClick(context),
-                  isDisabled: phoneNumber == null || phoneNumber!.length != 10,
-                  isLoading: isLoading,
-                )
+                ListenableBuilder(
+                    listenable: loginState,
+                    builder: (context, child) => PrimaryButton(
+                          text: "Verify",
+                          onPressed: () => handleVerificationClick(context),
+                          isDisabled: loginState.data.inputData == null ||
+                              loginState.data.inputData!.length != 10,
+                          isLoading: isLoading,
+                        ))
               ],
 
               // phone number input, that also has error possibility

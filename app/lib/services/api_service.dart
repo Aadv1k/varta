@@ -13,7 +13,7 @@ class ApiService {
   static const String baseApiUrl = "http://localhost:8000/api/v1";
   final AuthService _authService = AuthService();
 
-  Future<http.Response> _makeRequest(HTTPMethod method, String endpoint,
+  Future<http.Response> makeRequest(HTTPMethod method, String endpoint,
       {dynamic body, bool isAuthenticated = false}) async {
     Map<String, String> headers = {};
     if (isAuthenticated) {
@@ -47,10 +47,10 @@ class ApiService {
     }
 
     throw UnsupportedError(
-        "Unreacbale. All HTTP methods should be handled in the HTTPMethod switch case");
+        "Unreachable. All HTTP methods should be handled in the HTTPMethod switch case");
   }
 
   Future<http.Response> get(String endpoint) async {
-    return await _makeRequest(HTTPMethod.GET, endpoint);
+    return await makeRequest(HTTPMethod.GET, endpoint);
   }
 }

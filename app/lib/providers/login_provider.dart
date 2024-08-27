@@ -8,7 +8,13 @@ class LoginProvider extends InheritedWidget {
       {super.key, required this.loginState, required super.child});
 
   static LoginProvider of(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<LoginProvider>()!;
+    final provider = context.getInheritedWidgetOfExactType<LoginProvider>();
+
+    if (provider == null) {
+      throw AssertionError(
+          "LoginProvider.of couldn't find the inhereted widget higher in the tree");
+    }
+    return provider;
   }
 
   @override

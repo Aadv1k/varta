@@ -3,6 +3,7 @@ import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/providers/login_provider.dart';
 import 'package:app/repository/school_repo.dart';
+import 'package:app/screens/phone_login.dart';
 import 'package:app/widgets/button.dart';
 import 'package:flutter/material.dart';
 
@@ -50,6 +51,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     final loginState = LoginProvider.of(context).loginState;
+
+    if (organizations.isNotEmpty && loginState.data.schoolIDAndName == null) {
+      loginState.setLoginData(loginState.data.copyWith(schoolIDAndName: (
+        organizations.keys.first,
+        organizations.values.first
+      )));
+    }
 
     return SafeArea(
       child: Container(
@@ -121,19 +129,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     isDisabled: organizations.isEmpty || errorMessage != null,
                     onPressed: organizations.isNotEmpty && errorMessage == null
                         ? () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => PhoneLogin(
-                            //       userLoginData: UserLoginData(
-                            //         schoolIDAndName: (
-                            //           selectedOrganizationID!,
-                            //           organizations[selectedOrganizationID]!
-                            //         ),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginProvider(
+                                    loginState: loginState,
+                                    child: const PhoneLogin()),
+                              ),
+                            );
                           }
                         : null,
                     isLight: true,

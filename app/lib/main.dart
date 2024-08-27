@@ -10,12 +10,12 @@ import 'package:flutter/material.dart';
 Future main() async {
   await AuthService().initSharedPrefs();
 
-  bool isLoggedIn = await AuthService().isLoggedIn();
-  bool isFirstTimeLogin = await AuthService().isFirstTimeLogin();
+  // bool isLoggedIn = await AuthService().isLoggedIn();
+  // bool isFirstTimeLogin = await AuthService().isFirstTimeLogin();
 
-  runApp(VartaApp(
-    isFirstTimeLogin: isFirstTimeLogin,
-    isLoggedIn: isLoggedIn,
+  runApp(const VartaApp(
+    isFirstTimeLogin: true, //isFirstTimeLogin,
+    isLoggedIn: false, //isLoggedIn,
   ));
 }
 

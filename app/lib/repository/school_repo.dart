@@ -8,7 +8,7 @@ class SchoolRepository {
   final ApiService _apiService = ApiService();
 
   Future<List<SchoolModel>> getSchools() async {
-    String? foundCache = AuthService.sharedPrefs.getString("schoolListData");
+    String? foundCache = AuthService().sharedPrefs!.getString("schoolListData");
 
     if (foundCache != null) {
       final data = jsonDecode(foundCache);
@@ -31,13 +31,13 @@ class SchoolRepository {
     final List<SchoolModel> parsedData =
         responseData.map((jsonItem) => SchoolModel.fromJson(jsonItem)).toList();
 
-    AuthService.sharedPrefs.setString(
-      "schoolListData",
-      jsonEncode({
-        "cachedAt": DateTime.now().millisecondsSinceEpoch,
-        "data": parsedData.map((school) => school.toJson()).toList()
-      }),
-    );
+    AuthService().sharedPrefs!.setString(
+          "schoolListData",
+          jsonEncode({
+            "cachedAt": DateTime.now().millisecondsSinceEpoch,
+            "data": parsedData.map((school) => school.toJson()).toList()
+          }),
+        );
 
     return parsedData;
   }
