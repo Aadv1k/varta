@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     "schools",
     "accounts",
+    "announcements",
 
     "common"
 ]
@@ -147,9 +148,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 OTP_EXPIRY_IN_SECONDS = 300
 OTP_LENGTH = 6 
 
-
 MJ_APIKEY_PUBLIC = os.getenv("MJ_APIKEY_PUBLIC")
 MJ_APIKEY_PRIVATE = os.getenv("MJ_APIKEY_PRIVATE")
 
 if not MJ_APIKEY_PUBLIC or not MJ_APIKEY_PRIVATE:
     raise Exception("BAD CONFIG mailjet MJ_APIKEY_PUBLIC and MJ_APIKEY_PRIVATE configuration for email required")
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (       
+        'accounts.authentication.JWTAuthentication',
+    ),
+}

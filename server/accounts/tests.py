@@ -131,7 +131,6 @@ class UserActionTest(APITestCase):
     def test_user_can_refresh_with_good_token(self):
 
         at, rt = TokenService.generate_token_pair(TokenPayload(sub=str(self.student.public_id), role=self.student.user_type, iss="varta.app"))
-        print(at)
 
         response = self.client.post(reverse("user_refresh"), {
             "refresh_token": rt

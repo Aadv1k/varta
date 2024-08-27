@@ -15,7 +15,6 @@ class JWTAuthentication(BaseAuthentication):
 
         token = auth_header.pop()
 
-
         try:
             payload = TokenService.try_decode_token(token)
             user = User.from_public_id(payload.sub)

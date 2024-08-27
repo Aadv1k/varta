@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
-class SchoolsConfig(AppConfig):
+
+class AnnouncementsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'schools'
+    name = 'announcements'

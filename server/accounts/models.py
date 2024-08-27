@@ -50,6 +50,9 @@ class User(models.Model):
     def from_public_id(cls, public_id: str):
         return cls.objects.get(public_id=public_id)
 
+    def is_authenticated():
+        return True
+
     @property
     def user_type(self):
        if isinstance(self, Student):
@@ -66,9 +69,6 @@ class Teacher(User):
     departments =  models.ManyToManyField(Department)
     subject_teacher_of = models.ManyToManyField(Classroom, related_name="subject_teacher_of")
     class_teacher_of = models.OneToOneField(Classroom, on_delete=models.SET_NULL, null=True, related_name="class_teacher_of")
-
-class Admin(Teacher):
-    pass
 
 class UserContact(models.Model):
     class ContactImportance(models.TextChoices):
