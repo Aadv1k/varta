@@ -37,7 +37,7 @@ class Department(models.Model):
 
 class User(models.Model):
     school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="users")
-    public_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False)
 
     first_name = models.CharField(max_length=255)
     middle_name = models.CharField(max_length=255, blank=True, null=True)

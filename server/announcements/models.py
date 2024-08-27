@@ -37,7 +37,9 @@ class AnnouncementScope(models.Model):
     
     announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="scopes")
     filter = models.CharField(max_length=48, choices=FilterType.choices)
-    filter_data = models.CharField(max_length=255)
+
+    # NOTE: at the time of writing this I assume this means the field needs to explicitly be set to null
+    filter_data = models.CharField(max_length=255, null=True, blank=False) 
 
     def matches_for_user(self, user: User) -> bool:
         assert False, "Not Implemented"

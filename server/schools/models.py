@@ -16,3 +16,7 @@ class AcademicYear(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     current = models.BooleanField(default=False)
+
+    @staticmethod
+    def get_current_academic_year():
+        return AcademicYear.objects.get(current=True)
