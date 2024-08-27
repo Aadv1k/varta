@@ -1,6 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 
+from django.core.paginator import Paginator
+
 from .models import Announcement
 from accounts.permissions import IsJWTAuthenticated
 
@@ -13,6 +15,12 @@ class AnnouncementViewSet(viewsets.ViewSet):
         all_announcements = Announcement.objects.filter(
             author__school=request.user.school,
         ).exclude(author__id=request.user.id)
+
+        pages = Paginator(all_announcements, 20)
+        
+        # page_number: 1,
+        # page_length: 10,
+        # page_count: 10,
 
         return ErrorResponseBuilder().set_message("Lmao you failed bro").build()
 

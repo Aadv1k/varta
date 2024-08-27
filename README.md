@@ -97,9 +97,9 @@ All information for a school, is organized in the following way
 - title: plain unicode text capped at 256 characters 
 - body: simple plain unicode text max 4000 characters
 - scopes: an announcement may have maximum of 12 scopes
-    - `scope_type`: teacher, student, admin
+    - ~~`scope_type`: teacher, student, admin~~ WE NO LONGER NEED THIS ISNCE IT CAN BE INFERRED 
     - `scope_filter`
-      - for teachers: `t_class_teacher_of, t_subject_teacher_of_standard, t_subject_teacher_of_standard_division, t_department, t_subject_taught, t_grade_level` 
+      - for teachers: `t_class_teacher_of, t_subject_teacher_of_standard, t_subject_teacher_of_standard_division, t_department, ~~t_subject_taught~~, ~~~t_grade_level~~~` 
       - for students: `stu_standard, stu_standard_division, stu_house`
     - `scope_content`
 
