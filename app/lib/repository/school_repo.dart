@@ -26,7 +26,7 @@ class SchoolRepository {
       }
     }
 
-    final response = await _apiService.get("/schools");
+    final response = await _apiService.makeRequest(HTTPMethod.GET, "/schools");
     final data = jsonDecode(response.body);
 
     final List<dynamic> responseData = data["data"];

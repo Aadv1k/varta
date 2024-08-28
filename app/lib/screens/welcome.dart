@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
+import 'package:app/models/school_model.dart';
 import 'package:app/providers/login_provider.dart';
 import 'package:app/repository/school_repo.dart';
 import 'package:app/screens/phone_login.dart';
@@ -17,7 +18,7 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  Map<String, String> organizations = {};
+  List<SchoolModel> _schoolList = [];
   bool isLoading = true;
   String? errorMessage;
 
@@ -29,18 +30,40 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       errorMessage = null;
     });
     try {
-      final schools = await _schoolRepository.getSchools();
-
       setState(() {
-        if (schools.isEmpty) {
-          errorMessage = "API didn't send any schools. This should not happen.";
-          isLoading = false;
-          return;
-        }
+        _schoolList = [
+          SchoolModel(
+            schoolId: 1,
+            schoolName: "Delhi Public School",
+            schoolAddress: "Sector 12, Dwarka, New Delhi, Delhi - 110078",
+            schoolContactNo: "+91-11-23456789",
+            schoolEmail: "info@dpsdwarka.edu.in",
+          ),
+          SchoolModel(
+            schoolId: 2,
+            schoolName: "St. Xavier's High School",
+            schoolAddress: "5, Park Street, Kolkata, West Bengal - 700016",
+            schoolContactNo: "+91-33-22345678",
+            schoolEmail: "contact@stxavierskolkata.edu.in",
+          ),
+          SchoolModel(
+            schoolId: 3,
+            schoolName: "Rishi Valley School",
+            schoolAddress:
+                "Rishi Valley Post, Chittoor, Andhra Pradesh - 517352",
+            schoolContactNo: "+91-8574-282003",
+            schoolEmail: "info@rishivalley.org",
+          ),
+          SchoolModel(
+            schoolId: 4,
+            schoolName: "Bharatiya Vidya Bhavan",
+            schoolAddress:
+                "Bharatiya Vidya Bhavan, K. M. Munshi Marg, Mumbai, Maharashtra - 400007",
+            schoolContactNo: "+91-22-23812345",
+            schoolEmail: "admissions@bvbmumbai.edu.in",
+          ),
+        ];
 
-        for (var school in schools) {
-          organizations[school.schoolId.toString()] = school.schoolName;
-        }
         isLoading = false;
       });
     } catch (e) {
@@ -61,10 +84,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     final loginState = LoginProvider.of(context).loginState;
 
-    if (organizations.isNotEmpty && loginState.data.schoolIDAndName == null) {
+    if (_schoolList.isNotEmpty && loginState.data.schoolIDAndName == null) {
       loginState.setLoginData(loginState.data.copyWith(schoolIDAndName: (
-        organizations.keys.first,
-        organizations.values.first
+        _schoolList.first.schoolId.toString(),
+        _schoolList.first.schoolName
       )));
     }
 
@@ -72,9 +95,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       child: Container(
         height: MediaQuery.sizeOf(context).height,
         width: MediaQuery.sizeOf(context).width,
-        color: AppColors.primaryColor,
+        color: AppColors.almostBlack,
         padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.xl, vertical: Spacing.xl),
+            horizontal: AppStyles.screenHorizontalPadding,
+            vertical: Spacing.xl),
         child: Column(
           children: [
             const Spacer(),
@@ -108,13 +132,20 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       listenable: loginState,
                       builder: (context, child) {
                         return BottomSheetSelect(
-                          disabled: organizations.isEmpty,
-                          optionsKeyValue: organizations,
-                          selectedOptionKey:
-                              loginState.data.schoolIDAndName?.$1,
-                          onSelect: (id) {
+                          disabled: false,
+                          schools: _schoolList,
+                          selectedSchool: _schoolList.firstWhere(
+                              (school) =>
+                                  school.schoolId.toString() ==
+                                  loginState.data.schoolIDAndName?.$1,
+                              orElse: () => throw AssertionError(
+                                  "This should've been caught at the time of initialization")),
+                          onSelect: (school) {
                             loginState.setLoginData(loginState.data.copyWith(
-                                schoolIDAndName: (id, organizations[id]!)));
+                                schoolIDAndName: (
+                                  school.schoolId.toString(),
+                                  school.schoolName
+                                )));
                           },
                         );
                       }),
@@ -132,8 +163,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   const SizedBox(height: Spacing.sm),
                   PrimaryButton(
                     text: "Get Started",
-                    isDisabled: organizations.isEmpty || errorMessage != null,
-                    onPressed: organizations.isNotEmpty && errorMessage == null
+                    isDisabled: _schoolList.isEmpty || errorMessage != null,
+                    onPressed: _schoolList.isNotEmpty && errorMessage == null
                         ? () {
                             Navigator.push(
                               context,
@@ -160,14 +191,14 @@ class BottomSheetSelect extends StatelessWidget {
   const BottomSheetSelect({
     super.key,
     required this.onSelect,
-    this.selectedOptionKey,
-    required this.optionsKeyValue,
+    this.selectedSchool,
+    required this.schools,
     this.disabled = false,
   });
 
-  final Function onSelect;
-  final String? selectedOptionKey;
-  final Map<String, String> optionsKeyValue;
+  final Function(SchoolModel) onSelect;
+  final SchoolModel? selectedSchool;
+  final List<SchoolModel> schools;
   final bool disabled;
 
   @override
@@ -178,55 +209,73 @@ class BottomSheetSelect extends StatelessWidget {
               showModalBottomSheet(
                 context: context,
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
                 ),
                 builder: (BuildContext context) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                     width: double.infinity,
                     height: MediaQuery.sizeOf(context).height / 2,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: Spacing.md),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text("Select School",
-                              style:
-                                  Theme.of(context).textTheme.headlineMedium),
+                          Text(
+                            "Select School",
+                            style: Theme.of(context).textTheme.headlineLarge,
+                          ),
                           Expanded(
                             child: ListView(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              children: optionsKeyValue.entries.map((elem) {
-                                bool isSelected = elem.key == selectedOptionKey;
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: Spacing.md),
+                              children: schools.map((school) {
+                                bool isSelected = school == selectedSchool;
                                 return ListTile(
+                                  minTileHeight: 72,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: Spacing.lg),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(32),
                                   ),
                                   enabled: !disabled,
                                   onTap: !isSelected && !disabled
                                       ? () {
-                                          onSelect(elem.key);
+                                          onSelect(school);
                                           Navigator.pop(context);
                                         }
                                       : null,
                                   tileColor: isSelected
-                                      ? AppColors.primaryColor
+                                      ? AppColors.primaryColor.withOpacity(0.10)
                                       : Colors.transparent,
                                   title: Text(
-                                    elem.value,
+                                    school.schoolName,
                                     style: TextStyle(
                                       fontWeight: FontWeight.normal,
-                                      color: isSelected
-                                          ? TWColor.white
-                                          : (disabled
-                                              ? TWColor.zinc300.withOpacity(0.5)
-                                              : TWColor.black),
+                                      color: AppColors.heading,
                                       fontSize: FontSizes.textBase,
                                       fontStyle: disabled
                                           ? FontStyle.italic
                                           : FontStyle.normal,
                                     ),
                                   ),
+                                  subtitle: Text(
+                                    school.schoolAddress,
+                                    style: TextStyle(
+                                      fontSize: FontSizes.textSm,
+                                      color: AppColors.body,
+                                      fontStyle: disabled
+                                          ? FontStyle.italic
+                                          : FontStyle.normal,
+                                    ),
+                                  ),
+                                  trailing: isSelected
+                                      ? const Icon(
+                                          Icons.check_circle,
+                                          color: AppColors.primaryColor,
+                                        )
+                                      : null,
                                 );
                               }).toList(),
                             ),
@@ -243,12 +292,12 @@ class BottomSheetSelect extends StatelessWidget {
         opacity: disabled ? 0.6 : 1.0,
         child: Container(
           width: double.infinity,
-          height: AppStyles.buttonHeight + 2.5,
+          height: AppStyles.buttonHeight,
           constraints: const BoxConstraints(maxWidth: AppStyles.maxButtonWidth),
           padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
           decoration: BoxDecoration(
             color: AppColors.darkDropdownButtonBg,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: const BorderRadius.all(AppStyles.buttonRadius),
             border: Border.all(
               color: AppColors.darkDropdownButtonAccent,
               width: 1.0,
@@ -259,9 +308,9 @@ class BottomSheetSelect extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  selectedOptionKey == null
+                  selectedSchool == null
                       ? "Select a School"
-                      : optionsKeyValue[selectedOptionKey]!,
+                      : selectedSchool!.schoolName,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontStyle: disabled ? FontStyle.italic : FontStyle.normal,

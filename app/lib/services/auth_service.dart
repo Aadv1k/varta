@@ -4,6 +4,8 @@ import 'package:app/services/shared_pref_service.dart';
 import 'package:app/services/token_service.dart';
 
 class AuthService {
+  final ApiService _apiService = ApiService();
+
   Future<bool> isLoggedIn() async {
     final TokenService _tokenService = TokenService();
 
@@ -19,21 +21,25 @@ class AuthService {
   }
 
   Future<void> sendOtp(LoginData data) async {
-    final ApiService _apiService = ApiService();
+    final response;
 
-    final response = await _apiService.makeRequest(
-      HTTPMethod.POST,
-      "/me/login",
-      body: {
-        "input_data": data.inputData,
-        "input_format":
-            data.inputType == LoginType.email ? "email" : "phone_number",
-        "school_id": data.schoolIDAndName!.$1
-      },
-    );
-    if (response.statusCode != 200) {
-      throw ApiException('Failed to send OTP');
+    try {
+      response = await _apiService.makeRequest(
+        HTTPMethod.POST,
+        "/me/login",
+        body: {
+          "input_data": data.inputData,
+          "input_format":
+              data.inputType == LoginType.email ? "email" : "phone_number",
+          "school_id": data.schoolIDAndName!.$1
+        },
+      );
+    } on ApiClientException catch (_) {
+      rethrow;
     }
+
+    throw UnimplementedError(
+        "If you got to this point, then well atleast some code worked lol ");
   }
 
   bool tokenExpired(String token) {

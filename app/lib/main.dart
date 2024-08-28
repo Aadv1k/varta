@@ -1,7 +1,10 @@
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/common/styles.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
+import 'package:app/screens/otp_verification.dart';
+import 'package:app/screens/phone_login.dart';
 import 'package:app/screens/welcome.dart';
 import 'package:app/state/login_state.dart';
 import 'package:flutter/material.dart';
@@ -29,44 +32,31 @@ class VartaApp extends StatelessWidget {
         title: 'Varta',
         theme: ThemeData(
           elevatedButtonTheme: const ElevatedButtonThemeData(
-              style: ButtonStyle(
-                  backgroundColor:
-                      WidgetStatePropertyAll(AppColors.darkPrimaryColor),
-                  textStyle: WidgetStatePropertyAll(TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)))),
-          textTheme: const TextTheme(
-              labelMedium:
-                  TextStyle(fontSize: FontSizes.textBase, color: Colors.black),
-              displayLarge: TextStyle(
-                  fontSize: FontSizes.text4xl,
-                  height: 1.5,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.heading),
-              displaySmall: TextStyle(
-                  fontSize: FontSizes.textBase,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.heading),
-              headlineMedium: TextStyle(
-                  fontSize: FontSizes.textLg,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.heading),
-              headlineLarge: TextStyle(
-                  fontSize: FontSizes.text2xl,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.heading),
-              bodyLarge: TextStyle(
-                  fontSize: FontSizes.textLg,
-                  fontWeight: FontWeight.normal,
-                  color: AppColors.body),
-              bodyMedium: TextStyle(
-                  fontSize: FontSizes.textBase,
-                  fontWeight: FontWeight.normal,
-                  color: AppColors.body)),
+            style: ButtonStyle(
+                backgroundColor:
+                    WidgetStatePropertyAll(AppColors.darkPrimaryColor),
+                textStyle: WidgetStatePropertyAll(TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold)),
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(AppStyles.buttonRadius)))),
+          ),
+          textTheme: TextTheme(
+              displayLarge: AppStyles.displayLarge,
+              headlineLarge: AppStyles.headlineLarge,
+              headlineMedium: AppStyles.headlineMedium,
+              headlineSmall: AppStyles.headlineSmall,
+              bodyLarge: AppStyles.bodyLarge,
+              bodyMedium: AppStyles.bodyMedium,
+              labelMedium: AppStyles.labelMedium),
           useMaterial3: true,
         ),
         home: LoginProvider(
-          loginState: LoginState(data: LoginData()),
-          child: const WelcomeScreen(),
+          loginState: LoginState(
+              data: LoginData(
+                  schoolIDAndName: ("1234", "Delhi Public School, Noida"),
+                  inputType: LoginType.phoneNumber,
+                  inputData: "+912086213307")),
+          child: const OTPVerification(),
         )
 
         // LoginProvider(

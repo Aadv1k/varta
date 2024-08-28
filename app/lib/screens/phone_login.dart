@@ -4,11 +4,12 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
+import 'package:app/screens/otp_verification.dart';
+import 'package:app/services/api_service.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/phone_number_input.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class PhoneLogin extends StatefulWidget {
   const PhoneLogin({super.key});
@@ -33,26 +34,22 @@ class _PhoneLoginState extends State<PhoneLogin> {
 
     try {
       final loginData = LoginProvider.of(context).loginState.data;
-      _authService.sendOtp(loginData);
-    } on http.ClientException {
+      // simulate success
+      // await _authService.sendOtp(loginData);
+    } on ApiClientException catch (_) {
       setState(() {
         isLoading = false;
         hasError = true;
         errorMessage = "Unable to connect at this moment. Try again later";
       });
-      return;
     }
 
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => OTPVerification(
-    //                 userLoginData: widget.userLoginData.copyWith(
-    //               inputData: phoneNumber,
-    //               inputType: LoginType.phoneNumber,
-    //             ))
-
-    //             ));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => LoginProvider(
+                loginState: LoginProvider.of(context).loginState,
+                child: OTPVerification())));
   }
 
   @override
@@ -65,7 +62,8 @@ class _PhoneLoginState extends State<PhoneLogin> {
           child: AppBar(
               elevation: 0,
               toolbarHeight: 72,
-              title: Text(loginState.data.schoolIDAndName!.$2),
+              title: Text(loginState.data.schoolIDAndName!.$2,
+                  style: Theme.of(context).textTheme.headlineMedium),
               centerTitle: true,
               leading: IconButton(
                   onPressed: () {
