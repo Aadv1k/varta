@@ -3,19 +3,13 @@ import 'package:app/common/sizes.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
 import 'package:app/screens/welcome.dart';
-import 'package:app/services/auth_service.dart';
 import 'package:app/state/login_state.dart';
 import 'package:flutter/material.dart';
 
-Future main() async {
-  await AuthService().initSharedPrefs();
-
-  // bool isLoggedIn = await AuthService().isLoggedIn();
-  // bool isFirstTimeLogin = await AuthService().isFirstTimeLogin();
-
+Future<void> main() async {
   runApp(const VartaApp(
-    isFirstTimeLogin: true, //isFirstTimeLogin,
-    isLoggedIn: false, //isLoggedIn,
+    isFirstTimeLogin: true,
+    isLoggedIn: false,
   ));
 }
 
@@ -29,7 +23,6 @@ class VartaApp extends StatelessWidget {
     required this.isFirstTimeLogin,
   });
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -72,8 +65,13 @@ class VartaApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: LoginProvider(
-            loginState: LoginState(data: LoginData()),
-            child: const WelcomeScreen())
+          loginState: LoginState(data: LoginData()),
+          child: const WelcomeScreen(),
+        )
+
+        // LoginProvider(
+        //     loginState: LoginState(data: LoginData()),
+        //     child: const WelcomeScreen())
 
         // !isLoggedIn
         //     ? (isFirstTimeLogin

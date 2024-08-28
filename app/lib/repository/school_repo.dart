@@ -2,13 +2,15 @@ import 'dart:convert';
 
 import 'package:app/models/school_model.dart';
 import 'package:app/services/api_service.dart';
-import 'package:app/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SchoolRepository {
   final ApiService _apiService = ApiService();
 
   Future<List<SchoolModel>> getSchools() async {
-    String? foundCache = AuthService().sharedPrefs!.getString("schoolListData");
+    final sharedPrefs = await SharedPreferences.getInstance();
+
+    String? foundCache = sharedPrefs.getString("schoolListData");
 
     if (foundCache != null) {
       final data = jsonDecode(foundCache);
@@ -31,13 +33,13 @@ class SchoolRepository {
     final List<SchoolModel> parsedData =
         responseData.map((jsonItem) => SchoolModel.fromJson(jsonItem)).toList();
 
-    AuthService().sharedPrefs!.setString(
-          "schoolListData",
-          jsonEncode({
-            "cachedAt": DateTime.now().millisecondsSinceEpoch,
-            "data": parsedData.map((school) => school.toJson()).toList()
-          }),
-        );
+    sharedPrefs.setString(
+      "schoolListData",
+      jsonEncode({
+        "cachedAt": DateTime.now().millisecondsSinceEpoch,
+        "data": parsedData.map((school) => school.toJson()).toList()
+      }),
+    );
 
     return parsedData;
   }

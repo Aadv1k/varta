@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
@@ -15,11 +17,11 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  final SchoolRepository _schoolRepository = SchoolRepository();
-
   Map<String, String> organizations = {};
   bool isLoading = true;
   String? errorMessage;
+
+  late final SchoolRepository _schoolRepository = SchoolRepository();
 
   void fetchSchoolList() async {
     setState(() {
@@ -28,7 +30,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     });
     try {
       final schools = await _schoolRepository.getSchools();
+
       setState(() {
+        if (schools.isEmpty) {
+          errorMessage = "API didn't send any schools. This should not happen.";
+          isLoading = false;
+          return;
+        }
+
         for (var school in schools) {
           organizations[school.schoolId.toString()] = school.schoolName;
         }
@@ -99,16 +108,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       listenable: loginState,
                       builder: (context, child) {
                         return BottomSheetSelect(
+                          disabled: organizations.isEmpty,
                           optionsKeyValue: organizations,
                           selectedOptionKey:
-                              loginState.data.schoolIDAndName?.$1 ??
-                                  organizations.keys.first,
+                              loginState.data.schoolIDAndName?.$1,
                           onSelect: (id) {
                             loginState.setLoginData(loginState.data.copyWith(
                                 schoolIDAndName: (id, organizations[id]!)));
                           },
-                          disabled: organizations.isEmpty ||
-                              organizations.length == 1,
                         );
                       }),
                   if (errorMessage != null)
@@ -116,9 +123,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
                       child: Text(
                         errorMessage!,
-                        textAlign: TextAlign.start,
                         style: const TextStyle(
-                            color: TWColor.red600,
+                            color: TWColor.red500,
                             fontSize: FontSizes.textSm,
                             decoration: TextDecoration.none),
                       ),
@@ -232,7 +238,7 @@ class BottomSheetSelect extends StatelessWidget {
                 },
               );
             }
-          : null, // Disable tap if disabled
+          : null,
       child: Opacity(
         opacity: disabled ? 0.6 : 1.0,
         child: Container(

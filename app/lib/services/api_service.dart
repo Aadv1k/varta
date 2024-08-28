@@ -1,6 +1,6 @@
 import "dart:io";
 
-import "package:app/services/auth_service.dart";
+import "package:app/services/token_service.dart";
 import "package:http/http.dart" as http;
 
 enum HTTPMethod { GET, POST, DELETE }
@@ -11,23 +11,24 @@ class ApiServiceException implements Exception {
 
 class ApiService {
   static const String baseApiUrl = "http://localhost:8000/api/v1";
-  final AuthService _authService = AuthService();
+  final TokenService _tokenService = TokenService();
 
   Future<http.Response> makeRequest(HTTPMethod method, String endpoint,
       {dynamic body, bool isAuthenticated = false}) async {
     Map<String, String> headers = {};
     if (isAuthenticated) {
-      String? accessToken = await _authService.getAccessToken();
+      String? accessToken = await _tokenService.getAccessToken();
 
       if (accessToken == null) {
         throw ApiServiceException(
             "Can't make an authenticated request when an access token isn't set");
       }
 
-      if (_authService.tokenExpired(accessToken)) {
-        _authService.renewToken();
-        accessToken = await _authService.getAccessToken();
-      }
+      // TODO: fix this lol
+      // if (_tokenService.tokenExpired(accessToken)) {
+      //   throw UnimplementedError("NEED TO RENEW THE TOKEN HERE LOL");
+      //   //accessToken = await _tokenService.getAccessToken();
+      // }
 
       headers[HttpHeaders.authorizationHeader] = "Bearer $accessToken";
     }
