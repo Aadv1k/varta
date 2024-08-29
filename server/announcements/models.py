@@ -14,8 +14,16 @@ class Announcement(models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
 
-    def is_for(self, user: User) -> bool:
-        return any([ann_scope.matches_for_user(user) for ann_scope in self.scopes])
+    def with_scope(self, filter_type, filter_data = None):
+        AnnouncementScope.objects.create(
+            announcement=self,
+            filter=filter_type,
+            filter_data=filter_data
+        )
+        return self
+
+    def for_user(self, user: User) -> bool:
+        return any([ann_scope.matches_for_user(user) for ann_scope in self.scopes.all()])
 
 class AnnouncementScope(models.Model):
     class FilterType(models.TextChoices):

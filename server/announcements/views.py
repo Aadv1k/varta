@@ -57,7 +57,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
         academic_year = AcademicYearField(required=False)
 
 
-    def _send_paginated_announcemets(self, request, base_query):
+    def _paginate_announcements(self, request, base_query):
         serializer = self.PaginationSerializer(
             data=dict(request.GET)
         )
@@ -73,18 +73,12 @@ class AnnouncementViewSet(viewsets.ViewSet):
         page_length = serializer.validated_data.get("page_length") or 20
         academic_year = serializer.validated_data.get("acadmic_year") 
 
-        if academic_year:
-            filtered_base_query = base_query.filter(
-                academic_year=academic_year
-            )
-            
-        else:
-            filtered_base_query = base_query.filter(
-                academic_year__current=True
-            )
-        
-        sorted_announcement_query = filtered_base_query.order_by("created_at")
-        serializer = AnnouncementOutputSerializer(data=sorted_announcement_query, many=True)
+        current_academic_year_query = base_query.filter(academic_year__current=True) if not academic_year else base_query.filter(academic_year=academic_year)
+
+        sorted_announcement_query = current_academic_year_query.order_by("created_at")
+        sorted_announcements_for_user = filter(lambda ann: ann.for_user(request.user), sorted_announcement_query.all())
+
+        serializer = AnnouncementOutputSerializer(data=sorted_announcements_for_user, many=True)
 
         serializer.is_valid()
 
@@ -99,8 +93,8 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
 
     def list(self, request):
-        return self._send_paginated_announcemets(request, Announcement.objects.all().exclude(author__id=request.user.id))
+        return self._paginate_announcements(request, Announcement.objects.all().exclude(author__id=request.user.id))
 
     @action(detail=True, methods=['get'])
     def list_mine(self, request):
-        return self._send_paginated_announcemets(request, Announcement.objects.filter(author__id=request.user.id))
+        return self._paginate_announcements(request, Announcement.objects.filter(author__id=request.user.id))
