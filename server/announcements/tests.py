@@ -42,7 +42,6 @@ class AnnouncementTestCase(APITestCase):
             classroom=Classroom.get_by_std_div_or_none("10A"),
         )
 
-
         self.stud_access_token, self.student_rt = TokenService.generate_token_pair(TokenPayload(sub=str(self.student.public_id), iss="varta.test", role=self.student.user_type))
 
         self.announcement_1 = Announcement.objects.create(
@@ -63,6 +62,9 @@ class AnnouncementTestCase(APITestCase):
         self.assertEqual(response.status_code, 403) 
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.stud_access_token)
-        self.client.get(reverse("announcement_list"))
+        response = self.client.get(reverse("announcement_list"))
 
         self.assertEqual(response.status_code, 200) 
+        self.assertEqual(len(response.data["data"]), 1) 
+
+        print(response.data)

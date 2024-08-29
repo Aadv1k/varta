@@ -90,7 +90,7 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         return instance
     
 class AnnouncementOutputSerializer(serializers.ModelSerializer):
-    scopes = AnnouncementSerializer(many=True)
+    scopes = AnnouncementScopeSerializer(many=True)
 
     class Meta:
         model = Announcement
