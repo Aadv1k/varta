@@ -50,4 +50,9 @@ class AnnouncementScope(models.Model):
     filter_data = models.CharField(max_length=255, null=True, blank=False) 
 
     def matches_for_user(self, user: User) -> bool:
-        assert False, "Not Implemented"
+        if self.filter == self.FilterType.EVERYONE:
+            return True
+        elif self.filter == self.FilterType.ALL_STUDENTS and user.user_type != User.UserType.STUDENT:
+            return False 
+        elif self.filter == self.FilterType.ALL_TEACHERS and user.user_type != User.UserType.TEACHER:
+            return False 

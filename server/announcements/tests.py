@@ -12,7 +12,7 @@ from .models import Announcement, AnnouncementScope
 class StudentAnnouncementTestCase(APITestCase):
     fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
 
-    def _only_has_these_filters(expected_scope_filters: set, announcements):
+    def _only_has_these_filters(self, expected_scope_filters: set, announcements):
         for announcement in announcements:
             if not all(map(lambda ann: ann["filter"] in expected_scope_filters, announcement.scopes)):
                 return False
@@ -55,7 +55,7 @@ class StudentAnnouncementTestCase(APITestCase):
                 title=f"Announcement #{i} for students of standard 9th",
                 body="Dear Students\nYou'll be pleased to informed NO SCHOOL!"
             ).with_scope(AnnouncementScope.FilterType.STU_STANDARD, filter_data="9")
-            for i in range(self.announcements_for_student_standard)]
+            for i in range(self.announcements_for_student_standard)],
 
             *[Announcement.objects.create(
                 author=self.teacher,
