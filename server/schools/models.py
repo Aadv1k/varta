@@ -20,3 +20,6 @@ class AcademicYear(models.Model):
     @staticmethod
     def get_current_academic_year():
         return AcademicYear.objects.get(current=True)
+    
+    def __str__(self):
+        return f"{self.start_date.year}-{self.start_date.year}"

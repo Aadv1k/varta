@@ -60,5 +60,9 @@ class AnnouncementScope(models.Model):
         elif self.filter == self.FilterType.STU_STANDARD:
             if user.student_details.classroom.standard == self.filter_data:
                 return True
+            
+        elif self.filter == self.FilterType.STU_STANDARD_DIVISION:
+            if user.student_details.classroom.equals_std_div_str(self.filter_data):
+                return True
 
         return False

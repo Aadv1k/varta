@@ -2,7 +2,12 @@ from rest_framework import serializers
 
 from rest_framework.exceptions import ValidationError
 
+
+from accounts.models import User
 from .models import Announcement, AnnouncementScope
+
+from common.fields.AcademicYearField import AcademicYearField
+
 from accounts.models import Department, Classroom
 
 def validate_standard(data: str):
@@ -42,7 +47,7 @@ class AnnouncementScopeSerializer(serializers.ModelSerializer):
             validate_standard_division(filter_data)
         elif filter_type == AnnouncementScope.FilterType.T_DEPARTMENT:
             validate_department(filter_type)
-        
+
         return filter_data
 
 
@@ -63,7 +68,7 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         if len(scopes_data) == 0:
             raise ValidationError("Announcement must have at-least one scope attached to it")
         
-        if any([scope in {AnnouncementScope.FilterType.ALL_STUDENTS, AnnouncementScope.FilterType.ALL_TEACHERS,  AnnouncementScope.FilterType.EVERYONE} for scope in scopes_data]) and len(scopes_data ) > 1:
+        if any([scope["filter"] in {AnnouncementScope.FilterType.ALL_STUDENTS, AnnouncementScope.FilterType.ALL_TEACHERS,  AnnouncementScope.FilterType.EVERYONE} for scope in scopes_data]) and len(scopes_data) > 1:
             raise ValidationError("Can't have a scope with filter that includes all students, teachers or everyone with other scopes")
         
         return scopes_data
@@ -79,7 +84,6 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         instance.title = validated_data.get("title", instance.title)
         instance.body = validated_data.get("body", instance.body)
 
-        # Get rid of all the old scopes
         instance.scopes.all().delete()
 
         for scope in validated_data.get("scopes", []):
@@ -88,10 +92,17 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
-    
+
+class SimpleAnnouncementAuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "public_id"]
+
 class AnnouncementOutputSerializer(serializers.ModelSerializer):
+    author = SimpleAnnouncementAuthorSerializer()
     scopes = AnnouncementScopeSerializer(many=True)
+    academic_year = AcademicYearField() 
 
     class Meta:
         model = Announcement
-        exclude = ["author"]
+        fields = "__all__"

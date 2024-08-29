@@ -26,6 +26,13 @@ class StudentAnnouncementTestCase(APITestCase):
                         f"- Issue:      The scope does not match any of the expected filter and filter_data pairs."
                     )
 
+    def _assertHasNAnnouncementsWithScope(self, s: Tuple[str, str], i: int, items):
+        self.assertEqual(
+            len(
+                list(filter(lambda ann: s in map(lambda scope: (scope["filter"], scope["filter_data"]), ann["scopes"]), items)),
+            ), i)
+
+
 
     def setUp(self):
         self.school = School.objects.create(
@@ -42,9 +49,9 @@ class StudentAnnouncementTestCase(APITestCase):
             last_name="Doe",
         )
 
-        self.announcements_for_all_students = 5
-        self.announcements_for_student_standard = 5
-        self.announcements_for_student_standard_division = 5
+        self.announcements_for_all_students = 3
+        self.announcements_for_student_standard = 3
+        self.announcements_for_student_standard_division = 3
 
         self.announcements = [
             *[Announcement.objects.create(
@@ -69,7 +76,7 @@ class StudentAnnouncementTestCase(APITestCase):
                 academic_year=AcademicYear.get_current_academic_year(),
                 title=f"Announcement #{i} for students of standard 9th",
                 body="Dear Students\nYou'll be pleased to informed NO SCHOOL!"
-            ).with_scope(AnnouncementScope.FilterType.STU_STANDARD_DIVISION, filter_data="9A")
+            ).with_scope(AnnouncementScope.FilterType.STU_STANDARD_DIVISION, filter_data="9C")
             for i in range(self.announcements_for_student_standard_division)]
         ]
 
@@ -115,7 +122,7 @@ class StudentAnnouncementTestCase(APITestCase):
         response = self.client.get(reverse("announcement_list"))
 
         self.assertEqual(response.status_code, 200) 
-        self.assertEqual(len(response.data["data"]), self.announcements_for_all_students)
+        self.assertEqual(response.data["metadata"]["page_length"], self.announcements_for_all_students)
         self._assertHasThese([
             ( AnnouncementScope.FilterType.ALL_STUDENTS, None)
         ], response.data["data"])
@@ -125,17 +132,27 @@ class StudentAnnouncementTestCase(APITestCase):
         response = self.client.get(reverse("announcement_list"))
 
         self.assertEqual(response.status_code, 200) 
+        
+        self._assertHasNAnnouncementsWithScope(
+            (AnnouncementScope.FilterType.STU_STANDARD, "9"), 
+            self.announcements_for_student_standard, 
+            response.data["data"]
+        )
+      
+    def test_student_can_view_announcements_for_their_standard_division_and_standard_and_everyone(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.stud_9C_at)
+        response = self.client.get(reverse("announcement_list"))
 
+        self.assertEqual(response.status_code, 200) 
 
-        self._assertHasThese([
-            ( AnnouncementScope.FilterType.STU_STANDARD, "9"),
-            ( AnnouncementScope.FilterType.ALL_STUDENTS, None),
-        ],
-        response.data["data"])
+        self._assertHasNAnnouncementsWithScope(
+            (AnnouncementScope.FilterType.STU_STANDARD, "9"), 
+            self.announcements_for_student_standard, 
+            response.data["data"]
+        )
 
-    # def test_student_can_view_announcements_for_their_standard_division_and_standard_and_everyone(self):
-    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.stud_9C_at)
-    #     response = self.client.get(reverse("announcement_list"))
-
-    #     self.assertEqual(response.status_code, 200) 
-    #     self.assertTrue(self._only_has_these_filters(( AnnouncementScope.FilterType.ALL_STUDENTS, None, AnnouncementScope.FilterType.STU_STANDARD_DIVISION ), response.data["data"]))
+        self._assertHasNAnnouncementsWithScope(
+            (AnnouncementScope.FilterType.STU_STANDARD_DIVISION, "9C"), 
+            self.announcements_for_student_standard_division, 
+            response.data["data"]
+        )

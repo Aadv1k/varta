@@ -13,6 +13,10 @@ class Classroom(models.Model):
     @staticmethod
     def validate_std_div_str(s: str) -> bool:
         return bool(re.match(r'^(1[0-2]|[1-9])[A-J]$', s))
+    
+    def equals_std_div_str(self, s: str):
+        classroom = Classroom.get_by_std_div_or_none(s)
+        return self.standard == classroom.standard and self.division == classroom.division
 
     @staticmethod
     def get_by_std_div_or_none(s: str):
