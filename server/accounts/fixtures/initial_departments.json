@@ -1,5 +1,6 @@
 [
     {"model": "accounts.department", "pk": 0, "fields": {"department_name": "mathematics"}},
-    {"model": "accounts.department", "pk": 1, "fields": {"department_name": "english"}},
-    {"model": "accounts.department", "pk": 1, "fields": {"department_name": "science"}}
+    {"model": "accounts.department", "pk": 2, "fields": {"department_name": "english"}},
+    {"model": "accounts.department", "pk": 3, "fields": {"department_name": "geography"}},
+    {"model": "accounts.department", "pk": 4, "fields": {"department_name": "administration"}}
 ]
