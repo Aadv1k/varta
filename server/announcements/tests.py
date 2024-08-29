@@ -15,26 +15,27 @@ from .models import Announcement, AnnouncementScope
 class StudentAnnouncementTestCase(APITestCase):
     fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
 
-    def _assertHasThese(self, expected: List[Tuple[str, str]], announcements):
-        for ann in announcements:
-            for scope in ann["scopes"]:
-                if (scope["filter"], scope["filter_data"]) not in expected:
-                    self.fail(
-                        f"Announcement ID: {ann['id']}\n"
-                        f"- Expected    {expected}\n"
-                        f"- Found       ({scope['filter']}, {scope['filter_data']})\n"
-                        f"- Issue:      The scope does not match any of the expected filter and filter_data pairs."
-                    )
+    def tearDown(self):
+        Announcement.objects.all().delete()
 
-    def _assertHasNAnnouncementsWithScope(self, s: Tuple[str, str], i: int, items):
-        self.assertEqual(
-            len(
-                list(filter(lambda ann: s in map(lambda scope: (scope["filter"], scope["filter_data"]), ann["scopes"]), items)),
-            ), i)
-
-
+    def create_student_and_token(self, std_div):
+        user = User.objects.create(
+            school=self.school,
+            first_name="Foo",
+            middle_name="Bar",
+            last_name="Baz",
+        )
+        StudentDetail.objects.create(
+            user=user,
+            classroom=Classroom.get_by_std_div_or_none(std_div),
+        )
+        token, _ = TokenService.generate_token_pair(TokenPayload(sub=str(user.public_id), iss="varta.test", role=user.user_type))
+        
+        return user, token
 
     def setUp(self):
+        self.tearDown()
+
         self.school = School.objects.create(
             name="Delhi Public School",
             address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
@@ -49,110 +50,79 @@ class StudentAnnouncementTestCase(APITestCase):
             last_name="Doe",
         )
 
-        self.announcements_for_all_students = 3
-        self.announcements_for_student_standard = 3
-        self.announcements_for_student_standard_division = 3
+        self.student_9A = self.create_student_and_token("9A")
+        self.student_9B = self.create_student_and_token("9B")
+        self.student_9C = self.create_student_and_token("9C")
 
-        self.announcements = [
-            *[Announcement.objects.create(
-                author=self.teacher,
-                academic_year=AcademicYear.get_current_academic_year(),
-                title=f"Announcement #{i} for all students",
-                body="Dear Students\nYou'll be pleased to informed NO SCHOOL!"
-            ).with_scope(AnnouncementScope.FilterType.ALL_STUDENTS)
-            for i in range(self.announcements_for_all_students)],
+        self.student_8A = self.create_student_and_token("8A")
+        self.student_8B = self.create_student_and_token("8B")
 
-
-            *[Announcement.objects.create(
-                author=self.teacher,
-                academic_year=AcademicYear.get_current_academic_year(),
-                title=f"Announcement #{i} for students of standard 9th",
-                body="Dear Students\nYou'll be pleased to informed NO SCHOOL!"
-            ).with_scope(AnnouncementScope.FilterType.STU_STANDARD, filter_data="9")
-            for i in range(self.announcements_for_student_standard)],
-
-            *[Announcement.objects.create(
-                author=self.teacher,
-                academic_year=AcademicYear.get_current_academic_year(),
-                title=f"Announcement #{i} for students of standard 9th",
-                body="Dear Students\nYou'll be pleased to informed NO SCHOOL!"
-            ).with_scope(AnnouncementScope.FilterType.STU_STANDARD_DIVISION, filter_data="9C")
-            for i in range(self.announcements_for_student_standard_division)]
-        ]
-
-        self.student_10A = User.objects.create(
-            school=self.school,
-            first_name="Aarav",
-            middle_name="Raj",
-            last_name="Sharma",
-        )
-        StudentDetail.objects.create(
-            user=self.student_10A,
-            classroom=Classroom.get_by_std_div_or_none("10A"),
-        )
-        self.stud_10A_at, _ = TokenService.generate_token_pair(TokenPayload(sub=str(self.student_10A.public_id), iss="varta.test", role=self.student_10A.user_type))
-
-        self.student_9B = User.objects.create(
-            school=self.school,
-            first_name="Aarav",
-            middle_name="Raj",
-            last_name="Sharma",
-        )
-        StudentDetail.objects.create(
-            user=self.student_9B,
-            classroom=Classroom.get_by_std_div_or_none("9B"),
-        )
-        self.stud_9B_at, _ = TokenService.generate_token_pair(TokenPayload(sub=str(self.student_9B.public_id), iss="varta.test", role=self.student_9B.user_type))
-
-        self.student_9C = User.objects.create(
-            school=self.school,
-            first_name="Aarav",
-            middle_name="Raj",
-            last_name="Sharma",
-        )
-        StudentDetail.objects.create(
-            user=self.student_9C,
-            classroom=Classroom.get_by_std_div_or_none("9C"),
-        )
-        self.stud_9C_at, _ = TokenService.generate_token_pair(TokenPayload(sub=str(self.student_9C.public_id), iss="varta.test", role=self.student_9C.user_type))
-
-
-    def test_student_can_view_announcements_for_all_students(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.stud_10A_at)
-        response = self.client.get(reverse("announcement_list"))
-
-        self.assertEqual(response.status_code, 200) 
-        self.assertEqual(response.data["metadata"]["page_length"], self.announcements_for_all_students)
-        self._assertHasThese([
-            ( AnnouncementScope.FilterType.ALL_STUDENTS, None)
-        ], response.data["data"])
 
     def test_student_can_view_announcements_for_their_standard_and_everyone(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.stud_9B_at)
-        response = self.client.get(reverse("announcement_list"))
+        cur_ann = Announcement.objects.create(
+            author=self.teacher, title="Test", body="Test", academic_year=AcademicYear.get_current_academic_year()
+        ).with_scope(AnnouncementScope.FilterType.ALL_STUDENTS)
 
-        self.assertEqual(response.status_code, 200) 
+
+        for (student, token) in [self.student_8A, self.student_9A, self.student_9B]:
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+            response = self.client.get(reverse("announcement_list"))
+
+            self.assertTrue(str(cur_ann.id) in [ann["id"] for ann in response.data["data"]])
         
-        self._assertHasNAnnouncementsWithScope(
-            (AnnouncementScope.FilterType.STU_STANDARD, "9"), 
-            self.announcements_for_student_standard, 
-            response.data["data"]
-        )
       
-    def test_student_can_view_announcements_for_their_standard_division_and_standard_and_everyone(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.stud_9C_at)
+    def test_student_of_particular_standard_can_view_announcements(self):
+        cur_ann = Announcement.objects.create(
+            author=self.teacher, title="Test", body="Test", academic_year=AcademicYear.get_current_academic_year()
+        ).with_scope(AnnouncementScope.FilterType.STU_STANDARD, filter_data="9")
+
+        for (student, token) in [self.student_9A, self.student_9B, self.student_9C]:
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+            response = self.client.get(reverse("announcement_list"))
+
+            self.assertTrue(str(cur_ann.id) in [ann["id"] for ann in response.data["data"]])
+
+        for (student, token) in [self.student_8A, self.student_8B]:
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+            response = self.client.get(reverse("announcement_list"))
+            self.assertEqual(len(response.data["data"]), 0)
+
+    def test_students_of_particular_standard_and_division_can_view_announcements(self):
+        cur_ann = Announcement.objects.create(
+            author=self.teacher, title="Test", body="Test", academic_year=AcademicYear.get_current_academic_year()
+        ).with_scope(AnnouncementScope.FilterType.STU_STANDARD_DIVISION, filter_data="9B")
+
+        for (student, token) in [self.student_8A, self.student_8B, self.student_9A, self.student_9C]:
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+            response = self.client.get(reverse("announcement_list"))
+            self.assertEqual(len(response.data["data"]), 0)
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_9B[1])
         response = self.client.get(reverse("announcement_list"))
 
-        self.assertEqual(response.status_code, 200) 
+        self.assertTrue(str(cur_ann.id) in [ann["id"] for ann in response.data["data"]])
 
-        self._assertHasNAnnouncementsWithScope(
-            (AnnouncementScope.FilterType.STU_STANDARD, "9"), 
-            self.announcements_for_student_standard, 
-            response.data["data"]
-        )
+    def test_announcements_with_multiple_standard_scope(self):
+        cur_ann = Announcement.objects.create(
+            author=self.teacher, title="Test", body="Test", academic_year=AcademicYear.get_current_academic_year()
+        ) \
+        .with_scope(AnnouncementScope.FilterType.STU_STANDARD, filter_data="9") \
+        .with_scope(AnnouncementScope.FilterType.STU_STANDARD, filter_data="8")
 
-        self._assertHasNAnnouncementsWithScope(
-            (AnnouncementScope.FilterType.STU_STANDARD_DIVISION, "9C"), 
-            self.announcements_for_student_standard_division, 
-            response.data["data"]
-        )
+        for (student, token) in [self.student_8A, self.student_8B, self.student_9A, self.student_9C, self.student_9B]:
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+            response = self.client.get(reverse("announcement_list"))
+
+            self.assertTrue(str(cur_ann.id) in [ann["id"] for ann in response.data["data"]])
+    
+    def test_students_cannot_view_announcements_for_teachers(self):
+        cur_ann = Announcement.objects.create(
+            author=self.teacher, title="Test", body="Test", academic_year=AcademicYear.get_current_academic_year()
+        ) \
+        .with_scope(AnnouncementScope.FilterType.ALL_TEACHERS, filter_data="9")
+
+        for (student, token) in [self.student_8A, self.student_8B, self.student_9A, self.student_9C, self.student_9B]:
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+            response = self.client.get(reverse("announcement_list"))
+
+            self.assertEqual(len(response.data["data"]), 0)
