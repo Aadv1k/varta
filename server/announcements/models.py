@@ -52,7 +52,13 @@ class AnnouncementScope(models.Model):
     def matches_for_user(self, user: User) -> bool:
         if self.filter == self.FilterType.EVERYONE:
             return True
-        elif self.filter == self.FilterType.ALL_STUDENTS and user.user_type != User.UserType.STUDENT:
-            return False 
-        elif self.filter == self.FilterType.ALL_TEACHERS and user.user_type != User.UserType.TEACHER:
-            return False 
+        elif self.filter == self.FilterType.ALL_STUDENTS and user.user_type == User.UserType.STUDENT:
+            return True 
+        elif self.filter == self.FilterType.ALL_TEACHERS and user.user_type == User.UserType.TEACHER:
+            return True 
+        
+        elif self.filter == self.FilterType.STU_STANDARD:
+            if user.student_details.classroom.standard == self.filter_data:
+                return True
+
+        return False

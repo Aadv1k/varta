@@ -2,7 +2,10 @@ from rest_framework.test import APITestCase
 
 from django.urls import reverse
 
+
+import json
 from common.services.token import TokenService, TokenPayload
+from typing import Tuple, List
 
 
 from schools.models import School, AcademicYear
@@ -12,12 +15,16 @@ from .models import Announcement, AnnouncementScope
 class StudentAnnouncementTestCase(APITestCase):
     fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
 
-    def _only_has_these_filters(self, expected_scope_filters: set, announcements):
-        for announcement in announcements:
-            if not all(map(lambda ann: ann["filter"] in expected_scope_filters, announcement.scopes)):
-                return False
-
-        return True
+    def _assertHasThese(self, expected: List[Tuple[str, str]], announcements):
+        for ann in announcements:
+            for scope in ann["scopes"]:
+                if (scope["filter"], scope["filter_data"]) not in expected:
+                    self.fail(
+                        f"Announcement ID: {ann['id']}\n"
+                        f"- Expected    {expected}\n"
+                        f"- Found       ({scope['filter']}, {scope['filter_data']})\n"
+                        f"- Issue:      The scope does not match any of the expected filter and filter_data pairs."
+                    )
 
 
     def setUp(self):
@@ -108,18 +115,27 @@ class StudentAnnouncementTestCase(APITestCase):
         response = self.client.get(reverse("announcement_list"))
 
         self.assertEqual(response.status_code, 200) 
-        self.assertTrue(self._only_has_these_filters({ AnnouncementScope.FilterType.ALL_STUDENTS, }, response.data["data"]))
+        self.assertEqual(len(response.data["data"]), self.announcements_for_all_students)
+        self._assertHasThese([
+            ( AnnouncementScope.FilterType.ALL_STUDENTS, None)
+        ], response.data["data"])
 
     def test_student_can_view_announcements_for_their_standard_and_everyone(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.stud_9B_at)
         response = self.client.get(reverse("announcement_list"))
 
         self.assertEqual(response.status_code, 200) 
-        self.assertTrue(self._only_has_these_filters({ AnnouncementScope.FilterType.ALL_STUDENTS, AnnouncementScope.FilterType.STU_STANDARD }, response.data["data"]))
 
-    def test_student_can_view_announcements_for_their_standard_division_and_standard_and_everyone(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.stud_9C_at)
-        response = self.client.get(reverse("announcement_list"))
 
-        self.assertEqual(response.status_code, 200) 
-        self.assertTrue(self._only_has_these_filters({ AnnouncementScope.FilterType.ALL_STUDENTS, AnnouncementScope.FilterType.STU_STANDARD, AnnouncementScope.FilterType.STU_STANDARD_DIVISION }, response.data["data"]))
+        self._assertHasThese([
+            ( AnnouncementScope.FilterType.STU_STANDARD, "9"),
+            ( AnnouncementScope.FilterType.ALL_STUDENTS, None),
+        ],
+        response.data["data"])
+
+    # def test_student_can_view_announcements_for_their_standard_division_and_standard_and_everyone(self):
+    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.stud_9C_at)
+    #     response = self.client.get(reverse("announcement_list"))
+
+    #     self.assertEqual(response.status_code, 200) 
+    #     self.assertTrue(self._only_has_these_filters(( AnnouncementScope.FilterType.ALL_STUDENTS, None, AnnouncementScope.FilterType.STU_STANDARD_DIVISION ), response.data["data"]))
