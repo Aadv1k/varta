@@ -1,7 +1,8 @@
-import 'package:app/common/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/common/styles.dart';
+import 'package:app/screens/mobile/home/for_you_feed.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showAppBarTitle = false;
 
   final double _toolBarHeight = 52;
-  final double _expandedAppBarHeight = 72 * 1.8;
+  final double _expandedAppBarHeight = 52 * 2;
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: PaletteNeutral.shade010,
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
@@ -46,15 +48,13 @@ class _HomeScreenState extends State<HomeScreen> {
             toolbarHeight: _toolBarHeight,
             pinned: true,
             scrolledUnderElevation: 0,
-            elevation: 0,
-            backgroundColor: Colors.white,
+            backgroundColor: PaletteNeutral.shade010,
             centerTitle: _showAppBarTitle,
             title: _showAppBarTitle
-                ? const Text("Announcements",
-                    style: TextStyle(
-                      fontSize: FontSizes.textLg,
-                      fontWeight: FontWeight.w900,
-                    ))
+                ? Text(
+                    "Announcements",
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  )
                 : null,
             actions: [
               Padding(
@@ -68,18 +68,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               )
             ],
-            flexibleSpace: const FlexibleSpaceBar(
+            flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.pin,
               background: Align(
                 alignment: Alignment.bottomLeft,
                 child: Padding(
-                  padding: EdgeInsets.only(left: Spacing.md),
+                  padding: const EdgeInsets.only(
+                      left: Spacing.md, bottom: Spacing.md),
                   child: Text(
                     "Announcements",
-                    style: TextStyle(
-                      fontSize: FontSizes.text3xl,
-                      fontWeight: FontWeight.w900,
-                    ),
+                    style: Theme.of(context).textTheme.displayMedium,
                   ),
                 ),
               ),
@@ -93,10 +91,9 @@ class _HomeScreenState extends State<HomeScreen> {
             delegate: TabListSearchDelegate(),
             pinned: false,
           ),
-          SliverList.builder(
-            itemBuilder: (context, index) =>
-                ListTile(title: Text("Item $index")),
-            itemCount: 32,
+          const SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: Spacing.lg),
+            sliver: AnnouncementSliverList(),
           )
         ],
       ),
@@ -105,42 +102,63 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class SearchHeaderSliverDelegate extends SliverPersistentHeaderDelegate {
-  // Constructor
-  SearchHeaderSliverDelegate();
+  double minHeight = 64;
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
+      height: minHeight,
       decoration: BoxDecoration(
-          color: TWColor.white,
+          color: PaletteNeutral.shade010,
           border: overlapsContent
-              ? const Border(bottom: BorderSide(color: TWColor.slate200))
-              : null),
-      padding: const EdgeInsets.only(
-          right: Spacing.md,
-          left: Spacing.md,
-          top: Spacing.sm,
-          bottom: Spacing.sm), // Example Spacing values
-      child: Container(
-        decoration: BoxDecoration(
-          color:
-              Colors.grey[300], // Example color, replace with TWColor.slate600
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-        ),
-      ),
+              ? const Border(bottom: BorderSide(color: PaletteNeutral.shade060))
+              : const Border()),
+      padding: const EdgeInsets.symmetric(
+          horizontal: Spacing.md, vertical: Spacing.sm),
+      child: const MockSearchBar(),
     );
   }
 
   @override
-  double get maxExtent => 64.0;
+  double get maxExtent => minHeight;
 
   @override
-  double get minExtent => 64.0;
+  double get minExtent => minHeight;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return oldDelegate != this;
+    return false;
+  }
+}
+
+class MockSearchBar extends StatelessWidget {
+  const MockSearchBar({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: PaletteNeutral.shade030,
+        border: Border.all(color: PaletteNeutral.shade040),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(Icons.search, size: 28, color: PaletteNeutral.shade600),
+          const SizedBox(width: Spacing.sm),
+          Text("Search for announcements",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: PaletteNeutral.shade600))
+        ],
+      ),
+    );
   }
 }
 
@@ -151,24 +169,66 @@ class TabListSearchDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-        padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.lg, vertical: Spacing.sm),
-        child: Row(children: [
-          Container(color: TWColor.slate900, child: const Text("For you")),
-          const SizedBox(width: Spacing.sm),
-          Container(
-              color: TWColor.slate400, child: const Text("Your Announcements")),
-        ]));
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.lg,
+        vertical: Spacing.sm,
+      ),
+      color: PaletteNeutral.shade010,
+      child: Row(children: [
+        TabViewSelectorChip(
+          text: "For You",
+          onPressed: () {},
+          isActive: true,
+        ),
+        const SizedBox(width: Spacing.sm),
+        TabViewSelectorChip(
+          text: "Your Announcements",
+          onPressed: () {},
+        ),
+      ]),
+    );
   }
 
   @override
-  double get maxExtent => 56.0;
+  double get maxExtent => 76.0;
 
   @override
-  double get minExtent => 56.0;
+  double get minExtent => 76.0;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return oldDelegate != this;
+    return false;
+  }
+}
+
+class TabViewSelectorChip extends StatelessWidget {
+  final String text;
+  final bool isActive;
+  final VoidCallback onPressed;
+
+  const TabViewSelectorChip({
+    Key? key,
+    required this.text,
+    this.isActive = false,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(100),
+        side: const BorderSide(color: AppColors.primaryColor),
+      ),
+      label: Text(
+        text,
+        style: TextStyle(
+          fontSize: FontSizes.textBase,
+          color: isActive ? AppColors.darkHeading : AppColors.heading,
+        ),
+      ),
+      backgroundColor: isActive ? AppColors.primaryColor : Colors.transparent,
+      onPressed: onPressed,
+    );
   }
 }

@@ -4,16 +4,18 @@ import 'package:flutter/material.dart';
 
 class AppStyles {
   static const double buttonHeight = 82.0;
-  static const Radius buttonRadius = Radius.circular(16);
+  static const Radius buttonRadius = Radius.circular(100);
   static const double maxButtonWidth = 428.0;
   static const double buttonLoaderSize = 24;
 
-  static const double screenHorizontalPadding = Spacing.xxl;
+  static const double screenHorizontalPadding = Spacing.xl;
 
   static const TextStyle displayLarge = TextStyle(
       fontWeight: FontWeight.w900,
       fontSize: FontSizes.text4xl,
-      color: AppColors.heading);
+      color: AppColors.almostBlack);
+  static final TextStyle displayMedium =
+      displayLarge.copyWith(fontSize: FontSizes.text3xl);
 
   static const TextStyle headlineLarge = TextStyle(
       fontWeight: FontWeight.bold,
@@ -28,6 +30,8 @@ class AppStyles {
       TextStyle(color: AppColors.body, fontSize: FontSizes.textLg);
   static const TextStyle bodyMedium =
       TextStyle(color: AppColors.body, fontSize: FontSizes.textBase);
+  static const TextStyle bodySmall =
+      TextStyle(color: AppColors.subtitle, fontSize: FontSizes.textSm);
 
   static const TextStyle labelMedium =
       TextStyle(color: AppColors.subtitle, fontSize: FontSizes.textSm);

@@ -155,7 +155,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       child: Text(
                         errorMessage!,
                         style: const TextStyle(
-                            color: TWColor.red500,
+                            color: AppColors.dangerBody,
                             fontSize: FontSizes.textSm,
                             decoration: TextDecoration.none),
                       ),

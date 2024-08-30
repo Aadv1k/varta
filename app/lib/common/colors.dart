@@ -248,22 +248,47 @@ class TWColor {
   static const Color rose900 = Color(0xff881337);
 }
 
+class PaletteNeutral {
+  static const Color shade000 = Color(0xFFFFFFFF);
+  static const Color shade010 = Color(0xFFfbfbfb);
+  static const Color shade020 = Color(0xFFF7F7F8);
+  static const Color shade030 = Color(0xFFeef0f1);
+  static const Color shade040 = Color(0xFFe4e6e8);
+  static const Color shade050 = Color(0xFFcbd0d2);
+  static const Color shade060 = Color(0xFFbfc4c8);
+  static const Color shade070 = Color(0xFFb4bbbf);
+  static const Color shade080 = Color(0xFFa8afb4);
+  static const Color shade090 = Color(0xFF9ca4a9);
+  static const Color shade100 = Color(0xFF8F989E);
+  static const Color shade200 = Color(0xFF838d94);
+  static const Color shade300 = Color(0xFF768289);
+  static const Color shade400 = Color(0xFF6c7880);
+  static const Color shade500 = Color(0xFF606d75);
+  static const Color shade600 = Color(0xFF55636c);
+  static const Color shade700 = Color(0xFF475660);
+  static const Color shade800 = Color(0xFF3a4b55);
+  static const Color shade900 = Color(0xFF30414c);
+}
+
 class AppColors {
   static const Color primaryColor = Color(0xFF191919);
 
-  static const Color almostBlack = Color(0xFF070D0D);
+  static const Color almostBlack = Color(0xFF191919);
 
-  static const Color heading = TWColor.neutral900;
-  static const Color subtitle = TWColor.neutral500;
-  static const Color body = TWColor.neutral600;
+  static const Color heading = PaletteNeutral.shade900;
+  static const Color subtitle = PaletteNeutral.shade400;
+  static const Color body = PaletteNeutral.shade600;
+  static const Color subtitleLighter = PaletteNeutral.shade040;
 
-  static const Color darkDropdownButtonBg = TWColor.neutral800;
-  static const Color darkDropdownButtonAccent = TWColor.neutral700;
-  static const Color darkDropdownTextColor = TWColor.neutral300;
-  static const Color darkDropdownDisabledTextColor = TWColor.neutral400;
+  static const Color darkDropdownButtonBg = TWColor.zinc800;
+  static const Color darkDropdownButtonAccent = TWColor.zinc700;
+  static const Color darkDropdownTextColor = TWColor.zinc300;
+  static const Color darkDropdownDisabledTextColor = TWColor.zinc400;
 
-  static const darkPrimaryColor = TWColor.neutral300;
+  static const Color dangerBody = TWColor.red600;
 
-  static const Color darkHeading = TWColor.white;
-  static const Color darkBody = TWColor.neutral400;
+  static const darkPrimaryColor = PaletteNeutral.shade020;
+
+  static const Color darkHeading = PaletteNeutral.shade000;
+  static const Color darkBody = PaletteNeutral.shade050;
 }

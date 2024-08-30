@@ -1,11 +1,9 @@
 import 'package:app/common/colors.dart';
-import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
+import 'package:app/screens/mobile/home/for_you_feed.dart';
 import 'package:app/screens/mobile/home/home_screen.dart';
-import 'package:app/screens/otp_verification.dart';
-import 'package:app/screens/phone_login.dart';
 import 'package:app/screens/welcome.dart';
 import 'package:app/state/login_state.dart';
 import 'package:flutter/material.dart';
@@ -37,21 +35,23 @@ class VartaApp extends StatelessWidget {
                 backgroundColor:
                     WidgetStatePropertyAll(AppColors.darkPrimaryColor),
                 textStyle: WidgetStatePropertyAll(TextStyle(
-                    color: Colors.black, fontWeight: FontWeight.bold)),
+                    color: TWColor.neutral400, fontWeight: FontWeight.bold)),
                 shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(AppStyles.buttonRadius)))),
           ),
           textTheme: TextTheme(
               displayLarge: AppStyles.displayLarge,
+              displayMedium: AppStyles.displayMedium,
               headlineLarge: AppStyles.headlineLarge,
               headlineMedium: AppStyles.headlineMedium,
               headlineSmall: AppStyles.headlineSmall,
               bodyLarge: AppStyles.bodyLarge,
               bodyMedium: AppStyles.bodyMedium,
+              bodySmall: AppStyles.bodySmall,
               labelMedium: AppStyles.labelMedium),
           useMaterial3: true,
         ),
-        home: const HomeScreen()
+        home: const Scaffold(backgroundColor: TWColor.white, body: HomeScreen())
 
         // LoginProvider(
         //   loginState: LoginState(
@@ -61,10 +61,6 @@ class VartaApp extends StatelessWidget {
         //           inputData: "+912086213307")),
         //   child: const OTPVerification(),
         // )
-
-        // LoginProvider(
-        //     loginState: LoginState(data: LoginData()),
-        //     child: const WelcomeScreen())
 
         // !isLoggedIn
         //     ? (isFirstTimeLogin
