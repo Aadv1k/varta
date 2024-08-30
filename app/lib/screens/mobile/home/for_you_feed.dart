@@ -4,6 +4,8 @@ import 'package:app/models/announcement_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import "dart:math" as math;
+
 final List<AnnouncementModel> announcements = [
   AnnouncementModel(
     title: 'Holiday Announcement for Diwali',
@@ -223,15 +225,45 @@ final List<AnnouncementModel> announcements = [
   ),
 ];
 
-class AnnouncementSliverList extends StatelessWidget {
-  const AnnouncementSliverList({Key? key}) : super(key: key);
+class AnnouncementSliverList extends StatefulWidget {
+  final ScrollController scrollController;
+
+  const AnnouncementSliverList({super.key, required this.scrollController});
+
+  @override
+  State<AnnouncementSliverList> createState() => _AnnouncementSliverListState();
+}
+
+class _AnnouncementSliverListState extends State<AnnouncementSliverList> {
+  bool stopScrollListener = false;
+
+  @override
+  void initState() {
+    widget.scrollController.addListener(_scrollListener);
+    super.initState();
+  }
+
+  void _scrollListener() {
+    const _offset = 32;
+
+    if (widget.scrollController.position.pixels + _offset >=
+            widget.scrollController.position.maxScrollExtent &&
+        !stopScrollListener) {
+      setState(() {
+        stopScrollListener = true;
+      });
+    }
+  }
+
+  void _fetchData() {}
 
   @override
   Widget build(BuildContext context) {
     return SliverList.separated(
       itemBuilder: (BuildContext context, int index) => SizedBox(
           child: AnnouncementListItem(announcement: announcements[index])),
-      itemCount: announcements.length,
+      itemCount:
+          (announcements.length / 2).floor() + (stopScrollListener ? 1 : 0),
       separatorBuilder: (BuildContext context, int index) =>
           const Divider(color: AppColors.subtitleLighter, height: 1.0),
     );

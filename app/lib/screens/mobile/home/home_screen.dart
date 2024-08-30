@@ -12,11 +12,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  ScrollController? _scrollController;
+  late ScrollController _scrollController;
   bool _showAppBarTitle = false;
 
-  final double _toolBarHeight = 52;
-  final double _expandedAppBarHeight = 52 * 2;
+  final double _toolBarHeight = 56;
+  final double _expandedAppBarHeight = 56 * 2;
 
   @override
   void initState() {
@@ -47,8 +47,10 @@ class _HomeScreenState extends State<HomeScreen> {
             expandedHeight: _expandedAppBarHeight,
             toolbarHeight: _toolBarHeight,
             pinned: true,
-            scrolledUnderElevation: 0,
-            backgroundColor: PaletteNeutral.shade010,
+            elevation: 0,
+            backgroundColor:
+                TWColor.white, // Set background color to transparent
+            shadowColor: PaletteNeutral.shade400.withOpacity(0.25),
             centerTitle: _showAppBarTitle,
             title: _showAppBarTitle
                 ? Text(
@@ -60,8 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.only(right: Spacing.md),
                 child: SizedBox(
-                  width: 36,
-                  height: 36,
+                  width: 42,
+                  height: 42,
                   child: CircleAvatar(
                     backgroundColor: Colors.deepPurple.shade400,
                   ),
@@ -85,15 +87,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           SliverPersistentHeader(
             delegate: SearchHeaderSliverDelegate(),
-            pinned: true,
           ),
           SliverPersistentHeader(
             delegate: TabListSearchDelegate(),
-            pinned: false,
           ),
-          const SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: Spacing.lg),
-            sliver: AnnouncementSliverList(),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+            sliver: AnnouncementSliverList(scrollController: _scrollController),
           )
         ],
       ),
@@ -139,23 +139,27 @@ class MockSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
+        horizontal: Spacing.sm,
       ),
       decoration: BoxDecoration(
         color: PaletteNeutral.shade030,
-        border: Border.all(color: PaletteNeutral.shade040),
+        border: Border.all(color: PaletteNeutral.shade030),
         borderRadius: const BorderRadius.all(Radius.circular(16)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Icon(Icons.search, size: 28, color: PaletteNeutral.shade600),
+          const Icon(
+            Icons.search,
+            size: 28,
+            color: PaletteNeutral.shade200,
+          ),
           const SizedBox(width: Spacing.sm),
           Text("Search for announcements",
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium
-                  ?.copyWith(color: PaletteNeutral.shade600))
+                  ?.copyWith(color: PaletteNeutral.shade500))
         ],
       ),
     );
