@@ -1,5 +1,39 @@
 # Varta
 
+## Marketing
+
+- Create a second repo, something along the lines of VartaApp which is going to serve as the
+  "open-source" version of this app
+
+- Extensively document the following topics
+    - the back-end architecture (explain the various flows)
+    - the api design
+    - the database strcutrue (ER-diagram)
+
+    - the UX research. this can be largley single page but need to document the thought process
+            - define what was needed
+            - why didn't go with a typical dropdown
+            - document the initial idea of a multi-level design, and why it fell through
+            - describe the final idea of a sentence builder adjacent UX
+
+- Extract the design system and create a new post on behance and dribble with the design. Point
+  them to the github repository of the app
+
+
+- ~~ProductHunt pitch~~ isn't much of a commercial project but perhaps
+- Reddit
+    - r/developersindia: entire development workflow
+    - r/uxdesign with the UX research and the thought process 
+    - r/indian\_academia: a pitch for the app and a call for if interested in the app (explain what
+      is open-source and you would love to set something up for them too)
+    - r/django communication tool backend
+    - r/flutterdev app design and development process
+- Showwwcase
+- LinkedIn
+
+
+---
+
 WhatsApp isn't built for one-way multi-channel school communications; We Are.
 
 **Target Audience**: we are targeting schools whose primary means of informal (and formal) communications is WhatsApp.
