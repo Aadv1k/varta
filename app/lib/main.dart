@@ -3,6 +3,7 @@ import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
+import 'package:app/screens/mobile/home/home_screen.dart';
 import 'package:app/screens/otp_verification.dart';
 import 'package:app/screens/phone_login.dart';
 import 'package:app/screens/welcome.dart';
@@ -50,14 +51,16 @@ class VartaApp extends StatelessWidget {
               labelMedium: AppStyles.labelMedium),
           useMaterial3: true,
         ),
-        home: LoginProvider(
-          loginState: LoginState(
-              data: LoginData(
-                  schoolIDAndName: ("1234", "Delhi Public School, Noida"),
-                  inputType: LoginType.phoneNumber,
-                  inputData: "+912086213307")),
-          child: const OTPVerification(),
-        )
+        home: const HomeScreen()
+
+        // LoginProvider(
+        //   loginState: LoginState(
+        //       data: LoginData(
+        //           schoolIDAndName: ("1234", "Delhi Public School, Noida"),
+        //           inputType: LoginType.phoneNumber,
+        //           inputData: "+912086213307")),
+        //   child: const OTPVerification(),
+        // )
 
         // LoginProvider(
         //     loginState: LoginState(data: LoginData()),

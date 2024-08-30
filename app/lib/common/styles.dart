@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class AppStyles {
   static const double buttonHeight = 82.0;
-  static const Radius buttonRadius = Radius.circular(32);
+  static const Radius buttonRadius = Radius.circular(16);
   static const double maxButtonWidth = 428.0;
   static const double buttonLoaderSize = 24;
 

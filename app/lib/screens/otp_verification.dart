@@ -38,9 +38,11 @@ class _OTPVerificationState extends State<OTPVerification> {
     final loginData = LoginProvider.of(context).loginState.data;
 
     try {
-      await _authService.sendOtp(loginData);
+      // await _authService.sendOtp(loginData);
+
+      //Navigator.push(context, MaterialPageRoute(builder: (context) => null,));
     } on ApiException catch (e) {
-      // some kind of bad resposne has been thrown
+      // TODO: some kind of bad resposne has been thrown
     } on ApiClientException catch (e) {
       setState(() {
         hasError = true;
