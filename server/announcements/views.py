@@ -18,16 +18,25 @@ from common.response_builder import ErrorResponseBuilder, SuccessResponseBuilder
 from common.fields.AcademicYearField import AcademicYearField
 import re
 
+from accounts.permissions import IsTeacher
+
 
 
 class AnnouncementViewSet(viewsets.ViewSet):
-    permission_classes = ( IsJWTAuthenticated, )
+    permission_classes = [ IsJWTAuthenticated, ]
+
+    def get_permissions(self):
+        if self.action == "list_mine":
+            permission_classes = [IsJWTAuthenticated, IsTeacher]
+        else:
+            permission_classes = [IsJWTAuthenticated]
+
+        return [perm() for perm in permission_classes]
 
     class PaginationSerializer(serializers.Serializer):
         page = serializers.IntegerField(required=False)
         per_page = serializers.IntegerField(max_value=100, min_value=20, required=False)
         academic_year = AcademicYearField(required=False)
-
 
     def _paginate_announcements(self, request, base_query):
         serializer = self.PaginationSerializer(

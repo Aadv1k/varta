@@ -47,16 +47,16 @@ class BaseAnnouncementTestCase(APITestCase):
 
         return user, token
 
-    def _assertVisibleTo(self, users: List[Tuple[User, str]], ann_id: str):
+    def _assertVisibleTo(self, users: List[Tuple[User, str]], ann_id: str, mine:bool=False):
         for (user, token) in users:
             self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
-            response = self.client.get(reverse("announcement_list"))
+            response = self.client.get(reverse("announcement_list")) if not mine else self.client.get(reverse("my_announcement_list"))
             self.assertIn(str(ann_id), [x["id"] for x in response.data["data"]])
 
-    def _assertNotVisibleTo(self, users: List[Tuple[User, str]], ann_id: str):
+    def _assertNotVisibleTo(self, users: List[Tuple[User, str]], ann_id: str, mine:bool=False):
         for (user, token) in users:
             self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
-            response = self.client.get(reverse("announcement_list"))
+            response = self.client.get(reverse("announcement_list")) if not mine else self.client.get(reverse("my_announcement_list"))
             self.assertNotIn(str(ann_id), [x["id"] for x in response.data["data"]])
 
 class StudentAnnouncementTestCase(BaseAnnouncementTestCase):
@@ -199,4 +199,44 @@ class TeacherAnnouncementTestCase(BaseAnnouncementTestCase):
         self._assertVisibleTo([self.mathematics_subject_teacher_10th, self.mathematics_subject_teacher_10th_2nd], str(cur_ann.id))
         self._assertNotVisibleTo([self.english_class_teacher_12th, self.primary_english_class_teacher_4th], str(cur_ann.id))
 
-# Additional tests can be added here for class teachers of 6th to 9th
+class MyAnnouncementsTestCase(BaseAnnouncementTestCase):
+    fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
+
+    def tearDown(self):
+        Announcement.objects.all().delete()
+
+    def setUp(self):
+        self.school = School.objects.create(
+            name="Delhi Public School",
+            address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
+            phone_number="+911123456789",
+            email="info@dpsrohini.com",
+            website="https://www.dpsrohini.com"
+        )
+
+        self.teacher_mathematics_9th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["mathematics"], ["9A", "9B"], class_teacher_of=None)
+        self.teacher_class_english_12th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["english"], ["12A", "12B", "12C", "12D"], class_teacher_of="12D")
+        self.student_12D = BaseAnnouncementTestCase.create_student_and_token(self.school, "12D")
+
+        
+    def test_student_cannot_access_my_announcements_endpoint(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.student_12D[1]}")
+        response = self.client.get(reverse("my_announcement_list"))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_teacher_can_view_announcements_by_them(self):
+        ann = Announcement.objects.create(author=self.teacher_mathematics_9th[0], title="Test", academic_year=AcademicYear.get_current_academic_year())\
+            .with_scope(AnnouncementScope.FilterType.EVERYONE)
+
+        self._assertVisibleTo([self.teacher_mathematics_9th], str(ann.id), mine=True)
+        self._assertNotVisibleTo([self.teacher_class_english_12th], str(ann.id), mine=True)
+        
+    def test_announcements_authored_by_teacher_is_not_present_when_requesting_all_announcements(self):
+        ann_by_9th_math_teacher = Announcement.objects.create(author=self.teacher_mathematics_9th[0], title="Test", academic_year=AcademicYear.get_current_academic_year())\
+            .with_scope(AnnouncementScope.FilterType.EVERYONE)
+        ann_by_12th_english_teacher = Announcement.objects.create(author=self.teacher_class_english_12th[0], title="Test", academic_year=AcademicYear.get_current_academic_year())\
+            .with_scope(AnnouncementScope.FilterType.EVERYONE)
+
+        self._assertNotVisibleTo([self.teacher_mathematics_9th], str(ann_by_9th_math_teacher.id))
+        self._assertVisibleTo([self.teacher_mathematics_9th], str(ann_by_12th_english_teacher.id))

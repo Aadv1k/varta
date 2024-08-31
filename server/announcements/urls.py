@@ -8,5 +8,5 @@ urlpatterns = [
 
     path("announcements/mine/", AnnouncementViewSet.as_view({
         "get": "list_mine",
-    }))
+    }), name="my_announcement_list")
 ]

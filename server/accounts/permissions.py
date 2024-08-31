@@ -2,6 +2,8 @@ from rest_framework import exceptions
 from rest_framework import permissions
 from rest_framework.authentication import get_authorization_header
 
+from accounts.models import User
+
 from common.services.token import TokenService
 
 import jwt
@@ -32,3 +34,7 @@ class IsJWTAuthenticated(permissions.BasePermission):
             return False;
 
         return True
+
+class IsTeacher(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.user_type == User.UserType.TEACHER
