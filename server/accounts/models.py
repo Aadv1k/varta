@@ -3,6 +3,9 @@ from schools.models import School
 import uuid
 import re
 
+from django.conf import settings
+from datetime import timezone, timedelta
+
 class Classroom(models.Model):
     STANDARD_CHOICES = [(str(i), str(i)) for i in range(1, 13)]
     DIVISION_CHOICES = [(chr(i), chr(i)) for i in range(ord('A'), ord('J') + 1)]
@@ -83,3 +86,31 @@ class UserContact(models.Model):
     contact_importance = models.CharField(max_length=10, choices=ContactImportance.choices)
     contact_type = models.CharField(max_length=14, choices=ContactType.choices)
     contact_data = models.CharField(max_length=255)
+
+class UserDevice(models.Model):
+    class DeviceType(models.TextChoices):
+        ANDROID = "android", "Android"
+        IOS = "ios", "iOS"
+        WEB = "web", "Web"
+
+    user = models.ForeignKey(User, related_name="devices", on_delete=models.CASCADE)
+    logged_in_through = models.ForeignKey(UserContact, related_name="registered_on", on_delete=models.CASCADE)
+    device_token = models.CharField(max_length=255, blank=False, null=False, unique=True)
+    device_type = models.CharField(max_length=10, choices=DeviceType.choices, blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'device_token')
+
+    @property
+    def is_expired(self):
+        expiry_days = getattr(settings, 'FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS', 30)
+        return self.last_used_at <= timezone.now() - timedelta(days=expiry_days)
+
+    def update_last_used(self):
+        self.last_used_at = timezone.now()
+        self.save(update_fields=['last_used_at'])
+
+    def __str__(self):
+        return f"{self.user}'s {self.device_type} device"

@@ -5,6 +5,7 @@ from typing import Tuple, List
 from schools.models import School, AcademicYear
 from accounts.models import User, Classroom, StudentDetail, TeacherDetail, Department
 from .models import Announcement, AnnouncementScope
+import math
 
 class BaseAnnouncementTestCase(APITestCase):
     @staticmethod
@@ -240,3 +241,44 @@ class MyAnnouncementsTestCase(BaseAnnouncementTestCase):
 
         self._assertNotVisibleTo([self.teacher_mathematics_9th], str(ann_by_9th_math_teacher.id))
         self._assertVisibleTo([self.teacher_mathematics_9th], str(ann_by_12th_english_teacher.id))
+
+class PaginatedAnnouncementsTestCase(BaseAnnouncementTestCase):
+    fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
+
+    def setUp(self):
+        self.school = School.objects.create(
+            name="Delhi Public School",
+            address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
+            phone_number="+911123456789",
+            email="info@dpsrohini.com",
+            website="https://www.dpsrohini.com"
+        )
+
+        self.teacher_mathematics_9th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["mathematics"], ["9A", "9B"], class_teacher_of=None)
+        self.teacher_class_english_12th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["english"], ["12A", "12B", "12C", "12D"], class_teacher_of="12D")
+        self.student_12D = BaseAnnouncementTestCase.create_student_and_token(self.school, "12D")
+
+        self.total_announcement = 50
+        self.announcements = [
+            Announcement.objects.create(author=self.teacher_mathematics_9th[0], title=f"Announcement {i}", academic_year=AcademicYear.get_current_academic_year())\
+                .with_scope(AnnouncementScope.FilterType.EVERYONE)
+            for i in range(self.total_announcement)
+        ]
+
+    def test_announcements_are_paginated_correctly(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
+        response = self.client.get(reverse("announcement_list"))
+
+        self.assertEqual(response.data["metadata"].get("page_number"), 1)
+        self.assertEqual(response.data["metadata"].get("page_length"), 20)
+        self.assertEqual(response.data["metadata"].get("total_pages"), math.ceil(self.total_announcement / 20))
+        
+        self.assertIn(str(self.announcements[-1].id), [item["id"] for item in response.data["data"]])
+        self.assertNotIn(str(self.announcements[20].id), [item["id"] for item in response.data["data"]])
+
+    def test_announcements_pagination_query_params(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
+        response = self.client.get(f"{reverse('announcement_list')}?per_page=10")
+
+        self.assertEqual(response.data["metadata"].get("page_length"), 10)
+        self.assertEqual(response.data["metadata"].get("total_pages"), math.ceil(self.total_announcement / 10))

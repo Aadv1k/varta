@@ -1,6 +1,6 @@
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
-from .serializers import UserLoginSerializer, UserVerificationSerializer
+from .serializers import UserLoginSerializer, UserVerificationSerializer, UserDeviceSerializer
 
 from .models import UserContact
 
@@ -12,8 +12,7 @@ from common.services.otp import OTPService
 from common.services.email import send_verification_email
 from common.services.token import TokenService, TokenPayload
 
-from .authentication import JWTAuthentication
-
+from .permissions import IsJWTAuthenticated
 
 @api_view(["POST"])
 def user_login(request):
@@ -126,4 +125,27 @@ def user_refresh(request):
                 .set_code(400)        \
                 .set_message("Invalid refresh token") \
                 .set_details([{"field": "refresh_token", "error": str(e)}]) \
+                .build()
+
+
+@api_view(["POST"])
+@permission_classes([IsJWTAuthenticated])
+def user_device(request):
+    serializer = UserDeviceSerializer(data={
+        "user": request.user.id,
+        **request.data
+    })
+
+    if not serializer.is_valid():
+        return ErrorResponseBuilder() \
+                .set_code(400)        \
+                .set_message("Could not register the user device") \
+                .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
+                .build()
+    
+    serializer.save()
+
+    return SuccessResponseBuilder() \
+                .set_code(204) \
+                .set_message(None) \
                 .build()

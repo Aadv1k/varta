@@ -34,47 +34,70 @@ class AnnouncementViewSet(viewsets.ViewSet):
         return [perm() for perm in permission_classes]
 
     class PaginationSerializer(serializers.Serializer):
-        page = serializers.IntegerField(required=False)
-        per_page = serializers.IntegerField(max_value=100, min_value=20, required=False)
-        academic_year = AcademicYearField(required=False)
+        page = serializers.IntegerField(required=False, min_value=1)
+        per_page = serializers.IntegerField(max_value=100, min_value=10, required=False)
+        academic_year = AcademicYearField(required=False, allow_null=True)
 
     def _paginate_announcements(self, request, base_query):
-        serializer = self.PaginationSerializer(
-            data=dict(request.GET)
-        )
+        try:
+            serializer = self.PaginationSerializer(
+                data=dict(
+                    per_page=request.GET.get("per_page", 20),
+                    page=request.GET.get("page", 1),
+                    academic_year=request.GET.get("academic_year")
+                )
+            )
+        except ValueError:
+            return ErrorResponseBuilder() \
+                    .set_message("Invalid pagination parameters. Please provide valid integers.") \
+                    .build()
 
         if not serializer.is_valid():
             return ErrorResponseBuilder() \
-                    .set_code(400)        \
-                    .set_message("Invalid data provicded") \
-                    .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items()]) \
+                    .set_code(400) \
+                    .set_message("Invalid pagination parameters.") \
+                    .set_details([{"field": key, "error": str(value[0])} for key, value in serializer.errors.items()]) \
                     .build()
 
-        page_number = serializer.validated_data.get("page") or 1
-        page_length = serializer.validated_data.get("page_length") or 20
-        academic_year = serializer.validated_data.get("acadmic_year") 
+        page_number = serializer.validated_data.get("page", 1)
+        per_page = serializer.validated_data.get("per_page", 20)
+        academic_year = serializer.validated_data.get("academic_year")
 
-        current_academic_year_query = base_query.filter(academic_year__current=True) if not academic_year else base_query.filter(academic_year=academic_year)
+        if academic_year:
+            current_academic_year_query = base_query.filter(academic_year=academic_year)
+        else:
+            current_academic_year_query = base_query.filter(academic_year__current=True)
 
-        sorted_announcement_query = current_academic_year_query.order_by("created_at")
-        sorted_announcements_for_user = filter(lambda ann: ann.for_user(request.user), sorted_announcement_query.all())
+        sorted_announcement_query = current_academic_year_query.order_by("-created_at")
+        sorted_announcements_for_user = [ann for ann in sorted_announcement_query if ann.for_user(request.user)]
 
         serializer = AnnouncementOutputSerializer(data=sorted_announcements_for_user, many=True)
-
         serializer.is_valid()
 
-        pages = Paginator(serializer.data, page_length)
-        current_page = pages.page(page_number)
+        paginator = Paginator(serializer.data, per_page)
+        try:
+            current_page = paginator.page(page_number)
+        except Paginator.EmptyPage:
+            return ErrorResponseBuilder() \
+                    .set_message(f"Page {page_number} does not exist. There are only {paginator.num_pages} pages available.") \
+                    .build()
 
         return SuccessResponseBuilder() \
-                .set_message("Something did happen actually come to think of it") \
+                .set_message("Announcements retrieved successfully.") \
                 .set_data(current_page.object_list) \
-                .set_metadata(dict(page_length=len(current_page), page_number=page_number, page_count=pages.num_pages)) \
+                .set_metadata({
+                    "page_length": len(current_page),
+                    "page_number": page_number,
+                    "total_pages": paginator.num_pages,
+                }) \
                 .build()
 
 
     def list(self, request):
         return self._paginate_announcements(request, Announcement.objects.all().exclude(author__id=request.user.id))
+
+    def create(self, request):
+        assert False, "Not implemented"
 
     @action(detail=True, methods=['get'])
     def list_mine(self, request):

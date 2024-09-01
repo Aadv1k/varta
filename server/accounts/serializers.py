@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 
 from schools.models import School
-from .models import UserContact
+from .models import UserContact, UserDevice
 import re
 
 email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
@@ -53,3 +53,25 @@ class UserLoginSerializer(serializers.Serializer):
             raise ValidationError("Unrecognized contact parameter; expected email or phone_number")
 
         return data
+
+class UserDeviceSerializer(serializers.ModelSerializer):
+    logged_in_through = serializers.CharField(max_length=255)
+
+    def validate_logged_in_through(self, value):
+        try:
+            UserContact.objects.get(user=self.initial_data["user"], contact_data=value)
+        except UserContact.DoesNotExist:
+            raise ValidationError(f"Contact {value} doesn't exist for this user")
+        
+        return value
+
+
+    def save(self, **kwargs):
+        logged_in_through = self.validated_data.pop("logged_in_through")
+        contact_instance = UserContact.objects.get(user=self.validated_data["user"], contact_data=logged_in_through)
+
+        return UserDevice.objects.create(logged_in_through=contact_instance, **self.validated_data)
+
+    class Meta:
+        model = UserDevice
+        exclude = ["created_at", "id"]

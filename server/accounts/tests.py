@@ -132,7 +132,6 @@ class UserActionTest(APITestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_user_can_refresh_with_good_token(self):
-
         at, rt = TokenService.generate_token_pair(TokenPayload(sub=str(self.student.public_id), role=self.student.user_type, iss="varta.app"))
 
         response = self.client.post(reverse("user_refresh"), {
@@ -141,3 +140,33 @@ class UserActionTest(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("access_token", response.data["data"])
+
+    def test_user_can_register_device(self):
+        at, _ = TokenService.generate_token_pair(TokenPayload(sub=str(self.student.public_id), role=self.student.user_type, iss="varta.app"))
+            
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {at}")
+        response = self.client.post(reverse("user_device"), {
+            "logged_in_through": self.student.contacts.filter(contact_type="phone_number").first().contact_data,
+            "device_token": "some-random-token-that-cannot-be-validated",
+            "device_type": "web",
+        }, format="json")
+
+        self.assertEqual(response.status_code, 204)
+        
+
+    def test_user_cannot_register_device_with_invalid_login_details(self):
+        at, _ = TokenService.generate_token_pair(TokenPayload(sub=str(self.student.public_id), role=self.student.user_type, iss="varta.app"))
+        response = self.client.post(reverse("user_device"), { }, format="json")
+
+        self.assertEqual(response.status_code, 403)
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {at}")
+        response = self.client.post(reverse("user_device"), {
+            "logged_in_through": "invalid-non-existent-contact",
+            "device_token": "some-random-token-that-cannot-be-validated",
+            "device_type": "web",
+        }, format="json")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("logged_in_through", map(lambda x: x["field"], response.data["errors"]))

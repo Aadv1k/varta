@@ -4,6 +4,7 @@ from .views import AnnouncementViewSet
 urlpatterns = [
     path("announcements/", AnnouncementViewSet.as_view({
         "get": "list",
+        "post": "create"
     }), name="announcement_list"),
 
     path("announcements/mine/", AnnouncementViewSet.as_view({
