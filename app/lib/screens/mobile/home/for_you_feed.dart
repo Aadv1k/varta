@@ -243,17 +243,7 @@ class _AnnouncementSliverListState extends State<AnnouncementSliverList> {
     super.initState();
   }
 
-  void _scrollListener() {
-    const _offset = 32;
-
-    if (widget.scrollController.position.pixels + _offset >=
-            widget.scrollController.position.maxScrollExtent &&
-        !stopScrollListener) {
-      setState(() {
-        stopScrollListener = true;
-      });
-    }
-  }
+  void _scrollListener() {}
 
   void _fetchData() {}
 
@@ -262,8 +252,7 @@ class _AnnouncementSliverListState extends State<AnnouncementSliverList> {
     return SliverList.separated(
       itemBuilder: (BuildContext context, int index) => SizedBox(
           child: AnnouncementListItem(announcement: announcements[index])),
-      itemCount:
-          (announcements.length / 2).floor() + (stopScrollListener ? 1 : 0),
+      itemCount: announcements.length,
       separatorBuilder: (BuildContext context, int index) =>
           const Divider(color: AppColors.subtitleLighter, height: 1.0),
     );
@@ -308,44 +297,50 @@ class AnnouncementListItem extends StatelessWidget {
   @override
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: Spacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                '${announcement.author.firstName} ${announcement.author.lastName}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(),
-              ),
-              const Spacer(),
-              Text(
-                formatDate(announcement.createdAt),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: Spacing.sm),
-          Text(
-            announcement.title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.heading, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: Spacing.xs),
-          Padding(
-            padding: const EdgeInsets.only(right: Spacing.lg),
-            child: Text(
-              announcement.body,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
+    return Dismissible(
+      background: Container(
+        color: Colors.green,
+      ),
+      key: ValueKey<String>(announcement.id),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: Spacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  '${announcement.author.firstName} ${announcement.author.lastName}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(),
+                ),
+                const Spacer(),
+                Text(
+                  formatDate(announcement.createdAt),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: Spacing.sm),
+            Text(
+              announcement.title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.heading, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: Spacing.xs),
+            Padding(
+              padding: const EdgeInsets.only(right: Spacing.lg),
+              child: Text(
+                announcement.body,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

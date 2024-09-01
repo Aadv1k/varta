@@ -3,6 +3,7 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/screens/mobile/home/for_you_feed.dart';
+import 'package:flutter/src/rendering/sliver_persistent_header.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -44,49 +45,52 @@ class _HomeScreenState extends State<HomeScreen> {
         controller: _scrollController,
         slivers: [
           SliverAppBar(
-            expandedHeight: _expandedAppBarHeight,
             toolbarHeight: _toolBarHeight,
             pinned: true,
             elevation: 0,
-            backgroundColor:
-                TWColor.white, // Set background color to transparent
-            shadowColor: PaletteNeutral.shade400.withOpacity(0.25),
-            centerTitle: _showAppBarTitle,
-            title: _showAppBarTitle
+            scrolledUnderElevation: 0,
+            backgroundColor: TWColor.white,
+            //shadowColor: PaletteNeutral.shade400.withOpacity(0.25),
+            centerTitle: true,
+            title: true
                 ? Text(
                     "Announcements",
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   )
                 : null,
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: Spacing.md),
                 child: SizedBox(
-                  width: 42,
-                  height: 42,
+                  width: 36,
+                  height: 36,
                   child: CircleAvatar(
                     backgroundColor: Colors.deepPurple.shade400,
                   ),
                 ),
               )
             ],
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.pin,
-              background: Align(
-                alignment: Alignment.bottomLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: Spacing.md, bottom: Spacing.md),
-                  child: Text(
-                    "Announcements",
-                    style: Theme.of(context).textTheme.displayMedium,
-                  ),
-                ),
-              ),
-            ),
+            // flexibleSpace: FlexibleSpaceBar(
+            //   collapseMode: CollapseMode.pin,
+            //   background: Align(
+            //     alignment: Alignment.bottomLeft,
+            //     child: Padding(
+            //       padding: const EdgeInsets.only(
+            //           left: Spacing.md, bottom: Spacing.md),
+            //       child: Text(
+            //         "Announcements",
+            //         style: Theme.of(context).textTheme.displayMedium,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ),
           SliverPersistentHeader(
             delegate: SearchHeaderSliverDelegate(),
+            pinned: true,
           ),
           SliverPersistentHeader(
             delegate: TabListSearchDelegate(),
@@ -114,8 +118,8 @@ class SearchHeaderSliverDelegate extends SliverPersistentHeaderDelegate {
           border: overlapsContent
               ? const Border(bottom: BorderSide(color: PaletteNeutral.shade060))
               : const Border()),
-      padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.md, vertical: Spacing.sm),
+      padding: const EdgeInsets.only(
+          left: Spacing.md, right: Spacing.md, bottom: Spacing.md),
       child: const MockSearchBar(),
     );
   }
@@ -151,7 +155,7 @@ class MockSearchBar extends StatelessWidget {
         children: [
           const Icon(
             Icons.search,
-            size: 28,
+            size: 24,
             color: PaletteNeutral.shade200,
           ),
           const SizedBox(width: Spacing.sm),
@@ -221,17 +225,17 @@ class TabViewSelectorChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionChip(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(100),
-        side: const BorderSide(color: AppColors.primaryColor),
-      ),
+          borderRadius: BorderRadius.circular(999),
+          side: const BorderSide(style: BorderStyle.none)),
       label: Text(
         text,
         style: TextStyle(
           fontSize: FontSizes.textBase,
-          color: isActive ? AppColors.darkHeading : AppColors.heading,
+          color: isActive ? AppColors.activeChipFg : AppColors.inactiveChipFg,
         ),
       ),
-      backgroundColor: isActive ? AppColors.primaryColor : Colors.transparent,
+      backgroundColor:
+          isActive ? AppColors.activeChipBg : AppColors.inactiveChipBg,
       onPressed: onPressed,
     );
   }
