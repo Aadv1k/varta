@@ -2,9 +2,11 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
-import 'package:app/screens/mobile/home/for_you_feed.dart';
-import 'package:app/screens/mobile/home/home_screen.dart';
-import 'package:app/screens/welcome.dart';
+import 'package:app/screens/announcement_inbox/mobile/home_screen.dart';
+import 'package:app/screens/announcement_inbox/mobile/search_screen.dart';
+import 'package:app/screens/otp_verification/otp_verification.dart';
+import 'package:app/screens/phone_login.dart';
+import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/state/login_state.dart';
 import 'package:flutter/material.dart';
 
@@ -33,34 +35,20 @@ class VartaApp extends StatelessWidget {
           elevatedButtonTheme: const ElevatedButtonThemeData(
             style: ButtonStyle(
                 backgroundColor:
-                    WidgetStatePropertyAll(AppColors.darkPrimaryColor),
+                    WidgetStatePropertyAll(AppColor.darkPrimaryColor),
                 textStyle: WidgetStatePropertyAll(TextStyle(
                     color: TWColor.neutral400, fontWeight: FontWeight.bold)),
                 shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(AppStyles.buttonRadius)))),
+                    borderRadius:
+                        BorderRadius.all(AppSharedStyle.buttonRadius)))),
           ),
-          textTheme: TextTheme(
-              displayLarge: AppStyles.displayLarge,
-              displayMedium: AppStyles.displayMedium,
-              headlineLarge: AppStyles.headlineLarge,
-              headlineMedium: AppStyles.headlineMedium,
-              headlineSmall: AppStyles.headlineSmall,
-              bodyLarge: AppStyles.bodyLarge,
-              bodyMedium: AppStyles.bodyMedium,
-              bodySmall: AppStyles.bodySmall,
-              labelMedium: AppStyles.labelMedium),
+          textTheme: AppTextTheme(),
           useMaterial3: true,
         ),
-        home: const Scaffold(backgroundColor: TWColor.white, body: HomeScreen())
-
-        // LoginProvider(
-        //   loginState: LoginState(
-        //       data: LoginData(
-        //           schoolIDAndName: ("1234", "Delhi Public School, Noida"),
-        //           inputType: LoginType.phoneNumber,
-        //           inputData: "+912086213307")),
-        //   child: const OTPVerification(),
-        // )
+        home: LoginProvider(
+          loginState: LoginState(data: LoginData()),
+          child: const WelcomeScreen(),
+        )
 
         // !isLoggedIn
         //     ? (isFirstTimeLogin

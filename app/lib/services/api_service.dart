@@ -1,24 +1,9 @@
 import "dart:io";
+import "package:app/common/exceptions.dart";
 import "package:app/services/token_service.dart";
 import "package:http/http.dart" as http;
 
 enum HTTPMethod { GET, POST, DELETE }
-
-class ApiServiceException implements Exception {
-  final String message;
-  ApiServiceException(this.message);
-
-  @override
-  String toString() => "ApiServiceException: $message";
-}
-
-class ApiClientException implements Exception {
-  final String message;
-  ApiClientException(this.message);
-
-  @override
-  String toString() => "ApiClientException: $message";
-}
 
 class ApiService {
   static const String baseApiUrl = "http://localhost:8000/api/v1";
@@ -30,10 +15,8 @@ class ApiService {
     if (isAuthenticated) {
       String? accessToken = await _tokenService.getAccessToken();
 
-      if (accessToken == null) {
-        throw ApiServiceException(
-            "Can't make an authenticated request when an access token isn't set. This is due to invalid call");
-      }
+      assert(accessToken != null,
+          "Can't make an authenticated request when an access token isn't set. This is due to invalid call");
 
       // TODO: handle token renewal
       // if (_tokenService.tokenExpired(accessToken)) {

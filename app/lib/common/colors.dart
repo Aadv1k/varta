@@ -270,7 +270,7 @@ class PaletteNeutral {
   static const Color shade900 = Color(0xFF30414c);
 }
 
-class AppColors {
+class AppColor {
   static const Color primaryColor = Color(0xFF141b21);
 
   static const Color almostBlack = Color(0xFF191919);
@@ -281,10 +281,14 @@ class AppColors {
   static const Color subtitleLighter = PaletteNeutral.shade040;
 
   static const Color inactiveChipBg = PaletteNeutral.shade040;
-  static const Color inactiveChipFg = PaletteNeutral.shade600;
+  static const Color inactiveChipFg = PaletteNeutral.shade700;
 
   static const Color activeChipBg = primaryColor;
   static const Color activeChipFg = TWColor.white;
+
+  static const Color primaryBg = TWColor.white;
+
+  static const Color appBarBottomBorder = PaletteNeutral.shade050;
 
   static const Color darkDropdownButtonBg = TWColor.zinc800;
   static const Color darkDropdownButtonAccent = TWColor.zinc700;
@@ -296,5 +300,5 @@ class AppColors {
   static const darkPrimaryColor = PaletteNeutral.shade020;
 
   static const Color darkHeading = PaletteNeutral.shade000;
-  static const Color darkBody = PaletteNeutral.shade050;
+  static const Color darkBody = PaletteNeutral.shade080;
 }

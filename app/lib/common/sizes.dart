@@ -1,4 +1,17 @@
+// ignore: constant_identifier_names
 const REM = 16.0;
+
+class FontSize {
+  static const double text5xl = 61;
+  static const double text4xl = 49;
+  static const double text3xl = 39;
+  static const double text2xl = 31;
+  static const double textXl = 26;
+  static const double textLg = 25;
+  static const double textBase = 16;
+  static const double textSm = 13;
+  static const double textXs = 10;
+}
 
 class Spacing {
   static const double xs = 4.0;
@@ -10,18 +23,12 @@ class Spacing {
   static const double xxxl = 64.0;
 }
 
-class FontSizes {
-  static const double textXs = 0.75 * REM;
-  static const double textSm = 0.875 * REM;
-  static const double textBase = 1 * REM;
-  static const double textLg = 1.125 * REM;
-  static const double textXl = 1.25 * REM;
-  static const double text2xl = 1.5 * REM;
-  static const double text3xl = 1.875 * REM;
-  static const double text4xl = 2.25 * REM;
-  static const double text5xl = 3 * REM;
-  static const double text6xl = 3.75 * REM;
-  static const double text7xl = 4.5 * REM;
-  static const double text8xl = 6 * REM;
-  static const double text9xl = 8 * REM;
+class IconSizes {
+  static const double iconXs = 0.75 * REM;
+  static const double iconSm = 1 * REM;
+  static const double iconMd = 1.5 * REM;
+  static const double iconLg = 2 * REM;
+  static const double iconXl = 2.5 * REM;
+  static const double iconXxl = 3 * REM;
+  static const double iconXxxl = 4 * REM;
 }

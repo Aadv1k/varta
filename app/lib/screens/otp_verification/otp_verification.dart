@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:app/common/colors.dart';
+import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
-import 'package:app/services/api_service.dart';
+import 'package:app/screens/announcement_inbox/mobile/home_screen.dart';
+import 'package:app/screens/otp_verification/timed_text_button.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:app/widgets/basic_app_bar.dart';
 import 'package:app/widgets/button.dart';
+import 'package:app/widgets/error_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
@@ -39,15 +42,16 @@ class _OTPVerificationState extends State<OTPVerification> {
 
     try {
       // await _authService.sendOtp(loginData);
-
-      //Navigator.push(context, MaterialPageRoute(builder: (context) => null,));
-    } on ApiException catch (e) {
-      // TODO: some kind of bad resposne has been thrown
-    } on ApiClientException catch (e) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ));
+    } on ApiException catch (exc) {
       setState(() {
-        hasError = true;
-        errorMessage = e.message;
         isLoading = false;
+        hasError = true;
+        errorMessage = exc.message;
       });
     }
   }
@@ -57,24 +61,17 @@ class _OTPVerificationState extends State<OTPVerification> {
     final loginData = LoginProvider.of(context).loginState.data;
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(72),
-        child: AppBar(
-            elevation: 0,
-            toolbarHeight: 72,
-            title: Text(loginData.schoolIDAndName!.$2,
-                style: Theme.of(context).textTheme.headlineMedium),
-            centerTitle: true,
-            leading: IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.chevron_left,
-                  color: TWColor.black,
-                  size: 32,
-                ))),
-      ),
+      appBar: BasicAppBar(
+          title: loginData.schoolIDAndName!.$2,
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.chevron_left,
+                color: TWColor.black,
+                size: IconSizes.iconLg,
+              ))),
       body: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.only(
@@ -109,7 +106,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                    color: AppColors.heading,
+                                    color: AppColor.heading,
                                     fontWeight: FontWeight.bold))
                       ])),
             ),
@@ -119,12 +116,15 @@ class _OTPVerificationState extends State<OTPVerification> {
                 builder: (context, child) {
                   return OtpTextField(
                     numberOfFields: 6,
+                    textStyle: const TextStyle(
+                      fontSize: FontSize.textLg,
+                      color: AppColor.heading,
+                    ),
                     showFieldAsBox: false,
-                    focusedBorderColor: AppColors.primaryColor,
-                    borderColor: AppColors.body,
-                    cursorColor: AppColors.body,
+                    focusedBorderColor: AppColor.primaryColor,
+                    borderColor: AppColor.body,
+                    cursorColor: AppColor.body,
                     onCodeChanged: (String code) {
-                      // Update OTP as each code field changes
                       LoginProvider.of(context)
                           .loginState
                           .setLoginData(loginData.copyWith(otp: code));
@@ -140,20 +140,9 @@ class _OTPVerificationState extends State<OTPVerification> {
                   );
                 }),
             const SizedBox(height: Spacing.md),
-            if (hasError && errorMessage != null) ...[
-              SizedBox(
-                width: 320,
-                child: Text(
-                  errorMessage!,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelMedium
-                      ?.copyWith(color: TWColor.red700),
-                ),
-              ),
-              const SizedBox(height: Spacing.md),
-            ],
+            if (hasError && errorMessage != null)
+              SizedBox(width: 280, child: ErrorText(text: errorMessage!)),
+            const SizedBox(height: Spacing.md),
             TimedTextButton(onPressed: () {
               handleVerificationClick(context);
             }),
@@ -166,59 +155,6 @@ class _OTPVerificationState extends State<OTPVerification> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class TimedTextButton extends StatefulWidget {
-  final VoidCallback onPressed;
-
-  const TimedTextButton({super.key, required this.onPressed});
-
-  @override
-  _TimedTextButtonState createState() => _TimedTextButtonState();
-}
-
-class _TimedTextButtonState extends State<TimedTextButton> {
-  bool isDisabled = false;
-
-  Timer? buttonEnabledTimer;
-  int timeLeftInSeconds = 60;
-
-  void handleButtonPress() {
-    setState(() {
-      isDisabled = true;
-    });
-
-    buttonEnabledTimer =
-        Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-      if (timeLeftInSeconds > 0) {
-        setState(() {
-          timeLeftInSeconds--;
-        });
-        return;
-      }
-      timer.cancel();
-      setState(() {
-        timeLeftInSeconds = 60;
-        isDisabled = false;
-      });
-    });
-
-    widget.onPressed();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: isDisabled ? null : handleButtonPress,
-      child: Text(
-        "Didn't receive? ${!isDisabled ? 'Resend' : 'Resend in $timeLeftInSeconds'}",
-        style: Theme.of(context)
-            .textTheme
-            .bodyMedium
-            ?.copyWith(color: AppColors.subtitle),
       ),
     );
   }

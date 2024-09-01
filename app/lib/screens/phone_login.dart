@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:app/common/colors.dart';
+import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
-import 'package:app/screens/otp_verification.dart';
-import 'package:app/services/api_service.dart';
+import 'package:app/screens/otp_verification/otp_verification.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:app/widgets/basic_app_bar.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/phone_number_input.dart';
 import 'package:flutter/material.dart';
@@ -32,24 +33,29 @@ class _PhoneLoginState extends State<PhoneLogin> {
       errorMessage = null;
     });
 
-    try {
-      final loginData = LoginProvider.of(context).loginState.data;
-      // simulate success
-      // await _authService.sendOtp(loginData);
-    } on ApiClientException catch (_) {
-      setState(() {
-        isLoading = false;
-        hasError = true;
-        errorMessage = "Unable to connect at this moment. Try again later";
-      });
-    }
+    // try {
+    //   final loginData = LoginProvider.of(context).loginState.data;
+    //   await _authService.sendOtp(loginData);
+    // } on ApiClientException catch (_) {
+    //   setState(() {
+    //     isLoading = false;
+    //     hasError = true;
+    //     errorMessage = "Unable to connect at this moment. Try again later. ";
+    //   });
+    // } on ApiException catch (exc) {
+    //   setState(() {
+    //     isLoading = false;
+    //     hasError = true;
+    //     errorMessage = exc.message;
+    //   });
+    // }
 
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => LoginProvider(
                 loginState: LoginProvider.of(context).loginState,
-                child: OTPVerification())));
+                child: const OTPVerification())));
   }
 
   @override
@@ -57,24 +63,17 @@ class _PhoneLoginState extends State<PhoneLogin> {
     final loginState = LoginProvider.of(context).loginState;
 
     return Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(72),
-          child: AppBar(
-              elevation: 0,
-              toolbarHeight: 72,
-              title: Text(loginState.data.schoolIDAndName!.$2,
-                  style: Theme.of(context).textTheme.headlineMedium),
-              centerTitle: true,
-              leading: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(
-                    Icons.chevron_left,
-                    color: TWColor.black,
-                    size: 32,
-                  ))),
-        ),
+        appBar: BasicAppBar(
+            title: loginState.data.schoolIDAndName!.$2,
+            leading: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(
+                  Icons.chevron_left,
+                  color: TWColor.black,
+                  size: IconSizes.iconLg,
+                ))),
         body: Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.only(
@@ -86,7 +85,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text("Your Phone",
-                    style: Theme.of(context).textTheme.headlineLarge),
+                    style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: Spacing.md),
                 SizedBox(
                   width: 320,
@@ -109,14 +108,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                 ),
                 const SizedBox(height: Spacing.lg),
                 TextButton(
-                    onPressed: () {
-                      // Navigator.pushReplacement(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //       builder: (context) => EmailLogin(
-                      //           userLoginData: widget.userLoginData)),
-                      // );
-                    },
+                    onPressed: () {},
                     child: Text("Use Email Instead",
                         style: Theme.of(context)
                             .textTheme
@@ -127,15 +119,18 @@ class _PhoneLoginState extends State<PhoneLogin> {
                     listenable: loginState,
                     builder: (context, child) => PrimaryButton(
                           text: "Verify",
-                          onPressed: () => handleVerificationClick(context),
+                          onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginProvider(
+                                      loginState: loginState,
+                                      child: const OTPVerification()))),
+                          // handleVerificationClick(context),
                           isDisabled: loginState.data.inputData == null ||
                               loginState.data.inputData!.length != 10,
                           isLoading: isLoading,
                         ))
               ],
-
-              // phone number input, that also has error possibility
-              // use email instead
             )));
   }
 }

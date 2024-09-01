@@ -68,7 +68,7 @@ class _EmailInputState extends State<EmailInput> {
                     : null,
                 border: InputBorder.none,
                 hintStyle: const TextStyle(
-                    color: AppColors.subtitle, fontSize: FontSizes.textBase),
+                    color: AppColor.subtitle, fontSize: FontSizes.textBase),
               ),
             ),
           ),

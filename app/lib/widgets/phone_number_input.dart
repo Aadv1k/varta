@@ -1,5 +1,6 @@
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/widgets/error_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -60,7 +61,8 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
 
   @override
   Widget build(BuildContext context) {
-    Color borderAccent = widget.hasError ? TWColor.red400 : TWColor.zinc200;
+    Color borderAccent =
+        widget.hasError ? AppColor.dangerBody : PaletteNeutral.shade070;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,8 +88,8 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                   child: Text(
                     "+91",
                     style: TextStyle(
-                      fontSize: FontSizes.textBase,
-                      color: AppColors.subtitle,
+                      fontSize: FontSize.textBase,
+                      color: AppColor.subtitle,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -112,12 +114,12 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                         hintText: "Phone Number",
                         suffixIcon: widget.hasError
                             ? const Icon(Icons.error_outline,
-                                color: TWColor.red400)
+                                color: AppColor.dangerBody)
                             : null,
                         border: InputBorder.none,
                         hintStyle: const TextStyle(
-                            color: AppColors.subtitle,
-                            fontSize: FontSizes.textBase),
+                            color: AppColor.subtitle,
+                            fontSize: FontSize.textBase),
                       ),
                     ),
                   ),
@@ -126,16 +128,11 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
             ],
           ),
         ),
-        SizedBox(height: Spacing.sm),
+        const SizedBox(height: Spacing.sm),
         widget.hasError
             ? Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
-                child: Text(
-                  widget.errorMessage!,
-                  style: const TextStyle(
-                      color: TWColor.red600, fontSize: FontSizes.textSm),
-                ),
-              )
+                child: ErrorText(text: widget.errorMessage!))
             : const SizedBox.shrink(),
       ],
     );

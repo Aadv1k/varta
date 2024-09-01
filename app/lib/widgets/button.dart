@@ -22,43 +22,34 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor =
-        isLight ? AppColors.darkPrimaryColor : AppColors.primaryColor;
+        isLight ? AppColor.darkPrimaryColor : AppColor.primaryColor;
     final Color foregroundColor =
-        isLight ? AppColors.primaryColor : Colors.white;
-
-    final buttonStyle = Theme.of(context).elevatedButtonTheme.style?.copyWith(
-          backgroundColor: WidgetStatePropertyAll(
-            isDisabled ? backgroundColor.withOpacity(0.5) : backgroundColor,
-          ),
-          foregroundColor: WidgetStatePropertyAll(
-            isDisabled ? foregroundColor.withOpacity(0.5) : foregroundColor,
-          ),
-        );
+        isLight ? AppColor.primaryColor : Colors.white;
 
     return Container(
-      constraints: const BoxConstraints(maxWidth: AppStyles.maxButtonWidth),
-      height: AppStyles.buttonHeight,
+      constraints:
+          const BoxConstraints(maxWidth: AppSharedStyle.maxButtonWidth),
+      height: AppSharedStyle.buttonHeight,
       width: double.infinity,
       child: Opacity(
         opacity: isDisabled ? 0.5 : 1.0,
         child: ElevatedButton(
           onPressed: isDisabled ? null : (isLoading ? null : onPressed),
-          style: buttonStyle,
+          style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll(backgroundColor)),
           child: isLoading
               ? Center(
                   child: SizedBox(
-                      width: AppStyles.buttonLoaderSize,
-                      height: AppStyles.buttonLoaderSize,
+                      width: AppSharedStyle.buttonLoaderSize,
+                      height: AppSharedStyle.buttonLoaderSize,
                       child: CircularProgressIndicator(
                           color: foregroundColor, strokeWidth: 3)))
-              : Text(
-                  text,
+              : Text(text,
                   style: TextStyle(
+                    fontSize: FontSize.textBase,
+                    fontWeight: FontWeight.w600,
                     color: foregroundColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: FontSizes.textBase,
-                  ),
-                ),
+                  )),
         ),
       ),
     );

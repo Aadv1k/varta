@@ -1,7 +1,6 @@
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/models/user.dart'; // Adjust this import based on your actual file structure
-import 'package:app/screens/otp_verification.dart';
+import 'package:app/screens/otp_verification/otp_verification.dart';
 import 'package:app/screens/phone_login.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/email_input.dart';
