@@ -26,7 +26,7 @@ class BottomSheetSelect extends StatelessWidget {
               showModalBottomSheet(
                 context: context,
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
                 builder: (BuildContext context) {
                   return Container(
@@ -37,11 +37,12 @@ class BottomSheetSelect extends StatelessWidget {
                       padding:
                           const EdgeInsets.symmetric(horizontal: Spacing.md),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             "Select School",
-                            style: Theme.of(context).textTheme.headlineMedium,
+                            textAlign: TextAlign.start,
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
                           Expanded(
                             child: ListView(
@@ -50,11 +51,10 @@ class BottomSheetSelect extends StatelessWidget {
                               children: schools.map((school) {
                                 bool isSelected = school == selectedSchool;
                                 return ListTile(
-                                  minTileHeight: 72,
                                   contentPadding: const EdgeInsets.symmetric(
                                       horizontal: Spacing.lg),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(32),
+                                    borderRadius: BorderRadius.circular(999),
                                   ),
                                   enabled: !disabled,
                                   onTap: !isSelected && !disabled
@@ -68,13 +68,17 @@ class BottomSheetSelect extends StatelessWidget {
                                       : Colors.transparent,
                                   title: Text(
                                     school.schoolName,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(color: AppColor.heading),
                                   ),
                                   subtitle: Text(
                                     school.schoolAddress,
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: AppColor.subtitle),
                                   ),
                                   trailing: isSelected
                                       ? const Icon(
@@ -115,24 +119,21 @@ class BottomSheetSelect extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  selectedSchool == null
-                      ? "Select a School"
-                      : selectedSchool!.schoolName,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontStyle: disabled ? FontStyle.italic : FontStyle.normal,
-                    color: disabled
-                        ? AppColor.darkDropdownDisabledTextColor
-                        : AppColor.darkDropdownTextColor,
-                    fontSize: FontSize.textBase,
-                    fontWeight: FontWeight.normal,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
+                    selectedSchool == null
+                        ? "Select a School"
+                        : selectedSchool!.schoolName,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontStyle:
+                              disabled ? FontStyle.italic : FontStyle.normal,
+                          color: disabled
+                              ? AppColor.darkDropdownDisabledTextColor
+                              : AppColor.darkDropdownTextColor,
+                        )),
               ),
               Icon(
-                Icons.arrow_drop_down,
-                size: 32,
+                Icons.arrow_drop_down_rounded,
+                size: IconSizes.iconLg,
                 color: disabled
                     ? AppColor.darkDropdownDisabledTextColor
                     : AppColor.darkDropdownTextColor,

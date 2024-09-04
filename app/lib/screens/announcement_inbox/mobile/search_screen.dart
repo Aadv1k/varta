@@ -106,6 +106,43 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 }
 
+// class BasicActionChip extends StatelessWidget {
+//   final VoidCallback? onPressed;
+//   final String label;
+//   final bool isDropdown;
+
+//   const BasicActionChip({
+//     Key? key,
+//     required this.onPressed,
+//     required this.label,
+//     this.isDropdown = false,
+//   }) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return ActionChip(
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(999),
+//       ),
+//       label: Row(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           Text(label, style: const TextStyle(fontFamily: "Geist")),
+//           if (isDropdown)
+//             const Padding(
+//               padding: EdgeInsets.only(left: Spacing.sm),
+//               child: Icon(
+//                 Icons.arrow_drop_down,
+//                 size: IconSizes.iconMd,
+//               ),
+//             ),
+//         ],
+//       ),
+//       onPressed: onPressed,
+//     );
+//   }
+// }
+
 class DropdownFilterChip extends StatelessWidget {
   final String label;
   final String? value;
@@ -120,35 +157,11 @@ class DropdownFilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ActionChip(
-      backgroundColor:
-          value != null ? AppColor.activeChipBg : AppColor.inactiveChipBg,
+    return SearchFilterChip(
+      label: 'Posted By',
       onPressed: () => _showBottomSheet(context),
-      padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.sm, vertical: Spacing.sm),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(999),
-        side: const BorderSide(style: BorderStyle.none),
-      ),
-      label: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            value ?? label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: value != null
-                      ? AppColor.activeChipFg
-                      : AppColor.inactiveChipFg,
-                ),
-          ),
-          Icon(
-            Icons.arrow_drop_down,
-            size: IconSizes.iconMd,
-            color:
-                value != null ? AppColor.activeChipFg : AppColor.inactiveChipFg,
-          ),
-        ],
-      ),
+      isFilled: false,
+      isDropdown: true,
     );
   }
 
@@ -157,115 +170,127 @@ class DropdownFilterChip extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.symmetric(
-              vertical: Spacing.md, horizontal: Spacing.md),
+          padding: const EdgeInsets.only(top: Spacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Posted By",
-                  style: Theme.of(context).textTheme.headlineMedium),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                child: Text("Posted By",
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
               const SizedBox(height: Spacing.sm),
-              Wrap(spacing: Spacing.sm, children: [
-                Chip(
-                  label: Text("Jane Doe"),
-                  onDeleted: () {},
-                ),
-                Chip(
-                  label: Text("Jane Doe"),
-                  onDeleted: () {},
-                ),
-                Chip(
-                  label: Text("Jane Doe"),
-                  onDeleted: () {},
-                ),
-              ]),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                child: Wrap(
+                    spacing: Spacing.sm,
+                    runSpacing: Spacing.md,
+                    children: [
+                      InputChip(
+                        label: Text("Amit Sharma"),
+                        onDeleted: () {},
+                      ),
+                      InputChip(
+                        label: Text("Jane Doe"),
+                        onDeleted: () {},
+                      ),
+                      InputChip(
+                        label: Text("Jane Doe"),
+                        onDeleted: () {},
+                      ),
+                    ]),
+              ),
               const SizedBox(height: Spacing.sm),
               const Divider(
                 height: 1,
-                color: AppColor.subtitle,
+                color: AppColor.subtitleLighter,
               ),
               const SizedBox(height: Spacing.sm),
               Expanded(
-                  child: ListView.builder(
-                itemBuilder: (context, index) => ListTile(
-                    subtitle: RichText(
-            text:
-                    TextSpan(
-                      text: "Teaches", 
-                      children: [
-                        ...mockTeacherData[index].departments.map(dept => Text(dept.name")),
-                        in 
-                        ...mockTeacherData[index].subjectTeacherOf.map(class => Text(dept.name")),
-                      ]
-                    ),
-
-                    )
-                    title: Text(
-                        "${mockTeacherData[index].firstName} ${mockTeacherData[index].lastName}")),
-                itemCount: mockTeacherData.length,
+                  child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+                child: ListView.builder(
+                  itemBuilder: (context, index) => ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      subtitle: RichText(
+                          text: TextSpan(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: AppColor.subtitle),
+                              text: "Teaches ",
+                              children: [
+                            ...mockTeacherData[index]
+                                .departments
+                                .asMap()
+                                .entries
+                                .map((entry) => TextSpan(
+                                      text:
+                                          "${entry.value.deptName}${entry.key == mockTeacherData[index].departments.length - 1 ? '' : ', '}",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: AppColor.heading),
+                                    )),
+                            const TextSpan(text: " to "),
+                            ...mockTeacherData[index]
+                                .subjectTeacherOf
+                                .asMap()
+                                .entries
+                                .map((entry) => TextSpan(
+                                      text:
+                                          "${entry.value.standard}${entry.value.division}${entry.key == mockTeacherData[index].departments.length - 1 ? '' : ', '}",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: AppColor.heading),
+                                    )),
+                          ])),
+                      title: Text(
+                          "${mockTeacherData[index].firstName} ${mockTeacherData[index].lastName}",
+                          style: Theme.of(context).textTheme.titleSmall)),
+                  itemCount: mockTeacherData.length,
+                ),
               )),
             ],
           ),
-        ); },
+        );
+      },
     );
   }
 }
 
-class DateFilterChip extends StatelessWidget {
+class SearchFilterChip extends StatelessWidget {
+  final bool isDropdown;
+  final bool isFilled;
   final String label;
-  final DateTime? value;
-  final ValueChanged<DateTime?> onChanged;
+  final VoidCallback onPressed;
 
-  const DateFilterChip({
-    Key? key,
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  }) : super(key: key);
+  const SearchFilterChip(
+      {super.key,
+      this.isDropdown = false,
+      this.isFilled = false,
+      required this.label,
+      required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
+    final bg = this.isFilled ? AppColor.activeChipBg : AppColor.inactiveChipBg;
+    final fg = this.isFilled ? AppColor.activeChipFg : AppColor.inactiveChipFg;
+
     return ActionChip(
-      backgroundColor:
-          value != null ? AppColor.activeChipBg : AppColor.inactiveChipBg,
-      onPressed: () => _selectDate(context),
-      padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.sm, vertical: Spacing.sm),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(999),
-        side: const BorderSide(style: BorderStyle.none),
-      ),
-      label: Text(
-        value != null ? _formatDate(value!) : label,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: value != null
-                  ? AppColor.activeChipFg
-                  : AppColor.inactiveChipFg,
-            ),
-      ),
+      label: Row(children: [
+        Text("Posted By",
+            style: Theme.of(context).chipTheme.labelStyle?.copyWith(color: fg)),
+        if (isDropdown)
+          const SizedBox(width: Spacing.sm)
+        else
+          const SizedBox.shrink(),
+        if (isDropdown)
+          Icon(Icons.arrow_drop_down_rounded, color: fg, size: IconSizes.iconMd)
+      ]),
+      backgroundColor: bg,
+      onPressed: onPressed,
     );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime now = DateTime.now();
-    final DateTime firstDate =
-        DateTime(now.year - 1, 8, 1); // August 1st of last year
-    final DateTime lastDate =
-        DateTime(now.year + 1, 7, 31); // July 31st of next year
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: value ?? now,
-      firstDate: firstDate,
-      lastDate: lastDate,
-    );
-    if (picked != null && picked != value) {
-      onChanged(picked);
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    final DateFormat formatter = DateFormat('MMM, d yyyy');
-    return formatter.format(date);
   }
 }

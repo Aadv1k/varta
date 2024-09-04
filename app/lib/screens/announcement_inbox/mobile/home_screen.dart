@@ -72,18 +72,12 @@ class _HomeScreenState extends State<HomeScreen> {
             scrolledUnderElevation: 0,
             backgroundColor: AppColor.primaryBg,
             centerTitle: true,
-            title: const Text(
-              "Varta",
-              style: TextStyle(
-                  color: AppColor.heading,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 22,
-                  height: 28 / 22),
-            ),
+            title:
+                Text("Varta", style: Theme.of(context).textTheme.titleMedium),
             leading: const SizedBox.shrink(),
             actions: [
               Padding(
-                padding: const EdgeInsets.only(right: Spacing.md),
+                padding: const EdgeInsets.only(right: Spacing.lg),
                 child: CircleAvatar(
                   backgroundColor: PaletteNeutral.shade040,
                   child: IconButton(

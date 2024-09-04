@@ -22,11 +22,11 @@ class TabViewSelectorChip extends StatelessWidget {
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999),
           side: const BorderSide(style: BorderStyle.none)),
-      label: Text(text,
-          style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color:
-                  isActive ? AppColor.activeChipFg : AppColor.inactiveChipFg)),
+      label: Text(
+        text,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: isActive ? AppColor.activeChipFg : AppColor.inactiveChipFg),
+      ),
       backgroundColor:
           isActive ? AppColor.activeChipBg : AppColor.inactiveChipBg,
       onPressed: onPressed,

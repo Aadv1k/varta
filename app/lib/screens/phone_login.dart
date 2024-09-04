@@ -7,6 +7,7 @@ import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
 import 'package:app/screens/otp_verification/otp_verification.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:app/state/login_state.dart';
 import 'package:app/widgets/basic_app_bar.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/phone_number_input.dart';
@@ -26,7 +27,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
 
   final AuthService _authService = AuthService();
 
-  Future<void> handleVerificationClick(context) async {
+  Future<void> handleVerificationClick(LoginState loginState) async {
     setState(() {
       isLoading = true;
       hasError = false;
@@ -34,33 +35,41 @@ class _PhoneLoginState extends State<PhoneLogin> {
     });
 
     // try {
-    //   final loginData = LoginProvider.of(context).loginState.data;
-    //   await _authService.sendOtp(loginData);
+    //   // final loginData = LoginProvider.of(context).loginState.data;
+    //   // await _authService.sendOtp(loginData);
+    //   throw ApiClientException("yoo");
     // } on ApiClientException catch (_) {
     //   setState(() {
     //     isLoading = false;
     //     hasError = true;
     //     errorMessage = "Unable to connect at this moment. Try again later. ";
     //   });
+    //   return;
     // } on ApiException catch (exc) {
     //   setState(() {
     //     isLoading = false;
     //     hasError = true;
     //     errorMessage = exc.message;
     //   });
+    //   return;
     // }
 
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => LoginProvider(
-                loginState: LoginProvider.of(context).loginState,
-                child: const OTPVerification())));
+                loginState: loginState, child: const OTPVerification())));
   }
 
   @override
   Widget build(BuildContext context) {
     final loginState = LoginProvider.of(context).loginState;
+    final shouldBeCompact = MediaQuery.of(context).size.height <= 840;
+
+    final contentGap = shouldBeCompact ? Spacing.md : Spacing.xl;
+    final headingStyle = shouldBeCompact
+        ? Theme.of(context).textTheme.headlineSmall
+        : Theme.of(context).textTheme.headlineLarge;
 
     return Scaffold(
         backgroundColor: AppColor.primaryBg,
@@ -68,16 +77,15 @@ class _PhoneLoginState extends State<PhoneLogin> {
         body: Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.only(
-                top: Spacing.xxl,
-                bottom: Spacing.lg,
+                top: Spacing.md,
+                bottom: Spacing.md,
                 left: Spacing.xl,
                 right: Spacing.xl),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text("Your Phone",
-                    style: Theme.of(context).textTheme.headlineLarge),
-                const SizedBox(height: Spacing.md),
+                Text("Your Phone", style: headingStyle),
+                SizedBox(height: contentGap),
                 SizedBox(
                   width: 320,
                   child: Text(
@@ -85,7 +93,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                 ),
-                const SizedBox(height: Spacing.xxl),
+                SizedBox(height: contentGap),
                 ListenableBuilder(
                   listenable: loginState,
                   builder: (context, child) => PhoneNumberInput(
@@ -97,26 +105,20 @@ class _PhoneLoginState extends State<PhoneLogin> {
                     errorMessage: errorMessage,
                   ),
                 ),
-                const SizedBox(height: Spacing.lg),
+                SizedBox(height: contentGap),
                 TextButton(
                     onPressed: () {},
                     child: Text("Use Email Instead",
                         style: Theme.of(context)
                             .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: TWColor.blue700))),
+                            .labelLarge
+                            ?.copyWith(color: TWColor.blue600))),
                 const Spacer(),
                 ListenableBuilder(
                     listenable: loginState,
                     builder: (context, child) => PrimaryButton(
                           text: "Verify",
-                          onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginProvider(
-                                      loginState: loginState,
-                                      child: const OTPVerification()))),
-                          // handleVerificationClick(context),
+                          onPressed: () => handleVerificationClick(loginState),
                           isDisabled: loginState.data.inputData == null ||
                               loginState.data.inputData!.length != 10,
                           isLoading: isLoading,

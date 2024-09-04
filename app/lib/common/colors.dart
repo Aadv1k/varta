@@ -282,7 +282,7 @@ class AppColor {
   static const Color subtitleLighter = PaletteNeutral.shade040;
 
   static const Color inactiveChipBg = PaletteNeutral.shade040;
-  static const Color inactiveChipFg = PaletteNeutral.shade700;
+  static const Color inactiveChipFg = PaletteNeutral.shade800;
 
   static const Color activeChipBg = primaryColor;
   static const Color activeChipFg = TWColor.white;

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/common/colors.dart';
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
 import 'package:app/screens/announcement_inbox/mobile/home_screen.dart';
 import 'package:app/screens/otp_verification/timed_text_button.dart';
@@ -68,7 +69,7 @@ class _OTPVerificationState extends State<OTPVerification> {
       body: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.only(
-          top: Spacing.xxl,
+          top: Spacing.xl,
           bottom: Spacing.lg,
           left: Spacing.xl,
           right: Spacing.xl,
@@ -90,11 +91,12 @@ class _OTPVerificationState extends State<OTPVerification> {
               child: RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
-                      text: "We sent a 6-digit verification code sent to ",
+                      text: "We sent a 6-digit verification code to ",
                       style: Theme.of(context).textTheme.bodyMedium,
                       children: [
                         TextSpan(
-                            text: loginData.inputData,
+                            text:
+                                "${loginData.inputType == LoginType.email ? '' : '+91 '}${loginData.inputData}",
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -103,7 +105,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                                     fontWeight: FontWeight.bold))
                       ])),
             ),
-            const SizedBox(height: Spacing.xxl),
+            const SizedBox(height: Spacing.lg),
             ListenableBuilder(
                 listenable: LoginProvider.of(context).loginState,
                 builder: (context, child) {
@@ -135,7 +137,7 @@ class _OTPVerificationState extends State<OTPVerification> {
             const SizedBox(height: Spacing.md),
             if (hasError && errorMessage != null)
               SizedBox(width: 280, child: ErrorText(text: errorMessage!)),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: Spacing.sm),
             TimedTextButton(onPressed: () {
               handleVerificationClick(context);
             }),

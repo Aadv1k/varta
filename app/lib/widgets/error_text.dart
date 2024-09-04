@@ -10,9 +10,8 @@ class ErrorText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(text,
-        style: const TextStyle(
-            color: AppColor.dangerBody,
-            fontSize: FontSize.textBase,
-            decoration: TextDecoration.none));
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: AppColor.dangerBody,
+            ));
   }
 }

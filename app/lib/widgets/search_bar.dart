@@ -79,6 +79,10 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 enabled: !widget.navigational,
                 autofocus: widget.autofocus,
                 controller: widget.editingController,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: AppColor.subheading),
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: "Search for announcements",

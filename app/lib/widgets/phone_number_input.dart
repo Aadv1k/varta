@@ -68,8 +68,8 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 360,
-          height: 56,
+          width: 380,
+          height: 54,
           padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
           decoration: BoxDecoration(
             border: Border(
@@ -84,13 +84,13 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-                child: const Center(
+                child: Center(
                   child: Text(
                     "+91",
-                    style: TextStyle(
-                      fontSize: FontSize.textBase,
-                      color: AppColor.subtitle,
-                    ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: AppColor.subtitle),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -101,27 +101,27 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
                   padding: const EdgeInsets.only(left: Spacing.md),
                   child: Center(
                     child: TextField(
-                      autocorrect: true,
-                      focusNode: _focusNode,
-                      keyboardType: TextInputType.phone,
-                      controller: phoneNumberInputController,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(11),
-                        maskFormatter,
-                      ],
-                      style: const TextStyle(color: Colors.black),
-                      decoration: InputDecoration(
-                        hintText: "Phone Number",
-                        suffixIcon: widget.hasError
-                            ? const Icon(Icons.error_outline,
-                                color: AppColor.dangerBody)
-                            : null,
-                        border: InputBorder.none,
-                        hintStyle: const TextStyle(
-                            color: AppColor.subtitle,
-                            fontSize: FontSize.textBase),
-                      ),
-                    ),
+                        autocorrect: true,
+                        focusNode: _focusNode,
+                        keyboardType: TextInputType.phone,
+                        controller: phoneNumberInputController,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(11),
+                          maskFormatter,
+                        ],
+                        style: const TextStyle(color: AppColor.heading),
+                        decoration: InputDecoration(
+                          hintText: "Phone Number",
+                          suffixIcon: widget.hasError
+                              ? const Icon(Icons.error_outline,
+                                  color: AppColor.dangerBody)
+                              : null,
+                          border: InputBorder.none,
+                          hintStyle: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: AppColor.subtitle),
+                        )),
                   ),
                 ),
               ),

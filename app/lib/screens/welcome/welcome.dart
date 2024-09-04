@@ -89,9 +89,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ?.copyWith(color: AppColor.darkHeading)),
                 const SizedBox(height: Spacing.lg),
                 SizedBox(
-                    width: 300,
+                    width: 380,
                     child: Text(
-                        "Stay on top of what's happening in your school",
+                        "Stay on top of all that's happening in your school",
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme

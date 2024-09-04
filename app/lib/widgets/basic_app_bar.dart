@@ -15,19 +15,13 @@ class BasicAppBar extends StatelessWidget implements PreferredSizeWidget {
   }) : super(key: key);
 
   @override
-  Size get preferredSize => const Size.fromHeight(64.0);
+  Size get preferredSize => const Size.fromHeight(54.0);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       centerTitle: true,
-      title: Text(
-        title,
-        style: const TextStyle(
-            color: AppColor.heading,
-            fontWeight: FontWeight.bold,
-            fontSize: FontSize.textBase),
-      ),
+      title: Text(title, style: Theme.of(context).textTheme.titleSmall),
       actions: actions,
       leading: Row(
         children: [
