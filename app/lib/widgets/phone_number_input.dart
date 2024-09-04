@@ -62,7 +62,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
   @override
   Widget build(BuildContext context) {
     Color borderAccent =
-        widget.hasError ? AppColor.dangerBody : PaletteNeutral.shade070;
+        widget.hasError ? AppColor.dangerBody : AppColor.subtitleLighter;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

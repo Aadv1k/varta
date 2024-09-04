@@ -1,9 +1,13 @@
 import 'package:app/models/announcement_model.dart';
+import 'package:app/screens/announcement_inbox/mobile/search_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/tab_selector_chip.dart';
+import 'package:app/widgets/search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/screens/announcement_inbox/mobile/for_you_feed.dart';
+import 'package:flutter/services.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -38,32 +42,56 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: PaletteNeutral.shade010,
+      floatingActionButton: LayoutBuilder(
+        builder: (context, contraints) => contraints.maxWidth <= 600
+            ? FloatingActionButton.large(
+                onPressed: () {},
+                backgroundColor: AppColor.primaryColor,
+                child: const Icon(Icons.add,
+                    color: AppColor.primaryBg, size: IconSizes.iconXl),
+              )
+            : FloatingActionButton.extended(
+                onPressed: () {},
+                backgroundColor: AppColor.primaryColor,
+                label: const Text("Create Announcement",
+                    style: TextStyle(
+                        fontSize: FontSize.textBase,
+                        fontWeight: FontWeight.normal,
+                        color: AppColor.activeChipFg)),
+                icon: const Icon(Icons.add,
+                    color: AppColor.primaryBg, size: IconSizes.iconLg),
+              ),
+      ),
+      backgroundColor: AppColor.primaryBg,
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
           SliverAppBar(
-            toolbarHeight: 64,
+            toolbarHeight: 72,
             elevation: 0,
             scrolledUnderElevation: 0,
             backgroundColor: AppColor.primaryBg,
             centerTitle: true,
             title: const Text(
-              "Announcements",
+              "Varta",
               style: TextStyle(
-                color: AppColor.heading,
-                fontWeight: FontWeight.bold,
-                fontSize: FontSize.textBase,
-              ),
+                  color: AppColor.heading,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 22,
+                  height: 28 / 22),
             ),
+            leading: const SizedBox.shrink(),
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: Spacing.md),
-                child: SizedBox(
-                  width: IconSizes.iconXl,
-                  height: IconSizes.iconXl,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.deepPurple.shade400,
+                child: CircleAvatar(
+                  backgroundColor: PaletteNeutral.shade040,
+                  child: IconButton(
+                    splashColor: PaletteNeutral.shade060,
+                    padding: EdgeInsets.zero,
+                    iconSize: IconSizes.iconMd,
+                    onPressed: () {},
+                    icon: const Center(child: Icon(Icons.person)),
                   ),
                 ),
               )
@@ -78,11 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: PaletteNeutral.shade070, width: 1)
                             : const BorderSide(style: BorderStyle.none))),
                 padding: const EdgeInsets.only(
-                    top: Spacing.md,
-                    left: Spacing.md,
-                    right: Spacing.md,
-                    bottom: Spacing.md),
-                child: const MockSearchBar(),
+                    left: Spacing.md, right: Spacing.md, bottom: Spacing.sm),
+                child: const CustomSearchBar(navigational: true),
               ),
             ),
             pinned: true,
@@ -109,26 +134,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-
-          AnnouncementListView(
-            key: ValueKey<bool>(_isForYouView),
-            isForYouView: _isForYouView,
+          SliverPadding(
+            padding: const EdgeInsets.only(top: Spacing.md),
+            sliver: AnnouncementListView(
+              key: ValueKey<bool>(_isForYouView),
+              isForYouView: _isForYouView,
+            ),
           )
-          // SliverPadding(
-          //     padding: const EdgeInsets.symmetric(vertical: Spacing.md),
-          //     sliver: AnnouncementListView(isForYouView: _isForYouView)
-          //     // SliverList.separated(
-          //     //   itemCount: announcements.length,
-          //     //   itemBuilder: (BuildContext context, int index) =>
-          //     //       AnnouncementListItem(announcement: announcements[index]),
-          //     //   separatorBuilder: (BuildContext context, index) => const Divider(
-          //     //     height: 1.0,
-          //     //     color: AppColor.subtitleLighter,
-          //     //     endIndent: Spacing.md,
-          //     //     indent: Spacing.md,
-          //     //   ),
-          //     // ),
-          //     ),
         ],
       ),
     );
@@ -173,14 +185,36 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const SliverFillRemaining(
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+    return Skeletonizer.sliver(
+      enabled: _isLoading,
+      child: AnnouncementSliverList(
+          data: _isLoading
+              ? List.generate(
+                  10,
+                  (int index) => AnnouncementModel(
+                      title: 'This is an example title, to act as a proxy for',
+                      body:
+                          'So I guess we are generating some random data! pretty cool if you ask me ngl, anyway. Cool package, cool Language',
+                      id: '',
+                      createdAt: DateTime(2024, 30, 6),
+                      author: AnnouncementAuthorModel(
+                          firstName: 'Foo', lastName: 'Bar', publicId: '1234'),
+                      scopes: []))
+              : _data),
+    );
+  }
+}
 
+class AnnouncementSliverList extends StatelessWidget {
+  const AnnouncementSliverList({
+    super.key,
+    required List<AnnouncementModel> data,
+  }) : _data = data;
+
+  final List<AnnouncementModel> _data;
+
+  @override
+  Widget build(BuildContext context) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
@@ -197,41 +231,6 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
           );
         },
         childCount: _data.length,
-      ),
-    );
-  }
-}
-
-class MockSearchBar extends StatelessWidget {
-  const MockSearchBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.md,
-        vertical: Spacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: PaletteNeutral.shade030,
-        border: Border.all(color: PaletteNeutral.shade030),
-        borderRadius: const BorderRadius.all(Radius.circular(32)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.search_rounded,
-            size: IconSizes.iconMd,
-            color: PaletteNeutral.shade200,
-          ),
-          const SizedBox(width: Spacing.sm),
-          Text("Search for announcements",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: PaletteNeutral.shade400)),
-        ],
       ),
     );
   }

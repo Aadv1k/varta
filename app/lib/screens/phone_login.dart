@@ -63,17 +63,8 @@ class _PhoneLoginState extends State<PhoneLogin> {
     final loginState = LoginProvider.of(context).loginState;
 
     return Scaffold(
-        appBar: BasicAppBar(
-            title: loginState.data.schoolIDAndName!.$2,
-            leading: IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.chevron_left,
-                  color: TWColor.black,
-                  size: IconSizes.iconLg,
-                ))),
+        backgroundColor: AppColor.primaryBg,
+        appBar: BasicAppBar(title: loginState.data.schoolIDAndName!.$2),
         body: Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.only(
@@ -85,7 +76,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text("Your Phone",
-                    style: Theme.of(context).textTheme.headlineMedium),
+                    style: Theme.of(context).textTheme.headlineLarge),
                 const SizedBox(height: Spacing.md),
                 SizedBox(
                   width: 320,

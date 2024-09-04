@@ -2,6 +2,7 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
+import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/home_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/search_screen.dart';
 import 'package:app/screens/otp_verification/otp_verification.dart';
@@ -42,12 +43,12 @@ class VartaApp extends StatelessWidget {
                     borderRadius:
                         BorderRadius.all(AppSharedStyle.buttonRadius)))),
           ),
-          textTheme: AppTextTheme(),
+          textTheme: const AppTextTheme(),
           useMaterial3: true,
         ),
         home: LoginProvider(
           loginState: LoginState(data: LoginData()),
-          child: const WelcomeScreen(),
+          child: const SearchScreen(),
         )
 
         // !isLoggedIn

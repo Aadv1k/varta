@@ -68,7 +68,7 @@ class AnnouncementListItem extends StatelessWidget {
           const SizedBox(height: Spacing.md),
           Text(announcement.title,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColor.heading, fontWeight: FontWeight.bold)),
+                  color: AppColor.subheading, fontWeight: FontWeight.bold)),
           Padding(
             padding: const EdgeInsets.only(right: Spacing.lg),
             child: Text(

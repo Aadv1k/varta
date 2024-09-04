@@ -61,17 +61,10 @@ class _OTPVerificationState extends State<OTPVerification> {
     final loginData = LoginProvider.of(context).loginState.data;
 
     return Scaffold(
+      backgroundColor: AppColor.primaryBg,
       appBar: BasicAppBar(
-          title: loginData.schoolIDAndName!.$2,
-          leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(
-                Icons.chevron_left,
-                color: TWColor.black,
-                size: IconSizes.iconLg,
-              ))),
+        title: loginData.schoolIDAndName!.$2,
+      ),
       body: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.only(

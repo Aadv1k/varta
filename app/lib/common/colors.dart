@@ -275,7 +275,8 @@ class AppColor {
 
   static const Color almostBlack = Color(0xFF191919);
 
-  static const Color heading = PaletteNeutral.shade900;
+  static const Color heading = almostBlack;
+  static const Color subheading = PaletteNeutral.shade900;
   static const Color subtitle = PaletteNeutral.shade400;
   static const Color body = PaletteNeutral.shade600;
   static const Color subtitleLighter = PaletteNeutral.shade040;

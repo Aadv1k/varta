@@ -15,7 +15,7 @@ class BasicAppBar extends StatelessWidget implements PreferredSizeWidget {
   }) : super(key: key);
 
   @override
-  Size get preferredSize => const Size.fromHeight(72.0);
+  Size get preferredSize => const Size.fromHeight(64.0);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,20 @@ class BasicAppBar extends StatelessWidget implements PreferredSizeWidget {
             fontSize: FontSize.textBase),
       ),
       actions: actions,
-      leading: leading,
+      leading: Row(
+        children: [
+          IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.chevron_left,
+                color: TWColor.black,
+                size: IconSizes.iconMd,
+              )),
+          if (leading != null) leading!,
+        ],
+      ),
       backgroundColor: AppColor.primaryBg,
       elevation: 0,
     );

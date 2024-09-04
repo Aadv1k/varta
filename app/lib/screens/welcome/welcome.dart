@@ -85,7 +85,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Text("Varta",
                     style: Theme.of(context)
                         .textTheme
-                        .displayMedium
+                        .displayLarge
                         ?.copyWith(color: AppColor.darkHeading)),
                 const SizedBox(height: Spacing.lg),
                 SizedBox(
