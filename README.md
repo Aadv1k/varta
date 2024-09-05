@@ -153,7 +153,7 @@ All information for a school, is organized in the following way
     "metadata": {
         page_number: 1,
         page_length: 10,
-        page_count: 10,
+        total_pages: 10,
     },
 }
 ```
