@@ -43,6 +43,7 @@ dependencies:
   dart_jsonwebtoken: ^2.14.0
   flutter_svg: ^2.0.10+1
   skeletonizer: ^1.4.2
+  collection: ^1.18.0
 
 
 dev_dependencies:

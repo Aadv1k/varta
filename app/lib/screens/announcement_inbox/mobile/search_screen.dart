@@ -1,79 +1,41 @@
 import 'package:app/models/teacher_model.dart';
+import 'package:app/providers/search_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/widgets/search_bar.dart';
-import 'package:intl/intl.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+  const SearchScreen({super.key});
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  TextEditingController _controller = TextEditingController();
-  String? postedBy;
-  DateTime? dateFrom;
-  DateTime? dateTo;
-
-  @override
-  void initState() {
-    _controller.addListener(() {
-      _controller.text;
-    });
-    super.initState();
-  }
-
-  void _updatePostedBy(String? value) {
-    setState(() {
-      postedBy = value;
-    });
-  }
-
-  void _updateDateFrom(DateTime? value) {
-    setState(() {
-      dateFrom = value;
-    });
-  }
-
-  void _updateDateTo(DateTime? value) {
-    setState(() {
-      dateTo = value;
-    });
-  }
-
-  void _submitSearch() {
-    print('Search Query: ${_controller.text}');
-    print('Posted By: $postedBy');
-    print('Date From: $dateFrom');
-    print('Date To: $dateTo');
-  }
+  void _handleSearchSubmit(String finalQuery) {}
 
   @override
   Widget build(BuildContext context) {
+    final searchProvider = SearchProvider.of(context);
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(24),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(24),
           child: Align(
             alignment: Alignment.topLeft,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.zero,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+                padding: EdgeInsets.symmetric(horizontal: Spacing.lg),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    DropdownFilterChip(
-                      label: "Posted By",
-                      value: postedBy,
-                      onChanged: _updatePostedBy,
-                    ),
+                    PostedBySelectionChip(),
                   ],
                 ),
               ),
@@ -90,11 +52,14 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               Expanded(
                 child: CustomSearchBar(
-                  autofocus: true,
-                  navigational: false,
-                  onSearch: (p0) => _submitSearch(),
-                  editingController: _controller,
-                ),
+                    autofocus: true,
+                    navigational: false,
+                    onSubmit: _handleSearchSubmit,
+                    onChange: (String text) => searchProvider.searchState
+                        .setData(searchProvider.searchState.data
+                            .copyWith(query: text))
+                    // editingController: _controller,
+                    ),
               ),
             ],
           ),
@@ -106,54 +71,10 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 }
 
-// class BasicActionChip extends StatelessWidget {
-//   final VoidCallback? onPressed;
-//   final String label;
-//   final bool isDropdown;
-
-//   const BasicActionChip({
-//     Key? key,
-//     required this.onPressed,
-//     required this.label,
-//     this.isDropdown = false,
-//   }) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ActionChip(
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(999),
-//       ),
-//       label: Row(
-//         mainAxisSize: MainAxisSize.min,
-//         children: [
-//           Text(label, style: const TextStyle(fontFamily: "Geist")),
-//           if (isDropdown)
-//             const Padding(
-//               padding: EdgeInsets.only(left: Spacing.sm),
-//               child: Icon(
-//                 Icons.arrow_drop_down,
-//                 size: IconSizes.iconMd,
-//               ),
-//             ),
-//         ],
-//       ),
-//       onPressed: onPressed,
-//     );
-//   }
-// }
-
-class DropdownFilterChip extends StatelessWidget {
-  final String label;
-  final String? value;
-  final ValueChanged<String?> onChanged;
-
-  const DropdownFilterChip({
-    Key? key,
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  }) : super(key: key);
+class PostedBySelectionChip extends StatelessWidget {
+  const PostedBySelectionChip({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +87,9 @@ class DropdownFilterChip extends StatelessWidget {
   }
 
   void _showBottomSheet(BuildContext context) {
+    final searchState = SearchProvider.of(context).searchState;
     showModalBottomSheet(
+      enableDrag: true,
       context: context,
       builder: (BuildContext context) {
         return Padding(
@@ -180,26 +103,13 @@ class DropdownFilterChip extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium),
               ),
               const SizedBox(height: Spacing.sm),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-                child: Wrap(
-                    spacing: Spacing.sm,
-                    runSpacing: Spacing.md,
-                    children: [
-                      InputChip(
-                        label: Text("Amit Sharma"),
-                        onDeleted: () {},
-                      ),
-                      InputChip(
-                        label: Text("Jane Doe"),
-                        onDeleted: () {},
-                      ),
-                      InputChip(
-                        label: Text("Jane Doe"),
-                        onDeleted: () {},
-                      ),
-                    ]),
-              ),
+              ListenableBuilder(
+                  listenable: searchState,
+                  builder: (context, child) => Wrap(
+                        children: (searchState.data.postedBy ?? [])
+                            .map((t) => Text("Selected ${t.firstName}"))
+                            .toList(),
+                      )),
               const SizedBox(height: Spacing.sm),
               const Divider(
                 height: 1,
@@ -210,45 +120,89 @@ class DropdownFilterChip extends StatelessWidget {
                   child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
                 child: ListView.builder(
-                  itemBuilder: (context, index) => ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      subtitle: RichText(
-                          text: TextSpan(
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(color: AppColor.subtitle),
-                              text: "Teaches ",
-                              children: [
-                            ...mockTeacherData[index]
-                                .departments
-                                .asMap()
-                                .entries
-                                .map((entry) => TextSpan(
-                                      text:
-                                          "${entry.value.deptName}${entry.key == mockTeacherData[index].departments.length - 1 ? '' : ', '}",
+                  itemBuilder: (context, index) {
+                    final bool isActive = (searchState.data.postedBy ?? [])
+                        .contains(mockTeacherData[index]);
+                    return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        selected: isActive,
+                        selectedTileColor: PaletteNeutral.shade600,
+                        onTap: () {
+                          if (searchState.data.postedBy == null ||
+                              searchState.data.postedBy!.isEmpty) {
+                            searchState.setData(searchState.data
+                                .copyWith(postedBy: [mockTeacherData[index]]));
+                          }
+
+                          final postedBy;
+
+                          if (isActive) {
+                            postedBy = List<TeacherModel>.from(
+                                searchState.data.postedBy!)
+                              ..removeWhere(
+                                  (elem) => elem == mockTeacherData[index]);
+                          } else {
+                            postedBy = List<TeacherModel>.from(
+                                searchState.data.postedBy ?? [])
+                              ..add(mockTeacherData[index]);
+                          }
+
+                          searchState.setData(
+                              searchState.data.copyWith(postedBy: postedBy));
+                        },
+                        subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              RichText(
+                                  text: TextSpan(
+                                      text: "Teaches ",
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
-                                          ?.copyWith(color: AppColor.heading),
-                                    )),
-                            const TextSpan(text: " to "),
-                            ...mockTeacherData[index]
-                                .subjectTeacherOf
-                                .asMap()
-                                .entries
-                                .map((entry) => TextSpan(
-                                      text:
-                                          "${entry.value.standard}${entry.value.division}${entry.key == mockTeacherData[index].departments.length - 1 ? '' : ', '}",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(color: AppColor.heading),
-                                    )),
-                          ])),
-                      title: Text(
-                          "${mockTeacherData[index].firstName} ${mockTeacherData[index].lastName}",
-                          style: Theme.of(context).textTheme.titleSmall)),
+                                          ?.copyWith(color: AppColor.subtitle),
+                                      children: [
+                                    ...mockTeacherData[index]
+                                        .departments
+                                        .asMap()
+                                        .entries
+                                        .map((entry) => TextSpan(
+                                              text:
+                                                  "${entry.value.deptName}${entry.key == mockTeacherData[index].departments.length - 1 ? '' : ', '}",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                      color: AppColor.heading),
+                                            )),
+                                  ])),
+                              RichText(
+                                text: TextSpan(
+                                  text: "To ",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(color: AppColor.subtitle),
+                                  children: mockTeacherData[index]
+                                      .subjectTeacherOf
+                                      .asMap()
+                                      .entries
+                                      .map((entry) => TextSpan(
+                                            text:
+                                                "${entry.value.standard}${entry.value.division}${entry.key == mockTeacherData[index].departments.length - 1 ? '' : ', '}",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                    color: AppColor.heading),
+                                          ))
+                                      .toList(),
+                                ),
+                              ),
+                            ]),
+                        title: Text(
+                            "${mockTeacherData[index].firstName} ${mockTeacherData[index].lastName}",
+                            style: Theme.of(context).textTheme.titleSmall));
+                  },
                   itemCount: mockTeacherData.length,
                 ),
               )),

@@ -1,3 +1,6 @@
+import 'package:app/models/search_data.dart';
+import 'package:app/providers/search_provider.dart';
+import 'package:app/state/search_state.dart';
 import 'package:async/async.dart';
 
 import 'package:app/common/colors.dart';
@@ -8,17 +11,17 @@ import 'package:flutter/material.dart';
 class CustomSearchBar extends StatefulWidget {
   final bool navigational;
   final bool autofocus;
-  final TextEditingController? editingController;
-  final Function(String)? onSearch;
+  final Function(String)? onSubmit;
+  final Function(String)? onChange;
   final Duration duration;
 
   const CustomSearchBar(
       {Key? key,
       this.navigational = false,
       this.autofocus = false,
-      this.editingController,
-      this.onSearch,
-      this.duration = const Duration(seconds: 1)})
+      this.onSubmit,
+      this.duration = const Duration(seconds: 1),
+      this.onChange})
       : super(key: key);
 
   @override
@@ -28,22 +31,24 @@ class CustomSearchBar extends StatefulWidget {
 class _CustomSearchBarState extends State<CustomSearchBar> {
   bool isTyping = false;
   late RestartableTimer searchTimer;
+  final TextEditingController _editingController = TextEditingController();
 
   @override
   void initState() {
     searchTimer = RestartableTimer(widget.duration, () {
-      if (widget.onSearch != null) {
-        widget.onSearch!(widget.editingController!.text);
+      if (widget.onSubmit != null) {
+        widget.onSubmit!(_editingController.text);
       }
     });
-    if (widget.editingController != null) {
-      widget.editingController!.addListener(() {
-        setState(() {
-          isTyping = widget.editingController!.text.isNotEmpty;
-          searchTimer.reset();
-        });
+    _editingController.addListener(() {
+      if (widget.onChange != null) {
+        widget.onChange!(_editingController.text);
+      }
+      setState(() {
+        isTyping = _editingController.text.isNotEmpty;
+        searchTimer.reset();
       });
-    }
+    });
     super.initState();
   }
 
@@ -73,12 +78,14 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                   ? () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const SearchScreen()))
+                          builder: (context) => SearchProvider(
+                              searchState: SearchState(data: SearchData()),
+                              child: const SearchScreen())))
                   : null,
               child: TextField(
                 enabled: !widget.navigational,
                 autofocus: widget.autofocus,
-                controller: widget.editingController,
+                controller: _editingController,
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -96,7 +103,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           ),
           if (isTyping)
             IconButton(
-                onPressed: () => widget.editingController!.clear(),
+                onPressed: () => _editingController.clear(),
                 icon: const Icon(
                   Icons.cancel_outlined,
                   size: IconSizes.iconMd,

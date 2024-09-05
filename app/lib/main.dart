@@ -3,6 +3,7 @@ import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
+import 'package:app/screens/announcement_inbox/mobile/home_screen.dart';
 import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/state/login_state.dart';
 import 'package:flutter/material.dart';
@@ -33,15 +34,11 @@ class VartaApp extends StatelessWidget {
           chipTheme: ChipThemeData(
               deleteIconColor: AppColor.primaryBg,
               padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.md, vertical: Spacing.xs),
+                  horizontal: Spacing.md, vertical: Spacing.sm),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                   side: const BorderSide(style: BorderStyle.none)),
-              labelStyle: const TextStyle(
-                  fontFamily: "Geist",
-                  color: AppColor.primaryBg,
-                  fontSize: FontSize.textSm,
-                  fontWeight: FontWeight.w500),
+              labelStyle: const VartaTextTheme().labelMedium,
               backgroundColor: AppColor.primaryColor),
           appBarTheme: const AppBarTheme(backgroundColor: AppColor.primaryBg),
           elevatedButtonTheme: const ElevatedButtonThemeData(
@@ -59,7 +56,7 @@ class VartaApp extends StatelessWidget {
         ),
         home: LoginProvider(
           loginState: LoginState(data: LoginData()),
-          child: const WelcomeScreen(),
+          child: const HomeScreen(),
         )
 
         // !isLoggedIn
