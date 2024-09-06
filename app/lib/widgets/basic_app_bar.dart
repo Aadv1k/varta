@@ -8,11 +8,11 @@ class BasicAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
 
   const BasicAppBar({
-    Key? key,
+    super.key,
     this.title = '',
     this.actions,
     this.leading,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(54.0);

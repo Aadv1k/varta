@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:app/common/colors.dart';
-import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
-import 'package:app/screens/otp_verification/otp_verification.dart';
+import 'package:app/screens/login/otp_verification/otp_verification.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/state/login_state.dart';
 import 'package:app/widgets/basic_app_bar.dart';

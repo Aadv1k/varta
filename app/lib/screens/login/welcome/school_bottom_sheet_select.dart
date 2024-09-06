@@ -4,8 +4,8 @@ import 'package:app/common/styles.dart';
 import 'package:app/models/school_model.dart';
 import 'package:flutter/material.dart';
 
-class BottomSheetSelect extends StatelessWidget {
-  const BottomSheetSelect({
+class SchoolBottomSheetSelect extends StatelessWidget {
+  const SchoolBottomSheetSelect({
     super.key,
     required this.onSelect,
     this.selectedSchool,

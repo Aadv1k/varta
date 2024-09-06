@@ -11,13 +11,13 @@ class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   const PrimaryButton({
-    Key? key,
+    super.key,
     required this.text,
     this.isLight = false,
     this.isLoading = false,
     this.isDisabled = false,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

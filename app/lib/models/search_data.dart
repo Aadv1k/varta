@@ -1,4 +1,4 @@
-import 'package:app/models/teacher_model.dart';
+import 'package:app/models/user_model.dart';
 import 'package:collection/collection.dart';
 
 class SearchData {

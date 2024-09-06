@@ -4,7 +4,7 @@ import 'package:app/screens/announcement_inbox/mobile/tab_selector_chip.dart';
 import 'package:flutter/material.dart';
 
 class CreateAnnouncementScreen extends StatelessWidget {
-  const CreateAnnouncementScreen({Key? key}) : super(key: key);
+  const CreateAnnouncementScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

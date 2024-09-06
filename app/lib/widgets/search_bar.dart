@@ -5,7 +5,7 @@ import 'package:async/async.dart';
 
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/screens/announcement_inbox/mobile/search_screen.dart';
+import 'package:app/screens/announcement_search/search_screen.dart';
 import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatefulWidget {
@@ -16,13 +16,12 @@ class CustomSearchBar extends StatefulWidget {
   final Duration duration;
 
   const CustomSearchBar(
-      {Key? key,
+      {super.key,
       this.navigational = false,
       this.autofocus = false,
       this.onSubmit,
       this.duration = const Duration(seconds: 1),
-      this.onChange})
-      : super(key: key);
+      this.onChange});
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();

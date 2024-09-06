@@ -8,11 +8,11 @@ class TabViewSelectorChip extends StatelessWidget {
   final VoidCallback onPressed;
 
   const TabViewSelectorChip({
-    Key? key,
+    super.key,
     required this.text,
     this.isActive = false,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

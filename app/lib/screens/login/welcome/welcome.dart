@@ -4,8 +4,8 @@ import 'package:app/common/styles.dart';
 import 'package:app/models/school_model.dart';
 import 'package:app/providers/login_provider.dart';
 import 'package:app/repository/school_repo.dart';
-import 'package:app/screens/phone_login.dart';
-import 'package:app/screens/welcome/bottom_sheet_select.dart';
+import 'package:app/screens/login/phone_login.dart';
+import 'package:app/screens/login/welcome/school_bottom_sheet_select.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/error_text.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +108,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ListenableBuilder(
                       listenable: loginState,
                       builder: (context, child) {
-                        return BottomSheetSelect(
+                        return SchoolBottomSheetSelect(
                           disabled: _schoolList.isEmpty,
                           schools: _schoolList,
                           selectedSchool: _schoolList.isNotEmpty

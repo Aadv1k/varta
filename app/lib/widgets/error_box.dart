@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class ErrorBox extends StatelessWidget {
   final String errorMessage;
 
-  const ErrorBox({Key? key, required this.errorMessage}) : super(key: key);
+  const ErrorBox({super.key, required this.errorMessage});
 
   @override
   Widget build(BuildContext context) {

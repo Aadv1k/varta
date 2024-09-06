@@ -1,3 +1,5 @@
+import "package:uuid/uuid.dart";
+
 class TeacherDepartment {
   final String deptCode;
   final String deptName;
@@ -12,15 +14,52 @@ class Classroom {
   Classroom({required this.standard, required this.division});
 }
 
-class TeacherModel {
+enum ContactType { email, phoneNumber }
+
+class UserContact {
+  ContactType contactType;
+  String contactData;
+
+  UserContact({required this.contactType, required this.contactData});
+}
+
+class StudentModel {
+  final String publicId;
   final String firstName;
+  final String? middleName;
   final String lastName;
+
+  final Classroom? classroom;
+
+  final List<UserContact> contacts;
+
+  StudentModel({
+    required this.publicId,
+    required this.contacts,
+    this.classroom,
+    required this.firstName,
+    this.middleName,
+    required this.lastName,
+  });
+}
+
+class TeacherModel {
+  final String publicId;
+  final String firstName;
+  final String? middleName;
+  final String lastName;
+
   final Classroom? classTeacherOf;
   final List<Classroom> subjectTeacherOf;
   final List<TeacherDepartment> departments;
 
+  final List<UserContact> contacts;
+
   TeacherModel(
-      {required this.firstName,
+      {required this.publicId,
+      required this.contacts,
+      required this.firstName,
+      this.middleName,
       required this.lastName,
       this.classTeacherOf,
       required this.subjectTeacherOf,
@@ -29,8 +68,9 @@ class TeacherModel {
 
 final List<TeacherModel> mockTeacherData = [
   TeacherModel(
-    firstName: 'Amit',
-    lastName: 'Sharma',
+    publicId: const Uuid().v4(),
+    firstName: 'Ravi',
+    lastName: 'Patel',
     classTeacherOf: Classroom(standard: '10', division: 'A'),
     subjectTeacherOf: [
       Classroom(standard: '10', division: 'A'),
@@ -40,10 +80,17 @@ final List<TeacherModel> mockTeacherData = [
       TeacherDepartment(deptCode: 'MAT', deptName: 'Mathematics'),
       TeacherDepartment(deptCode: 'CS', deptName: 'Computer Science'),
     ],
+    contacts: [
+      UserContact(
+          contactType: ContactType.email, contactData: 'ravi.patel@school.com'),
+      UserContact(
+          contactType: ContactType.phoneNumber, contactData: '9876543210'),
+    ],
   ),
   TeacherModel(
-    firstName: 'Sneha',
-    lastName: 'Patel',
+    publicId: const Uuid().v4(),
+    firstName: 'Suman',
+    lastName: 'Chopra',
     classTeacherOf: Classroom(standard: '9', division: 'B'),
     subjectTeacherOf: [
       Classroom(standard: '9', division: 'B'),
@@ -53,10 +100,18 @@ final List<TeacherModel> mockTeacherData = [
       TeacherDepartment(deptCode: 'SCI', deptName: 'Science'),
       TeacherDepartment(deptCode: 'BIO', deptName: 'Biology'),
     ],
+    contacts: [
+      UserContact(
+          contactType: ContactType.email,
+          contactData: 'suman.chopra@school.com'),
+      UserContact(
+          contactType: ContactType.phoneNumber, contactData: '9876543211'),
+    ],
   ),
   TeacherModel(
-    firstName: 'Ravi',
-    lastName: 'Kumar',
+    publicId: const Uuid().v4(),
+    firstName: 'Ananya',
+    lastName: 'Mehra',
     classTeacherOf: null,
     subjectTeacherOf: [
       Classroom(standard: '10', division: 'B'),
@@ -66,9 +121,17 @@ final List<TeacherModel> mockTeacherData = [
       TeacherDepartment(deptCode: 'HIS', deptName: 'History'),
       TeacherDepartment(deptCode: 'SOC', deptName: 'Social Studies'),
     ],
+    contacts: [
+      UserContact(
+          contactType: ContactType.email,
+          contactData: 'ananya.mehr@school.com'),
+      UserContact(
+          contactType: ContactType.phoneNumber, contactData: '9876543212'),
+    ],
   ),
   TeacherModel(
-    firstName: 'Meera',
+    publicId: const Uuid().v4(),
+    firstName: 'Nikhil',
     lastName: 'Reddy',
     classTeacherOf: Classroom(standard: '8', division: 'C'),
     subjectTeacherOf: [
@@ -79,10 +142,18 @@ final List<TeacherModel> mockTeacherData = [
       TeacherDepartment(deptCode: 'ENG', deptName: 'English'),
       TeacherDepartment(deptCode: 'HIN', deptName: 'Hindi'),
     ],
+    contacts: [
+      UserContact(
+          contactType: ContactType.email,
+          contactData: 'nikhil.reddy@school.com'),
+      UserContact(
+          contactType: ContactType.phoneNumber, contactData: '9876543213'),
+    ],
   ),
   TeacherModel(
-    firstName: 'Suresh',
-    lastName: 'Verma',
+    publicId: const Uuid().v4(),
+    firstName: 'Aarti',
+    lastName: 'Singh',
     classTeacherOf: null,
     subjectTeacherOf: [
       Classroom(standard: '12', division: 'A'),
@@ -92,10 +163,18 @@ final List<TeacherModel> mockTeacherData = [
       TeacherDepartment(deptCode: 'PHY', deptName: 'Physics'),
       TeacherDepartment(deptCode: 'CS', deptName: 'Computer Science'),
     ],
+    contacts: [
+      UserContact(
+          contactType: ContactType.email,
+          contactData: 'aarti.singh@school.com'),
+      UserContact(
+          contactType: ContactType.phoneNumber, contactData: '9876543214'),
+    ],
   ),
   TeacherModel(
-    firstName: 'Priya',
-    lastName: 'Singh',
+    publicId: const Uuid().v4(),
+    firstName: 'Vikram',
+    lastName: 'Jain',
     classTeacherOf: Classroom(standard: '7', division: 'A'),
     subjectTeacherOf: [
       Classroom(standard: '7', division: 'A'),
@@ -105,10 +184,18 @@ final List<TeacherModel> mockTeacherData = [
       TeacherDepartment(deptCode: 'MAT', deptName: 'Mathematics'),
       TeacherDepartment(deptCode: 'SST', deptName: 'Social Studies'),
     ],
+    contacts: [
+      UserContact(
+          contactType: ContactType.email,
+          contactData: 'vikram.jain@school.com'),
+      UserContact(
+          contactType: ContactType.phoneNumber, contactData: '9876543215'),
+    ],
   ),
   TeacherModel(
-    firstName: 'Anil',
-    lastName: 'Kumar',
+    publicId: const Uuid().v4(),
+    firstName: 'Meera',
+    lastName: 'Verma',
     classTeacherOf: null,
     subjectTeacherOf: [
       Classroom(standard: '11', division: 'B'),
@@ -118,10 +205,18 @@ final List<TeacherModel> mockTeacherData = [
       TeacherDepartment(deptCode: 'CHE', deptName: 'Chemistry'),
       TeacherDepartment(deptCode: 'BIO', deptName: 'Biology'),
     ],
+    contacts: [
+      UserContact(
+          contactType: ContactType.email,
+          contactData: 'meera.verma@school.com'),
+      UserContact(
+          contactType: ContactType.phoneNumber, contactData: '9876543216'),
+    ],
   ),
   TeacherModel(
-    firstName: 'Pooja',
-    lastName: 'Nair',
+    publicId: const Uuid().v4(),
+    firstName: 'Rajesh',
+    lastName: 'Deshmukh',
     classTeacherOf: Classroom(standard: '6', division: 'B'),
     subjectTeacherOf: [
       Classroom(standard: '6', division: 'B'),
@@ -131,70 +226,33 @@ final List<TeacherModel> mockTeacherData = [
       TeacherDepartment(deptCode: 'BIO', deptName: 'Biology'),
       TeacherDepartment(deptCode: 'ENG', deptName: 'English'),
     ],
+    contacts: [
+      UserContact(
+          contactType: ContactType.email,
+          contactData: 'rajesh.deshmukh@school.com'),
+      UserContact(
+          contactType: ContactType.phoneNumber, contactData: '9876543217'),
+    ],
   ),
   TeacherModel(
-    firstName: 'Kiran',
-    lastName: 'Desai',
-    classTeacherOf: null,
+    publicId: const Uuid().v4(),
+    firstName: 'Pooja',
+    lastName: 'Kapoor',
+    classTeacherOf: Classroom(standard: '8', division: 'A'),
     subjectTeacherOf: [
-      Classroom(standard: '10', division: 'C'),
-      Classroom(standard: '9', division: 'A'),
+      Classroom(standard: '8', division: 'A'),
+      Classroom(standard: '7', division: 'C'),
     ],
     departments: [
       TeacherDepartment(deptCode: 'SST', deptName: 'Social Studies'),
       TeacherDepartment(deptCode: 'HIS', deptName: 'History'),
     ],
-  ),
-  TeacherModel(
-    firstName: 'Ritika',
-    lastName: 'Sharma',
-    classTeacherOf: Classroom(standard: '9', division: 'A'),
-    subjectTeacherOf: [
-      Classroom(standard: '9', division: 'A'),
-      Classroom(standard: '8', division: 'A'),
-    ],
-    departments: [
-      TeacherDepartment(deptCode: 'HIN', deptName: 'Hindi'),
-      TeacherDepartment(deptCode: 'ENG', deptName: 'English'),
-    ],
-  ),
-  TeacherModel(
-    firstName: 'Vikram',
-    lastName: 'Jain',
-    classTeacherOf: null,
-    subjectTeacherOf: [
-      Classroom(standard: '11', division: 'A'),
-      Classroom(standard: '12', division: 'B'),
-    ],
-    departments: [
-      TeacherDepartment(deptCode: 'CS', deptName: 'Computer Science'),
-      TeacherDepartment(deptCode: 'MAT', deptName: 'Mathematics'),
-    ],
-  ),
-  TeacherModel(
-    firstName: 'Nisha',
-    lastName: 'Gupta',
-    classTeacherOf: Classroom(standard: '8', division: 'A'),
-    subjectTeacherOf: [
-      Classroom(standard: '8', division: 'A'),
-      Classroom(standard: '7', division: 'B'),
-    ],
-    departments: [
-      TeacherDepartment(deptCode: 'ENG', deptName: 'English'),
-      TeacherDepartment(deptCode: 'SST', deptName: 'Social Studies'),
-    ],
-  ),
-  TeacherModel(
-    firstName: 'Rajesh',
-    lastName: 'Soni',
-    classTeacherOf: null,
-    subjectTeacherOf: [
-      Classroom(standard: '12', division: 'B'),
-      Classroom(standard: '11', division: 'C'),
-    ],
-    departments: [
-      TeacherDepartment(deptCode: 'ECO', deptName: 'Economics'),
-      TeacherDepartment(deptCode: 'PHY', deptName: 'Physics'),
+    contacts: [
+      UserContact(
+          contactType: ContactType.email,
+          contactData: 'pooja.kapoor@school.com'),
+      UserContact(
+          contactType: ContactType.phoneNumber, contactData: '9876543218'),
     ],
   ),
 ];

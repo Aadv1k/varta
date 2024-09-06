@@ -1,7 +1,7 @@
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/screens/otp_verification/otp_verification.dart';
-import 'package:app/screens/phone_login.dart';
+import 'package:app/screens/login/otp_verification/otp_verification.dart';
+import 'package:app/screens/login/phone_login.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/email_input.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 class EmailLogin extends StatefulWidget {
   final UserLoginData userLoginData;
 
-  const EmailLogin({Key? key, required this.userLoginData}) : super(key: key);
+  const EmailLogin({super.key, required this.userLoginData});
 
   @override
   _EmailLoginState createState() => _EmailLoginState();

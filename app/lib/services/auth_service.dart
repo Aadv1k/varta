@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:app/common/exceptions.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/services/api_service.dart';

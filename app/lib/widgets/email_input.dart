@@ -73,7 +73,7 @@ class _EmailInputState extends State<EmailInput> {
             ),
           ),
         ),
-        SizedBox(height: Spacing.sm),
+        const SizedBox(height: Spacing.sm),
         widget.hasError
             ? Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),

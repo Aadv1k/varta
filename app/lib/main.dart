@@ -1,10 +1,7 @@
-import 'package:app/common/colors.dart';
-import 'package:app/common/sizes.dart';
-import 'package:app/common/styles.dart';
+import 'package:app/common/varta_theme.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/providers/login_provider.dart';
-import 'package:app/screens/announcement_inbox/mobile/home_screen.dart';
-import 'package:app/screens/welcome/welcome.dart';
+import 'package:app/screens/announcement_search/search_screen.dart';
 import 'package:app/state/login_state.dart';
 import 'package:flutter/material.dart';
 
@@ -25,38 +22,23 @@ class VartaApp extends StatelessWidget {
     required this.isFirstTimeLogin,
   });
 
+  // chipTheme: ChipThemeData(
+  //     deleteIconColor: AppColor.primaryBg,
+  //     padding: const EdgeInsets.symmetric(
+  //         horizontal: Spacing.md, vertical: Spacing.sm),
+  //     shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.circular(999),
+  //         side: const BorderSide(style: BorderStyle.none)),
+  //     labelStyle: const VartaTextTheme().labelMedium,
+  //     backgroundColor: AppColor.primaryColor),
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Varta',
-        theme: ThemeData(
-          scaffoldBackgroundColor: AppColor.primaryBg,
-          chipTheme: ChipThemeData(
-              deleteIconColor: AppColor.primaryBg,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.md, vertical: Spacing.sm),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                  side: const BorderSide(style: BorderStyle.none)),
-              labelStyle: const VartaTextTheme().labelMedium,
-              backgroundColor: AppColor.primaryColor),
-          appBarTheme: const AppBarTheme(backgroundColor: AppColor.primaryBg),
-          elevatedButtonTheme: const ElevatedButtonThemeData(
-            style: ButtonStyle(
-                backgroundColor:
-                    WidgetStatePropertyAll(AppColor.darkPrimaryColor),
-                textStyle: WidgetStatePropertyAll(TextStyle(
-                    color: TWColor.neutral400, fontWeight: FontWeight.bold)),
-                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.all(AppSharedStyle.buttonRadius)))),
-          ),
-          textTheme: const VartaTextTheme(),
-          useMaterial3: true,
-        ),
+        theme: VartaTheme().data,
         home: LoginProvider(
           loginState: LoginState(data: LoginData()),
-          child: const HomeScreen(),
+          child: const SearchScreen(),
         )
 
         // !isLoggedIn

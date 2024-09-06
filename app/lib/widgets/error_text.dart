@@ -1,5 +1,4 @@
 import 'package:app/common/colors.dart';
-import 'package:app/common/sizes.dart';
 import 'package:flutter/material.dart';
 
 class ErrorText extends StatelessWidget {
