@@ -9,7 +9,7 @@ class Announcement(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    academic_year = models.ForeignKey(AcademicYear, on_delete=models.DO_NOTHING)
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.DO_NOTHING, default=AcademicYear.get_current_academic_year)
     author = models.ForeignKey(User, related_name="announcements", on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=255)
     body = models.TextField()

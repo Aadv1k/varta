@@ -6,6 +6,7 @@ from schools.models import School, AcademicYear
 from accounts.models import User, Classroom, StudentDetail, TeacherDetail, Department
 from .models import Announcement, AnnouncementScope
 import math
+import datetime
 
 class BaseAnnouncementTestCase(APITestCase):
     @staticmethod
@@ -282,3 +283,202 @@ class PaginatedAnnouncementsTestCase(BaseAnnouncementTestCase):
 
         self.assertEqual(response.data["metadata"].get("page_length"), 10)
         self.assertEqual(response.data["metadata"].get("total_pages"), math.ceil(self.total_announcement / 10))
+
+class SearchAnnouncementsTestCase(BaseAnnouncementTestCase):
+    fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
+
+    def setUp(self):
+        self.school = School.objects.create(
+            name="Delhi Public School",
+            address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
+            phone_number="+911123456789",
+            email="info@dpsrohini.com",
+            website="https://www.dpsrohini.com"
+        )
+
+        self.teacher_mathematics_9th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["mathematics"], ["9A", "9B"], class_teacher_of=None)
+        self.teacher_class_english_12th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["english"], ["12A", "12B", "12C", "12D"], class_teacher_of="12D")
+        self.student_12D = BaseAnnouncementTestCase.create_student_and_token(self.school, "12D")
+
+        self.total_announcement = 50
+        self.announcement_of_aug = Announcement.objects.create(
+            author=self.teacher_class_english_12th[0],
+            title = "Hello there this is something",
+            body = "Hello there this is something else which we call the body",
+            created_at = datetime.date(year=2024, month=8, day=10)
+        ).with_scope(AnnouncementScope.FilterType.EVERYONE)
+
+        self.announcement_of_sep = Announcement.objects.create(
+            author=self.teacher_mathematics_9th[0],
+            title = "Hello there this is something",
+            body = "Hello there this is something else which we call the body",
+            created_at = datetime.date(year=2024, month=9, day=4),
+        ).with_scope(AnnouncementScope.FilterType.EVERYONE)
+
+    def test_search_announcement_by_query(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
+        response = self.client.get(f"{reverse("announcement_search")}?query=hello")
+
+        self.assertEqual(response.status_code, 200)
+        ids = [announcement["id"] for announcement in response.data["data"]]
+        self.assertIn(str(self.announcement_of_aug.id), ids)
+        self.assertIn(str(self.announcement_of_sep.id), ids)
+
+    def test_search_announcement_posted_by_single(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
+        response = self.client.get(f"{reverse("announcement_search")}?posted_by={self.teacher_class_english_12th[0].public_id}")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["data"]), 1)
+        self.assertEqual(str(self.announcement_of_aug.id), response.data["data"][0]["id"])
+
+        response = self.client.get(f"{reverse("announcement_search")}?posted_by={self.teacher_mathematics_9th[0].public_id}")
+
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertEqual(len(response.data["data"]), 1)
+        self.assertEqual(str(self.announcement_of_sep.id), response.data["data"][0]["id"])
+
+    def test_search_announcements_posted_by_multiple(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
+        response = self.client.get(f"{reverse("announcement_search")}?posted_by={self.teacher_mathematics_9th[0].public_id}&posted_by={self.teacher_class_english_12th[0].public_id}")
+
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertEqual(len(response.data["data"]), 2)
+
+        ids = [announcement["id"] for announcement in response.data["data"]]
+        self.assertIn(str(self.announcement_of_aug.id), ids)
+        self.assertIn(str(self.announcement_of_sep.id), ids)
+
+class CreateAnnouncementTests(BaseAnnouncementTestCase):
+    fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
+
+    def setUp(self):
+        self.school = School.objects.create(
+            name="Jethalal Public School",
+            address="Gokuldham Society, Powder Gali, Goregaon East, Mumbai 400063, India",
+            phone_number="+912223456789",
+            email="info@jethalalschool.com",
+            website="https://www.jethalalschool.com"
+        )
+
+        self.teacher = self.create_teacher_and_token(self.school, ["mathematics"], ["9A", "9B"])
+        self.admin = self.create_teacher_and_token(self.school, ["administration"])
+        self.student = self.create_student_and_token(self.school, "12D")
+
+
+    def test_cannot_create_announcement_with_no_scope(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        response = self.client.post(reverse("announcement_list"), {
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": []
+        }, format="json")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("scopes", [error["field"] for error in response.data["errors"]])
+    
+
+    def test_cannot_create_announcement_with_invalid_scope_combination(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        url = reverse("announcement_list")
+        response = self.client.post(url, {
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+                {"filter": AnnouncementScope.FilterType.STU_STANDARD, "filter_data": "10"}
+            ]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("scopes", [error["field"] for error in response.data["errors"]])
+
+    def test_create_announcement_invalid_filter_content(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        url = reverse("announcement_list")
+        response = self.client.post(url, {
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.STU_STANDARD, "filter_data": "lmaoo"}
+            ]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("scopes", [error["field"] for error in response.data["errors"]])
+
+    # def test_create_announcement_for_specific_standard(self):
+    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+    #     url = reverse("announcement_list")
+    #     response = self.client.post(url, {
+    #         "title": "Announcement for 9th Standard",
+    #         "body": "This is an announcement for 9th standard students",
+    #         "scopes": [
+    #             {"filter_type": AnnouncementScope.FilterType.STU_STANDARD, "filter_data": "9"}
+    #         ]
+    #     }, format="json")
+
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(response.data["title"], "Announcement for 9th Standard")
+    #     self.assertIn("id", response.data)
+
+    # def test_create_announcement_for_all_teachers(self):
+    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
+    #     url = reverse("announcement_list")
+    #     response = self.client.post(url, {
+    #         "title": "Announcement for All Teachers",
+    #         "body": "This is an announcement for all teachers",
+    #         "scopes": [
+    #             {"filter_type": AnnouncementScope.FilterType.ALL_TEACHERS}
+    #         ]
+    #     }, format="json")
+
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(response.data["title"], "Announcement for All Teachers")
+    #     self.assertIn("id", response.data)
+
+    # def test_create_announcement_for_specific_department(self):
+    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
+    #     url = reverse("announcement_list")
+    #     response = self.client.post(url, {
+    #         "title": "Announcement for Mathematics Department",
+    #         "body": "This is an announcement for the mathematics department",
+    #         "scopes": [
+    #             {"filter_type": AnnouncementScope.FilterType.T_DEPARTMENT, "filter_data": "mathematics"}
+    #         ]
+    #     }, format="json")
+
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(response.data["title"], "Announcement for Mathematics Department")
+    #     self.assertIn("id", response.data)
+
+    # def test_create_announcement_with_multiple_scopes(self):
+    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
+    #     url = reverse("announcement_list")
+    #     response = self.client.post(url, {
+    #         "title": "Announcement for Multiple Scopes",
+    #         "body": "This is an announcement for multiple scopes",
+    #         "scopes": [
+    #             {"filter_type": AnnouncementScope.FilterType.STU_STANDARD, "filter_data": "9"},
+    #             {"filter_type": AnnouncementScope.FilterType.T_DEPARTMENT, "filter_data": "mathematics"}
+    #         ]
+    #     }, format="json")
+
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(response.data["title"], "Announcement for Multiple Scopes")
+    #     self.assertIn("id", response.data)
+
+    # def test_student_cannot_create_announcement(self):
+    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
+    #     url = reverse("announcement_list")
+    #     response = self.client.post(url, {
+    #         "title": "Unauthorized Announcement",
+    #         "body": "This announcement should not be created",
+    #         "scopes": [
+    #             {"filter_type": AnnouncementScope.FilterType.EVERYONE}
+    #         ]
+    #     }, format="json")
+
+    #     self.assertEqual(response.status_code, 403)

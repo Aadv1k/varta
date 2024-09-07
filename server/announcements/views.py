@@ -1,15 +1,22 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.request import Request
 
 from django.core.paginator import Paginator
 import datetime
 
+from django.core.exceptions import ValidationError as DjangoValidationError
+
 from .models import Announcement
 from accounts.permissions import IsJWTAuthenticated
+from accounts.models import User
 
 from rest_framework import serializers
 
-from .serializers import AnnouncementOutputSerializer
+from rest_framework.exceptions import ValidationError
+
+
+from .serializers import AnnouncementOutputSerializer, AnnouncementSerializer
 
 
 from schools.models import AcademicYear
@@ -19,8 +26,6 @@ from common.fields.AcademicYearField import AcademicYearField
 import re
 
 from accounts.permissions import IsTeacher
-
-
 
 class AnnouncementViewSet(viewsets.ViewSet):
     permission_classes = [ IsJWTAuthenticated, ]
@@ -97,8 +102,77 @@ class AnnouncementViewSet(viewsets.ViewSet):
         return self._paginate_announcements(request, Announcement.objects.all().exclude(author__id=request.user.id))
 
     def create(self, request):
-        assert False, "Not implemented"
+        serializer = AnnouncementSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return ErrorResponseBuilder() \
+                .set_code(400) \
+                .set_message("Could not create announcement due to error") \
+                .set_details([{"field": key, "error": str(value[0])} for key, value in serializer.errors.items()]) \
+                .build()
+
+        serializer.save()
+
+        return SuccessResponseBuilder() \
+            .set_message("Created announcement successfully") \
+            .set_data(serializer.data) \
+            .build()
+        
 
     @action(detail=True, methods=['get'])
     def list_mine(self, request):
         return self._paginate_announcements(request, Announcement.objects.filter(author__id=request.user.id))
+
+    class SearchSerializer(serializers.Serializer):
+        query = serializers.CharField(max_length=256, required=False, allow_blank=True)
+        posted_by = serializers.ListField(required=False, child=serializers.UUIDField(), allow_empty=True)
+        date_from = serializers.DateField(required=False, allow_null=True, input_formats=["iso-8601"])
+        date_to = serializers.DateField(required=False, allow_null=True, input_formats=["iso-8601"])
+
+    @action(detail=True, methods=['get'])
+    def search(self, request: Request):
+        # posted_by_query_param = request.query_params.get("posted_by"),
+        search_serializer = self.SearchSerializer(data={
+            "query": request.query_params.get("query", ""),
+            "posted_by": request.GET.getlist('posted_by'), #[puid for puid in posted_by_query_param if puid != None],
+            "date_from": request.query_params.get("date_from"),
+            "date_to": request.query_params.get("date_to"),
+        })
+
+        if not search_serializer.is_valid():
+            return ErrorResponseBuilder() \
+                .set_code(400) \
+                .set_message("Invalid search parameters.") \
+                .set_details([{"field": key, "error": str(value[0])} for key, value in search_serializer.errors.items()]) \
+                .build()
+
+        validated_data = search_serializer.validated_data
+        
+        if len(validated_data["posted_by"]) >= 1:
+            base_query = Announcement.objects.filter(author__school__id=request.user.school.id, author__public_id__in=validated_data["posted_by"])
+        else:
+            base_query = Announcement.objects.filter(author__school__id=request.user.school.id)
+
+
+        if validated_data.get("query"):
+            base_query = base_query.filter(title__icontains=validated_data["query"])
+
+        if validated_data.get("date_from"):
+            base_query = base_query.filter(created_at__gte=datetime.datetime(year=2024, month=9, day=1))
+            print(base_query.all().values("created_at"))
+
+        if validated_data.get("date_to"):
+            base_query = base_query.filter(created_at__lte=validated_data["date_to"])
+
+        results = base_query
+
+        output_serializer = AnnouncementOutputSerializer(data=results, many=True)
+        assert not output_serializer.is_valid(), search_serializer.errors
+
+        return SuccessResponseBuilder() \
+            .set_message("Search query complete") \
+            .set_data(output_serializer.data) \
+            .set_metadata({
+                "results": len(output_serializer.data),
+            }) \
+            .build()

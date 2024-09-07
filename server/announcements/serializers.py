@@ -29,27 +29,35 @@ def validate_department(data: str):
         raise ValidationError(f"{data} is not a valid department.")
 
 class AnnouncementScopeSerializer(serializers.ModelSerializer):
-    filter_data = serializers.CharField()
+    filter = serializers.ChoiceField(required=True, choices=AnnouncementScope.FilterType.choices)
+    filter_data = serializers.CharField(required=False, max_length=255)
 
-    def validate_filter_data(self, filter_data):
-        filter_type = self.get_attribute("filter")
+
+    def validate(self, data):
+        filter_type = data.get('filter')
+        filter_data = data.get('filter_data')
+
+        if not filter_type:
+            raise serializers.ValidationError({"filter": "This field is required."})
 
         if filter_type in {
             AnnouncementScope.FilterType.STU_STANDARD, 
-            AnnouncementScope.FilterType.T_SUBJECT_TEACHER_OF_STANDARD
-        }:
-            validate_standard(filter_data)
-        elif filter_type in {
+            AnnouncementScope.FilterType.T_SUBJECT_TEACHER_OF_STANDARD,
             AnnouncementScope.FilterType.STU_STANDARD_DIVISION,
             AnnouncementScope.FilterType.T_CLASS_TEACHER_OF_STANDARD_DIVISION,
             AnnouncementScope.FilterType.T_SUBJECT_TEACHER_OF_STANDARD_DIVISION,
+            AnnouncementScope.FilterType.T_DEPARTMENT
         }:
-            validate_standard_division(filter_data)
-        elif filter_type == AnnouncementScope.FilterType.T_DEPARTMENT:
-            validate_department(filter_type)
+            if not filter_data:
+                raise serializers.ValidationError({"filter_data": "This field is required for the selected filter type."})
+            if filter_type in {AnnouncementScope.FilterType.STU_STANDARD, AnnouncementScope.FilterType.T_SUBJECT_TEACHER_OF_STANDARD}:
+                validate_standard(filter_data)
+            elif filter_type in {AnnouncementScope.FilterType.STU_STANDARD_DIVISION, AnnouncementScope.FilterType.T_CLASS_TEACHER_OF_STANDARD_DIVISION, AnnouncementScope.FilterType.T_SUBJECT_TEACHER_OF_STANDARD_DIVISION}:
+                validate_standard_division(filter_data)
+            elif filter_type == AnnouncementScope.FilterType.T_DEPARTMENT:
+                validate_department(filter_data)
 
-        return filter_data
-
+        return data
 
     class Meta:
         model = AnnouncementScope
