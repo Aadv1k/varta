@@ -2,7 +2,11 @@ from announcements.models import Announcement
 from accounts.models import User, UserDevice, UserContact
 
 def send_notification(announcement_id: str):
-    announcement = Announcement.objects.get(id=announcement_id)
+    try:
+        announcement = Announcement.objects.get(id=announcement_id)
+    except Announcement.DoesNotExist: 
+        assert False, f"send_notification('{announcement_id}') announcement does not exist; This means either the announcement was deleted or this is a test environment."
+        
     user_query = User.objects.filter(school__id=announcement.author.school.id)
 
     for user in user_query.values():

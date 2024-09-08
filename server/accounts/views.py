@@ -64,7 +64,7 @@ def user_login(request):
                         .build()
 
     elif user_contact.contact_type == UserContact.ContactType.PHONE_NUMBER:
-        assert False, "Not Implemented"
+        assert False, "This isn't implemented yet and hence we should ignore it"
 
     return SuccessResponseBuilder() \
                 .set_message(f"Sent an OTP to {user_contact.contact_data}") \

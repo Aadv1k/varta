@@ -159,8 +159,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
             base_query = base_query.filter(title__icontains=validated_data["query"])
 
         if validated_data.get("date_from"):
-            base_query = base_query.filter(created_at__gte=datetime.datetime(year=2024, month=9, day=1))
-            print(base_query.all().values("created_at"))
+            base_query = base_query.filter(created_at__gte=validated_data["date_from"])
 
         if validated_data.get("date_to"):
             base_query = base_query.filter(created_at__lte=validated_data["date_to"])
