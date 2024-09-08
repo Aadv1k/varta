@@ -1,10 +1,12 @@
 from rest_framework.test import APITestCase
 from django.urls import reverse
 from unittest import skip
+import json
 
 from django.conf import settings
 
-from common.services.otp import OTPService, redis_inst
+from common.services.otp import OTPService
+from common.services.kv_store import KVStoreFactory
 from common.services.token import TokenService, TokenPayload
 
 from .models import User, StudentDetail, TeacherDetail, UserContact, Classroom
@@ -13,6 +15,9 @@ from schools.models import School
 class UserActionTest(APITestCase):
     def setUp(self):
         settings.DEBUG = True
+
+        self.kv_store = KVStoreFactory()
+        self.otp_service = OTPService()
 
         self.school = School.objects.create(
             name="Delhi Public School",
@@ -81,7 +86,7 @@ class UserActionTest(APITestCase):
         }, format="json")
 
 
-        self.assertIsNotNone(redis_inst.get(self.primary_contact_email.contact_data).decode("utf8"))
+        self.assertIsNotNone(self.kv_store.retrieve(self.primary_contact_email.contact_data))
 
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.data.get("data"))
@@ -108,7 +113,8 @@ class UserActionTest(APITestCase):
             "input_data": self.primary_contact_email.contact_data,
         }, format="json")
 
-        generated_otp = redis_inst.get(self.primary_contact_email.contact_data).decode("utf8")
+        stored_data = self.kv_store.retrieve(self.primary_contact_email.contact_data)
+        created_at, generated_otp = json.loads(stored_data)
 
         response = self.client.post(reverse("user_verify"), {
             "school_id": self.school.id,

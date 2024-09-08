@@ -2,13 +2,15 @@ from rest_framework import serializers
 
 from rest_framework.exceptions import ValidationError
 
-
 from accounts.models import User
 from .models import Announcement, AnnouncementScope
 
 from common.fields.AcademicYearField import AcademicYearField
+from common.services.notification_queue import NotificationQueueFactory
+from common.services.notification_service import send_notification
 
 from accounts.models import Department, Classroom
+
 
 def validate_standard(data: str):
     try:
@@ -63,6 +65,7 @@ class AnnouncementScopeSerializer(serializers.ModelSerializer):
         model = AnnouncementScope
         fields = ['filter', 'filter_data']
 
+
 class AnnouncementSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=255)
     body = serializers.CharField()
@@ -86,6 +89,12 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         announcement = Announcement.objects.create(**validated_data)
         for scope_data in scopes_data:
             AnnouncementScope.objects.create(announcement=announcement, **scope_data)
+        
+        # TODO: push to the notification queue right here
+
+        nq = NotificationQueueFactory(send_notification)
+        nq.enqueue(str(announcement.id))
+        
         return announcement
     
     def update(self, instance, validated_data):

@@ -368,6 +368,19 @@ class CreateAnnouncementTests(BaseAnnouncementTestCase):
         self.student = self.create_student_and_token(self.school, "12D")
 
 
+    def test_teacher_can_create_announcement_for_everyone(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        response = self.client.post(reverse("announcement_list"), {
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ]
+        }, format="json")
+        
+        self.assertEqual(response.status_code, 201)
+        
+
     def test_cannot_create_announcement_with_no_scope(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
         response = self.client.post(reverse("announcement_list"), {

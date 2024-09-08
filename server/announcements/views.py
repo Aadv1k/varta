@@ -114,6 +114,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
         serializer.save()
 
         return SuccessResponseBuilder() \
+            .set_code(201) \
             .set_message("Created announcement successfully") \
             .set_data(serializer.data) \
             .build()
