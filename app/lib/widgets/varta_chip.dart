@@ -42,14 +42,14 @@ class VartaChip extends StatelessWidget {
         padding = const EdgeInsets.symmetric(
             horizontal: Spacing.xs, vertical: Spacing.xs);
         spacing = Spacing.xs;
-        height = 36.0;
+        height = 28.0;
         break;
       case VartaChipSize.medium:
       default:
         padding = const EdgeInsets.symmetric(
             horizontal: Spacing.sm, vertical: Spacing.xs);
         spacing = Spacing.sm;
-        height = 36.0;
+        height = 32.0;
         break;
     }
 
