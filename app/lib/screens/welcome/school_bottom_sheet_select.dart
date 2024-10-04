@@ -52,9 +52,10 @@ class SchoolBottomSheetSelect extends StatelessWidget {
                                 bool isSelected = school == selectedSchool;
                                 return ListTile(
                                   contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: Spacing.lg),
+                                      horizontal: Spacing.md,
+                                      vertical: Spacing.xs),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(999),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                   enabled: !disabled,
                                   onTap: !isSelected && !disabled
@@ -64,7 +65,7 @@ class SchoolBottomSheetSelect extends StatelessWidget {
                                         }
                                       : null,
                                   tileColor: isSelected
-                                      ? AppColor.primaryColor.withOpacity(0.10)
+                                      ? PaletteNeutral.shade040
                                       : Colors.transparent,
                                   title: Text(
                                     school.schoolName,

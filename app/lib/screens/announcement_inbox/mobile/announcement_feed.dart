@@ -1,12 +1,10 @@
 import 'package:app/models/announcement_model.dart';
-import 'package:app/screens/announcement_search/search_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/tab_selector_chip.dart';
 import 'package:app/widgets/search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_list_item.dart';
-import 'package:flutter/services.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -152,7 +150,7 @@ class AnnouncementListView extends StatefulWidget {
 
 class _AnnouncementListViewState extends State<AnnouncementListView> {
   final List<AnnouncementModel> _data = [];
-  bool _isLoading = true;
+  final bool _isLoading = true;
 
   @override
   void initState() {

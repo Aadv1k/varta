@@ -3,7 +3,6 @@ import 'package:app/models/search_data.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/repository/announcements_repo.dart';
 import 'package:app/repository/user_repo.dart';
-import 'package:app/screens/announcement_inbox/mobile/announcement_feed.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_list_item.dart';
 import 'package:app/widgets/connection_error.dart';
 import 'package:app/widgets/varta_chip.dart';
@@ -27,7 +26,7 @@ String _formatDate(DateTime? date) {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  AnnouncementsRepository _announcementRepo = AnnouncementsRepository();
+  final AnnouncementsRepository _announcementRepo = AnnouncementsRepository();
   SearchData _data = SearchData();
   Future<List<AnnouncementModel>>? _searchResults;
 

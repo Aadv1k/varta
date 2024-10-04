@@ -2,10 +2,10 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/models/school_model.dart';
-import 'package:app/providers/login_provider.dart';
-import 'package:app/repository/school_repo.dart';
+import 'package:app/widgets/providers/login_provider.dart';
+import 'package:app/repository/school_repository.dart';
 import 'package:app/screens/login/phone_login.dart';
-import 'package:app/screens/login/welcome/school_bottom_sheet_select.dart';
+import 'package:app/screens/welcome/school_bottom_sheet_select.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/error_text.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +22,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   bool isLoading = true;
   String? errorMessage;
 
-  late final SchoolRepository _schoolRepository = SchoolRepository();
+  final SchoolRepository _schoolRepository = SchoolRepository();
 
   void fetchSchoolList() async {
     setState(() {
@@ -31,21 +31,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     });
     try {
       final data = await _schoolRepository.getSchools();
+      if (data.isEmpty) {
+        /* This should NOT have happened and is an error */
+        throw Exception();
+      }
+
       setState(() {
         _schoolList = data;
         isLoading = false;
       });
     } catch (e) {
       setState(() {
-        // errorMessage = 'Failed to load schools. Please try again later.';
-        _schoolList = [
-          SchoolModel(
-              schoolId: 69420,
-              schoolName: "Test Public School",
-              schoolAddress: "Random baker street",
-              schoolContactNo: "",
-              schoolEmail: "")
-        ];
+        errorMessage = 'Failed to load schools. Please try again later.';
         isLoading = false;
       });
     }
@@ -61,6 +58,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     final loginState = LoginProvider.of(context).loginState;
 
+    /* This is a comfort feature. Since for an unknown amount of duration the app
+     * will likely only have a single school, so we make it so the ID is
+     * automatically picked up */
     if (_schoolList.isNotEmpty && loginState.data.schoolIDAndName == null) {
       loginState.setLoginData(loginState.data.copyWith(schoolIDAndName: (
         _schoolList.first.schoolId.toString(),
@@ -91,7 +91,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 SizedBox(
                     width: 380,
                     child: Text(
-                        "Stay on top of all that's happening in your school",
+                        "You won't miss another update from your school again.",
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -111,14 +111,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         return SchoolBottomSheetSelect(
                           disabled: _schoolList.isEmpty,
                           schools: _schoolList,
-                          selectedSchool: _schoolList.isNotEmpty
-                              ? _schoolList.firstWhere(
-                                  (school) =>
-                                      school.schoolId.toString() ==
-                                      loginState.data.schoolIDAndName?.$1,
-                                  orElse: () => throw AssertionError(
-                                      "This should've been caught at the time of initialization"))
-                              : null,
+                          selectedSchool:
+                              _schoolList.isNotEmpty ? _schoolList.first : null,
                           onSelect: (school) {
                             loginState.setLoginData(loginState.data.copyWith(
                                 schoolIDAndName: (
@@ -136,7 +130,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   const SizedBox(height: Spacing.sm),
                   PrimaryButton(
                     text: "Get Started",
-                    isDisabled: _schoolList.isEmpty || errorMessage != null,
+                    isDisabled: errorMessage != null,
                     onPressed: _schoolList.isNotEmpty && errorMessage == null
                         ? () {
                             Navigator.push(

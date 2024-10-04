@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:app/common/colors.dart';
+import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/login_data.dart';
-import 'package:app/providers/login_provider.dart';
+import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/screens/login/otp_verification/otp_verification.dart';
 import 'package:app/services/auth_service.dart';
-import 'package:app/state/login_state.dart';
+import 'package:app/widgets/state/login_state.dart';
 import 'package:app/widgets/basic_app_bar.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/phone_number_input.dart';
@@ -26,48 +27,50 @@ class _PhoneLoginState extends State<PhoneLogin> {
 
   final AuthService _authService = AuthService();
 
-  Future<void> handleVerificationClick(LoginState loginState) async {
+  Future<void> handleVerificationClick(
+      BuildContext context, LoginState loginState) async {
     setState(() {
       isLoading = true;
       hasError = false;
       errorMessage = null;
     });
 
-    // try {
-    //   // final loginData = LoginProvider.of(context).loginState.data;
-    //   // await _authService.sendOtp(loginData);
-    //   throw ApiClientException("yoo");
-    // } on ApiClientException catch (_) {
-    //   setState(() {
-    //     isLoading = false;
-    //     hasError = true;
-    //     errorMessage = "Unable to connect at this moment. Try again later. ";
-    //   });
-    //   return;
-    // } on ApiException catch (exc) {
-    //   setState(() {
-    //     isLoading = false;
-    //     hasError = true;
-    //     errorMessage = exc.message;
-    //   });
-    //   return;
-    // }
+    try {
+      final loginData = LoginProvider.of(context).loginState.data;
+      await _authService.sendOtp(loginData);
+    } on ApiClientException catch (_) {
+      setState(() {
+        isLoading = false;
+        hasError = true;
+        errorMessage = "Unable to connect at this moment. Try again later.";
+      });
+      return;
+    } on ApiException catch (exc) {
+      setState(() {
+        isLoading = false;
+        hasError = true;
+        errorMessage = exc.message;
+      });
+      return;
+    }
 
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => LoginProvider(
-                loginState: loginState, child: const OTPVerification())));
+    if (context.mounted) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => LoginProvider(
+                  loginState: loginState, child: const OTPVerification())));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final loginState = LoginProvider.of(context).loginState;
-    final shouldBeCompact = MediaQuery.of(context).size.height <= 840;
+    final shouldBeCompact = MediaQuery.of(context).size.height <= 920;
 
     final contentGap = shouldBeCompact ? Spacing.md : Spacing.xl;
     final headingStyle = shouldBeCompact
-        ? Theme.of(context).textTheme.headlineSmall
+        ? Theme.of(context).textTheme.headlineMedium
         : Theme.of(context).textTheme.headlineLarge;
 
     return Scaffold(
@@ -117,7 +120,8 @@ class _PhoneLoginState extends State<PhoneLogin> {
                     listenable: loginState,
                     builder: (context, child) => PrimaryButton(
                           text: "Verify",
-                          onPressed: () => handleVerificationClick(loginState),
+                          onPressed: () =>
+                              handleVerificationClick(context, loginState),
                           isDisabled: loginState.data.inputData == null ||
                               loginState.data.inputData!.length != 10,
                           isLoading: isLoading,

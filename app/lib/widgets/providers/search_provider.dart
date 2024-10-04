@@ -1,4 +1,4 @@
-import 'package:app/state/search_state.dart';
+import 'package:app/widgets/state/search_state.dart';
 import 'package:flutter/material.dart';
 
 class SearchProvider extends InheritedWidget {

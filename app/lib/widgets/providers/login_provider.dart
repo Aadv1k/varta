@@ -1,4 +1,4 @@
-import 'package:app/state/login_state.dart';
+import 'package:app/widgets/state/login_state.dart';
 import 'package:flutter/material.dart';
 
 class LoginProvider extends InheritedWidget {

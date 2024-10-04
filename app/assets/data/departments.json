@@ -1,0 +1,18 @@
+[
+    {
+        "department_name": "english",
+        "department_code": "LANG/ENG"
+    },
+    {
+        "department_name": "mathematics",
+        "department_code": "MATHS"
+    },
+    {
+        "department_name": "geography",
+        "department_code": "GEO"
+    },
+    {
+        "department_name": "administration",
+        "department_code": "ADMIN"
+    }
+]

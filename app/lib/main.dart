@@ -1,10 +1,8 @@
 import 'package:app/common/varta_theme.dart';
 import 'package:app/models/login_data.dart';
-import 'package:app/providers/login_provider.dart';
 import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
-import 'package:app/screens/announcement_search/search_screen.dart';
-import 'package:app/screens/login/welcome/welcome.dart';
-import 'package:app/state/login_state.dart';
+import 'package:app/widgets/providers/login_provider.dart';
+import 'package:app/widgets/state/login_state.dart';
 import 'package:flutter/material.dart';
 
 Future<void> main() async {
@@ -24,15 +22,6 @@ class VartaApp extends StatelessWidget {
     required this.isFirstTimeLogin,
   });
 
-  // chipTheme: ChipThemeData(
-  //     deleteIconColor: AppColor.primaryBg,
-  //     padding: const EdgeInsets.symmetric(
-  //         horizontal: Spacing.md, vertical: Spacing.sm),
-  //     shape: RoundedRectangleBorder(
-  //         borderRadius: BorderRadius.circular(999),
-  //         side: const BorderSide(style: BorderStyle.none)),
-  //     labelStyle: const VartaTextTheme().labelMedium,
-  //     backgroundColor: AppColor.primaryColor),
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -41,16 +30,7 @@ class VartaApp extends StatelessWidget {
         home: LoginProvider(
           loginState: LoginState(data: LoginData()),
           child: const CreateAnnouncementScreen(),
-        )
-
-        // !isLoggedIn
-        //     ? (isFirstTimeLogin
-        //         ? const WelcomeScreen()
-        //         : PhoneLogin(
-        //             userLoginData: UserLoginData(),
-        //           ))
-        //     : const Placeholder(),
-        );
+        ));
   }
 }
 

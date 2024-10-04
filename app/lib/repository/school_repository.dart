@@ -2,15 +2,26 @@ import 'dart:convert';
 
 import 'package:app/models/school_model.dart';
 import 'package:app/services/api_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SchoolRepository {
   final ApiService _apiService = ApiService();
+  final _sharedPrefs = SharedPreferencesAsync();
 
   Future<List<SchoolModel>> getSchools() async {
-    final sharedPrefs = await SharedPreferences.getInstance();
+    if (kDebugMode) {
+      return [
+        SchoolModel(
+            schoolId: 1234,
+            schoolName: 'Bright Future Academy',
+            schoolAddress: '123, Sai Baba Nagar, Mumbai, Maharashtra, 400001',
+            schoolContactNo: '+912212345678',
+            schoolEmail: 'foo@example.com')
+      ];
+    }
 
-    String? foundCache = sharedPrefs.getString("schoolListData");
+    String? foundCache = await _sharedPrefs.getString("schoolListData");
 
     if (foundCache != null) {
       final data = jsonDecode(foundCache);
@@ -33,7 +44,7 @@ class SchoolRepository {
     final List<SchoolModel> parsedData =
         responseData.map((jsonItem) => SchoolModel.fromJson(jsonItem)).toList();
 
-    sharedPrefs.setString(
+    await _sharedPrefs.setString(
       "schoolListData",
       jsonEncode({
         "cachedAt": DateTime.now().millisecondsSinceEpoch,
