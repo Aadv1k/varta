@@ -1,6 +1,7 @@
 import 'package:app/common/varta_theme.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
+import 'package:app/screens/announcement_inbox/mobile/announcement_feed.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/widgets/state/login_state.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class VartaApp extends StatelessWidget {
         theme: VartaTheme().data,
         home: LoginProvider(
           loginState: LoginState(data: LoginData()),
-          child: const CreateAnnouncementScreen(),
+          child: const HomeScreen(),
         ));
   }
 }

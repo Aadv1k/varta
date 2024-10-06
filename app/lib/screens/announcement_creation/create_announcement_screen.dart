@@ -1,6 +1,5 @@
 import 'package:app/common/sizes.dart';
 import 'package:app/common/colors.dart';
-import 'package:app/models/search_data.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:app/screens/announcement_creation/scope_selection_bottom_sheet.dart';
@@ -13,45 +12,131 @@ class CreateAnnouncementScreen extends StatefulWidget {
       _CreateAnnouncementScreenState();
 }
 
+class AnnouncementCreationData {
+  final String title;
+  final String body;
+  final List<ScopeSelectionData> scopes;
+
+  AnnouncementCreationData copyWith({
+    String? title,
+    String? body,
+    List<ScopeSelectionData>? scopes,
+  }) {
+    return AnnouncementCreationData(
+      title: title ?? this.title,
+      body: body ?? this.body,
+      scopes: scopes ?? this.scopes,
+    );
+  }
+
+  bool isValid() {
+    return (title.trim().isNotEmpty && body.trim().isNotEmpty) &&
+        scopes.isNotEmpty;
+  }
+
+  AnnouncementCreationData(
+      {required this.scopes, required this.title, required this.body});
+}
+
 class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
-  List<ScopeSelectionData> selectedScopes = [];
+  AnnouncementCreationData _announcementData =
+      AnnouncementCreationData(scopes: [], title: "", body: "");
+  bool shouldDisableAdd = false;
+
+  final _titleController = TextEditingController();
+  final _bodyController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.addListener(() {
+      setState(() {
+        _announcementData =
+            _announcementData.copyWith(title: _titleController.text);
+      });
+    });
+
+    _bodyController.addListener(() {
+      setState(() {
+        _announcementData =
+            _announcementData.copyWith(body: _bodyController.text);
+      });
+    });
+  }
 
   void _handleCreateScope(ScopeSelectionData data) {
     setState(() {
-      selectedScopes.add(data);
+      if (!_announcementData.scopes.contains(data)) {
+        _announcementData = _announcementData.copyWith(
+          scopes: [..._announcementData.scopes, data],
+        );
+      }
+      if (data.scopeType == ScopeContext.everyone ||
+          data.scopeFilterType == GenericFilterType.all) {
+        shouldDisableAdd = true;
+      }
     });
   }
 
   void _handleDeleteScope(int index) {
     setState(() {
-      selectedScopes.removeAt(index);
+      ScopeSelectionData deletedScope = _announcementData.scopes[index];
+      _announcementData = _announcementData.copyWith(
+        scopes: [..._announcementData.scopes]..removeAt(index),
+      );
+      if (deletedScope.scopeType == ScopeContext.everyone ||
+          deletedScope.scopeFilterType == GenericFilterType.all) {
+        shouldDisableAdd = false;
+      }
     });
+  }
+
+  void _handleCreateAnnouncement() {
+    print(_announcementData);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: AppColor.primaryBg,
         appBar: AppBar(
-          toolbarHeight: 64,
-          leading: const IconButton(
-              onPressed: null,
-              icon: Icon(Icons.chevron_left,
-                  color: AppColor.heading, size: IconSizes.iconMd)),
+          scrolledUnderElevation: 0,
+          backgroundColor: AppColor.primaryBg,
+          toolbarHeight: 48,
+          titleSpacing: 0,
+          leading: const Padding(
+            padding: EdgeInsets.only(left: Spacing.sm),
+            child: IconButton(
+                onPressed: null,
+                icon: Icon(Icons.close,
+                    color: AppColor.body, size: IconSizes.iconMd)),
+          ),
           actions: [
-            TextButton(
-                onPressed: () {},
-                child: const Text("Create",
-                    style: TextStyle(
-                        fontSize: FontSize.textBase,
-                        fontWeight: FontWeight.bold,
-                        color: AppColor.primaryColor)))
+            Padding(
+              padding: const EdgeInsets.only(right: Spacing.sm),
+              child: TextButton(
+                  onPressed: _announcementData.isValid()
+                      ? _handleCreateAnnouncement
+                      : null,
+                  style: TextButton.styleFrom(
+                    backgroundColor: _announcementData.isValid()
+                        ? AppColor.primaryColor
+                        : AppColor.primaryColor.withOpacity(0.50),
+                    minimumSize: const Size(72, 40),
+                  ),
+                  child: Text("Create",
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelMedium!
+                          .copyWith(color: Colors.white))),
+            )
           ],
         ),
         body: Container(
             padding: const EdgeInsets.only(
-                left: Spacing.lg,
-                right: Spacing.lg,
-                top: Spacing.md,
+                left: Spacing.md,
+                right: Spacing.md,
+                top: Spacing.sm,
                 bottom: Spacing.md),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,6 +145,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                   TextField(
                       minLines: 1,
                       maxLines: 4,
+                      controller: _titleController,
                       style: Theme.of(context)
                           .textTheme
                           .headlineLarge!
@@ -74,7 +160,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                                 color: AppColor.subtitle,
                                 fontWeight: FontWeight.normal),
                       )),
-                  const SizedBox(height: Spacing.lg),
+                  const SizedBox(height: Spacing.md),
                   const Divider(height: 1, color: AppColor.subtitleLighter),
                   const SizedBox(height: Spacing.md),
                   Column(
@@ -82,41 +168,51 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Wrap(
-                          children: selectedScopes.asMap().entries.map((entry) {
+                          runSpacing: Spacing.sm,
+                          spacing: Spacing.sm,
+                          children: _announcementData.scopes
+                              .asMap()
+                              .entries
+                              .map((entry) {
                             int index = entry.key;
                             var scopeData = entry.value;
 
                             return VartaChip(
-                              variant: VartaChipVariant.secondary,
-                              text: scopeData.getUserFriendlyLabel(),
-                              onDeleted: () => _handleDeleteScope(index),
-                            );
+                                variant: VartaChipVariant.secondary,
+                                text: scopeData.getUserFriendlyLabel(),
+                                onDeleted: () => _handleDeleteScope(index),
+                                size: VartaChipSize.small);
                           }).toList(),
                         ),
+                        if (_announcementData.scopes.isNotEmpty)
+                          const SizedBox(height: Spacing.sm),
                         VartaChip(
-                            variant: VartaChipVariant.primary,
-                            onPressed: () {
-                              showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  isDismissible: false,
-                                  backgroundColor: Colors.white,
-                                  enableDrag: false,
-                                  builder: (context) =>
-                                      ScopeSelectionBottomSheet(
-                                          onCreated: (scope) =>
-                                              _handleCreateScope(scope)));
-                            },
+                            variant: VartaChipVariant.outlined,
+                            onPressed: shouldDisableAdd
+                                ? null
+                                : () {
+                                    showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        isDismissible: false,
+                                        backgroundColor: AppColor.primaryBg,
+                                        enableDrag: false,
+                                        builder: (context) =>
+                                            ScopeSelectionBottomSheet(
+                                                onCreated: (scope) =>
+                                                    _handleCreateScope(scope)));
+                                  },
                             text: "Add Scope",
-                            size: VartaChipSize.medium)
+                            size: VartaChipSize.small)
                       ]),
                   const SizedBox(height: Spacing.md),
                   const Divider(height: 1, color: AppColor.subtitleLighter),
-                  const SizedBox(height: Spacing.md),
+                  const SizedBox(height: Spacing.sm),
                   Expanded(
                     child: TextField(
                         maxLength: 3000,
                         maxLines: 999,
+                        controller: _bodyController,
                         decoration: InputDecoration(
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
@@ -128,7 +224,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                                       color: AppColor.subtitle,
                                     )),
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                              color: AppColor.body,
+                              color: AppColor.heading,
                             )),
                   ),
                 ])));

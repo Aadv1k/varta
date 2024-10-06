@@ -1,5 +1,5 @@
 import 'package:app/models/search_data.dart';
-import 'package:app/providers/search_provider.dart';
+import 'package:app/widgets/providers/search_provider.dart';
 import 'package:app/widgets/state/search_state.dart';
 import 'package:async/async.dart';
 

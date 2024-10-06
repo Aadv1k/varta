@@ -54,6 +54,8 @@ class _SearchScreenState extends State<SearchScreen> {
     showModalBottomSheet(
       context: context,
       builder: (context) => DateSelectionBottomSheet(
+        initialFromDate: _data.dateFrom,
+        initialToDate: _data.dateTo,
         onDateChange: (from, to) {
           // NOTE: is this the right way to do this?
           Navigator.pop(context);
@@ -79,6 +81,18 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  String _buildDateLabel() {
+    if (_data.dateFrom != null && _data.dateTo != null) {
+      return "${_formatDate(_data.dateFrom)} - ${_formatDate(_data.dateTo)}";
+    } else if (_data.dateFrom != null) {
+      return "Since ${_formatDate(_data.dateFrom)}";
+    } else if (_data.dateTo != null) {
+      return "Till ${_formatDate(_data.dateTo)}";
+    } else {
+      return "Date";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,7 +115,6 @@ class _SearchScreenState extends State<SearchScreen> {
                         variant: (_data.postedBy?.isNotEmpty ?? false)
                             ? VartaChipVariant.primary
                             : VartaChipVariant.secondary,
-                        showCaret: true,
                         text: (_data.postedBy?.isNotEmpty ?? false)
                             ? "${_data.postedBy![0].firstName} ${_data.postedBy![0].lastName} ${_data.postedBy!.length > 1 ? '+${_data.postedBy!.length - 1}' : ''}"
                             : "Posted By",
@@ -113,14 +126,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             (_data.dateFrom != null || _data.dateTo != null)
                                 ? VartaChipVariant.primary
                                 : VartaChipVariant.secondary,
-                        showCaret: false,
-                        text: (_data.dateFrom != null && _data.dateTo != null)
-                            ? "${_formatDate(_data.dateFrom)} - ${_formatDate(_data.dateTo)}"
-                            : (_data.dateFrom != null
-                                ? "Since ${_formatDate(_data.dateFrom)}"
-                                : (_data.dateTo != null
-                                    ? "Till ${_formatDate(_data.dateTo)}"
-                                    : "Date")),
+                        text: _buildDateLabel(),
                         onPressed: () =>
                             _handleDateSelectionByChipClick(context),
                       ),
@@ -131,7 +137,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           title: Padding(
-            padding: EdgeInsets.zero,
+            padding: EdgeInsets.symmetric(horizontal: Spacing.sm),
             child: Row(
               children: [
                 IconButton(
@@ -217,7 +223,14 @@ class _SearchScreenState extends State<SearchScreen> {
 class DateSelectionBottomSheet extends StatefulWidget {
   final void Function(DateTime? from, DateTime? to) onDateChange;
 
-  const DateSelectionBottomSheet({super.key, required this.onDateChange});
+  final DateTime? initialFromDate;
+  final DateTime? initialToDate;
+
+  const DateSelectionBottomSheet(
+      {super.key,
+      required this.onDateChange,
+      this.initialFromDate,
+      this.initialToDate});
 
   @override
   _DateSelectionBottomSheetState createState() =>
@@ -227,6 +240,13 @@ class DateSelectionBottomSheet extends StatefulWidget {
 class _DateSelectionBottomSheetState extends State<DateSelectionBottomSheet> {
   DateTime? _fromDate;
   DateTime? _toDate;
+
+  @override
+  void initState() {
+    _fromDate = widget.initialFromDate;
+    _toDate = widget.initialToDate;
+    super.initState();
+  }
 
   Future<void> _selectDate(BuildContext context, bool isFromDate) async {
     final initialDate = isFromDate
@@ -267,11 +287,6 @@ class _DateSelectionBottomSheetState extends State<DateSelectionBottomSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Date",
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: Spacing.sm),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -307,7 +322,7 @@ class _DateSelectionBottomSheetState extends State<DateSelectionBottomSheet> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("To",
+                    Text("Till",
                         style: Theme.of(context).textTheme.headlineMedium),
                     OutlinedButton(
                       onPressed: () => _selectDate(context, false),
@@ -341,7 +356,7 @@ class _DateSelectionBottomSheetState extends State<DateSelectionBottomSheet> {
                 TextButton(
                     style: TextButton.styleFrom(
                         padding: const EdgeInsets.only(
-                            top: Spacing.sm,
+                            top: Spacing.md,
                             right: Spacing.xs,
                             bottom: Spacing.sm,
                             left: Spacing.xs)),
@@ -350,7 +365,7 @@ class _DateSelectionBottomSheetState extends State<DateSelectionBottomSheet> {
                         _toDate = null;
                         _fromDate = null;
                       });
-                      widget.onDateChange(null, null);
+                      widget.onDateChange(_toDate, _fromDate);
                     },
                     child: Text("Clear All",
                         style: Theme.of(context)
@@ -427,7 +442,7 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
         children: [
           Padding(
             padding: const EdgeInsets.only(
-              top: Spacing.lg,
+              top: Spacing.md,
               left: Spacing.md,
               right: Spacing.md,
             ),

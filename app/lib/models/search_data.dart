@@ -22,8 +22,8 @@ class SearchData {
   }) {
     return SearchData(
       postedBy: postedBy ?? this.postedBy,
-      dateFrom: dateFrom ?? this.dateFrom,
-      dateTo: dateTo ?? this.dateTo,
+      dateFrom: dateFrom,
+      dateTo: dateTo,
       query: query ?? this.query,
     );
   }

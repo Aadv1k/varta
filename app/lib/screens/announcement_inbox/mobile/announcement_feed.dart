@@ -1,6 +1,7 @@
 import 'package:app/models/announcement_model.dart';
 import 'package:app/screens/announcement_inbox/mobile/tab_selector_chip.dart';
 import 'package:app/widgets/search_bar.dart';
+import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
@@ -111,16 +112,22 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Row(
                 children: [
-                  TabViewSelectorChip(
+                  VartaChip(
+                    variant: !_isForYouView
+                        ? VartaChipVariant.secondary
+                        : VartaChipVariant.primary,
                     text: "For You",
                     onPressed: () => setState(() => _isForYouView = true),
-                    isActive: _isForYouView ? true : false,
+                    size: VartaChipSize.medium,
                   ),
                   const SizedBox(width: Spacing.sm),
-                  TabViewSelectorChip(
+                  VartaChip(
+                    variant: _isForYouView
+                        ? VartaChipVariant.secondary
+                        : VartaChipVariant.primary,
                     text: "Your Announcements",
                     onPressed: () => setState(() => _isForYouView = false),
-                    isActive: _isForYouView ? false : true,
+                    size: VartaChipSize.medium,
                   ),
                 ],
               ),

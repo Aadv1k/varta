@@ -49,6 +49,24 @@ class ScopeSelectionData {
     this.isClassTeacher,
     this.isSubjectTeacher,
   });
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ScopeSelectionData &&
+          runtimeType == other.runtimeType &&
+          scopeType == other.scopeType &&
+          scopeFilterType == other.scopeFilterType &&
+          scopeFilterData == other.scopeFilterData &&
+          isClassTeacher == other.isClassTeacher &&
+          isSubjectTeacher == other.isSubjectTeacher;
+
+  @override
+  int get hashCode =>
+      scopeType.hashCode ^
+      scopeFilterType.hashCode ^
+      scopeFilterData.hashCode ^
+      isClassTeacher.hashCode ^
+      isSubjectTeacher.hashCode;
 
   ScopeSelectionData copyWith({
     ScopeContext? scopeContext,
@@ -70,21 +88,20 @@ class ScopeSelectionData {
     switch (scopeType) {
       case ScopeContext.student:
         return switch (scopeFilterType) {
-          GenericFilterType.standard => "Students: ${scopeFilterData} Grade",
-          GenericFilterType.standardDivision =>
-            "Students: Class $scopeFilterData",
+          GenericFilterType.standard => "${scopeFilterData}th Grade",
+          GenericFilterType.standardDivision => "Class ${scopeFilterData}",
           GenericFilterType.all => "All Students",
           _ => throw AssertionError("Invalid filter type for students"),
         };
       case ScopeContext.teacher:
         return switch (scopeFilterType) {
           GenericFilterType.standard when isSubjectTeacher == true =>
-            "Subject Teachers: ${scopeFilterData} Grade",
+            "${scopeFilterData}th Grade Teachers",
           GenericFilterType.standardDivision when isClassTeacher == true =>
-            "Class Teacher: $scopeFilterData",
+            "Class ${scopeFilterData} Teacher",
           GenericFilterType.standardDivision =>
-            "Subject Teachers: Class $scopeFilterData",
-          GenericFilterType.department => "Teachers: $scopeFilterData Dept",
+            "Class ${scopeFilterData} Teachers",
+          GenericFilterType.department => "${scopeFilterData} Dept",
           GenericFilterType.all => "All Teachers",
           _ => throw AssertionError("Invalid filter type for teachers"),
         };
@@ -241,7 +258,7 @@ class _ScopeSelectionBottomSheetState extends State<ScopeSelectionBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: MediaQuery.sizeOf(context).height * 0.80,
+        height: MediaQuery.sizeOf(context).height * 0.75,
         width: double.infinity,
         padding: const EdgeInsets.symmetric(
             horizontal: Spacing.lg, vertical: Spacing.lg),
