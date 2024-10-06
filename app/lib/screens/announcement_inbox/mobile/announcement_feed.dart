@@ -1,5 +1,5 @@
 import 'package:app/models/announcement_model.dart';
-import 'package:app/screens/announcement_inbox/mobile/tab_selector_chip.dart';
+import 'package:app/repository/announcements_repo.dart';
 import 'package:app/widgets/search_bar.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
@@ -157,7 +157,8 @@ class AnnouncementListView extends StatefulWidget {
 
 class _AnnouncementListViewState extends State<AnnouncementListView> {
   final List<AnnouncementModel> _data = [];
-  final bool _isLoading = true;
+  AnnouncementsRepository _announcementsRepository = AnnouncementsRepository();
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -174,12 +175,12 @@ class _AnnouncementListViewState extends State<AnnouncementListView> {
   }
 
   Future<void> _fetchData() async {
-    await Future.delayed(const Duration(seconds: 2));
-    // setState(() {
-    //   _data.addAll(
-    //       widget.isForYouView ? announcements : additionalAnnouncements);
-    //   _isLoading = false;
-    // });
+    await Future.delayed(const Duration(milliseconds: 100));
+    var announcements = await _announcementsRepository.getAnnouncements();
+    setState(() {
+      _data.addAll(announcements);
+      _isLoading = false;
+    });
   }
 
   @override
