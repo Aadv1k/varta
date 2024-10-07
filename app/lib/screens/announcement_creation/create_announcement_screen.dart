@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:app/screens/announcement_creation/scope_selection_bottom_sheet.dart';
 
 class CreateAnnouncementScreen extends StatefulWidget {
-  const CreateAnnouncementScreen({super.key});
+  final Function(AnnouncementCreationData) onCreate;
+
+  const CreateAnnouncementScreen({super.key, required this.onCreate});
 
   @override
   State<CreateAnnouncementScreen> createState() =>
@@ -92,7 +94,8 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
   }
 
   void _handleCreateAnnouncement() {
-    print(_announcementData);
+    widget.onCreate(_announcementData);
+    Navigator.pop(context);
   }
 
   @override
@@ -104,11 +107,13 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
           backgroundColor: AppColor.primaryBg,
           toolbarHeight: 48,
           titleSpacing: 0,
-          leading: const Padding(
-            padding: EdgeInsets.only(left: Spacing.sm),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: Spacing.sm),
             child: IconButton(
-                onPressed: null,
-                icon: Icon(Icons.close,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.close,
                     color: AppColor.body, size: IconSizes.iconMd)),
           ),
           actions: [

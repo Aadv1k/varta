@@ -1,6 +1,9 @@
 import 'package:app/models/announcement_model.dart';
 import 'package:app/repository/announcements_repo.dart';
+import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
+import 'package:app/widgets/providers/announcement_provider.dart';
 import 'package:app/widgets/search_bar.dart';
+import 'package:app/widgets/state/announcement_state.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
@@ -8,65 +11,81 @@ import 'package:app/common/sizes.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_list_item.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class AnnouncementFeed extends StatefulWidget {
+  const AnnouncementFeed({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _AnnouncementFeedState createState() => _AnnouncementFeedState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final ScrollController _scrollController = ScrollController();
-  bool _isScrolledUnder = false;
+class _AnnouncementFeedState extends State<AnnouncementFeed> {
   bool _isForYouView = true;
 
-  @override
-  void initState() {
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= 112) {
-        setState(() => _isScrolledUnder = true);
-      } else {
-        setState(() => _isScrolledUnder = false);
-      }
-    });
-    super.initState();
+  void TESTPUSH(AnnouncementProvider provider) {
+    provider.state.addAnnouncements([
+      AnnouncementModel(
+        title: 'Summer Break Schedule',
+        body:
+            'Please note that the office will be closed from June 15th to June 30th for summer break. We will resume our regular hours on July 1st.',
+        id: 'ANN-001',
+        createdAt: DateTime(2024, 3, 10),
+        author: AnnouncementAuthorModel(
+          firstName: 'Emily',
+          lastName: 'Chen',
+          publicId: 'EC-001',
+        ),
+        scopes: [],
+      )
+    ]);
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  void _handleCreateAnnouncement(AnnouncementCreationData data) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text("Announcement created successfully"),
+        action: SnackBarAction(label: "Undo", onPressed: () {}),
+      ),
+    );
+    setState(() {
+      _isForYouView = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: LayoutBuilder(
-        builder: (context, contraints) => contraints.maxWidth <= 600
-            ? FloatingActionButton.large(
-                onPressed: () {},
-                backgroundColor: AppColor.primaryColor,
-                child: const Icon(Icons.add,
-                    color: AppColor.primaryBg, size: IconSizes.iconXl),
-              )
-            : FloatingActionButton.extended(
-                onPressed: () {},
-                backgroundColor: AppColor.primaryColor,
-                label: const Text("Create Announcement",
-                    style: TextStyle(
-                        fontSize: FontSize.textBase,
-                        fontWeight: FontWeight.normal,
-                        color: AppColor.activeChipFg)),
-                icon: const Icon(Icons.add,
-                    color: AppColor.primaryBg, size: IconSizes.iconLg),
-              ),
-      ),
-      backgroundColor: AppColor.primaryBg,
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverAppBar(
-            toolbarHeight: 72,
+    return AnnouncementProvider(
+      state: AnnouncementState(),
+      child: Scaffold(
+          floatingActionButton: LayoutBuilder(
+            builder: (context, contraints) => contraints.maxWidth <= 600
+                ? FloatingActionButton(
+                    onPressed: () {
+                      TESTPUSH(AnnouncementProvider.of(context));
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => CreateAnnouncementScreen(
+                      //             onCreate: _handleCreateAnnouncement)));
+                    },
+                    backgroundColor: AppColor.primaryColor,
+                    child: const Icon(Icons.add,
+                        color: AppColor.primaryBg, size: IconSizes.iconLg),
+                  )
+                : FloatingActionButton.extended(
+                    onPressed: () {},
+                    backgroundColor: AppColor.primaryColor,
+                    label: const Text("Create Announcement",
+                        style: TextStyle(
+                            fontSize: FontSize.textBase,
+                            fontWeight: FontWeight.normal,
+                            color: AppColor.activeChipFg)),
+                    icon: const Icon(Icons.add,
+                        color: AppColor.primaryBg, size: IconSizes.iconLg),
+                  ),
+          ),
+          backgroundColor: AppColor.primaryBg,
+          appBar: AppBar(
+            toolbarHeight: 84,
             elevation: 0,
             scrolledUnderElevation: 0,
             backgroundColor: AppColor.primaryBg,
@@ -90,148 +109,226 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             ],
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(48),
+              preferredSize: const Size.fromHeight(84),
               child: Container(
-                decoration: BoxDecoration(
-                    border: Border(
-                        bottom: _isScrolledUnder
-                            ? const BorderSide(
-                                color: PaletteNeutral.shade070, width: 1)
-                            : const BorderSide(style: BorderStyle.none))),
-                padding: const EdgeInsets.only(
-                    left: Spacing.md, right: Spacing.md, bottom: Spacing.sm),
-                child: const CustomSearchBar(navigational: true),
-              ),
-            ),
-            pinned: true,
-          ),
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.lg,
-              ),
-              child: Row(
-                children: [
-                  VartaChip(
-                    variant: !_isForYouView
-                        ? VartaChipVariant.secondary
-                        : VartaChipVariant.primary,
-                    text: "For You",
-                    onPressed: () => setState(() => _isForYouView = true),
-                    size: VartaChipSize.medium,
-                  ),
-                  const SizedBox(width: Spacing.sm),
-                  VartaChip(
-                    variant: _isForYouView
-                        ? VartaChipVariant.secondary
-                        : VartaChipVariant.primary,
-                    text: "Your Announcements",
-                    onPressed: () => setState(() => _isForYouView = false),
-                    size: VartaChipSize.medium,
-                  ),
-                ],
+                padding:
+                    const EdgeInsets.only(left: Spacing.md, right: Spacing.md),
+                child: Column(
+                  children: [
+                    const CustomSearchBar(navigational: true),
+                    const SizedBox(height: Spacing.sm),
+                    Row(
+                      children: [
+                        VartaChip(
+                          variant: !_isForYouView
+                              ? VartaChipVariant.secondary
+                              : VartaChipVariant.primary,
+                          text: "For You",
+                          onPressed: () => setState(() => _isForYouView = true),
+                          size: VartaChipSize.medium,
+                        ),
+                        const SizedBox(width: Spacing.sm),
+                        VartaChip(
+                          variant: _isForYouView
+                              ? VartaChipVariant.secondary
+                              : VartaChipVariant.primary,
+                          text: "Your Announcements",
+                          onPressed: () =>
+                              setState(() => _isForYouView = false),
+                          size: VartaChipSize.medium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: Spacing.sm),
+                  ],
+                ),
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.only(top: Spacing.md),
-            sliver: AnnouncementListView(
-              key: ValueKey<bool>(_isForYouView),
-              isForYouView: _isForYouView,
-            ),
-          )
-        ],
-      ),
+          body: Builder(builder: (context) {
+            return RefreshIndicator(
+              color: AppColor.primaryColor,
+              backgroundColor: PaletteNeutral.shade000,
+              onRefresh: () {
+                return Future.delayed(const Duration(seconds: 1), () {
+                  TESTPUSH(AnnouncementProvider.of(context));
+                });
+              },
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [AnnouncementFeedSliverList(_isForYouView)],
+              ),
+            );
+          })),
     );
   }
 }
 
-class AnnouncementListView extends StatefulWidget {
+class AnnouncementFeedSliverList extends StatefulWidget {
   final bool isForYouView;
 
-  const AnnouncementListView({super.key, this.isForYouView = false});
+  const AnnouncementFeedSliverList(this.isForYouView, {super.key});
 
   @override
-  State<AnnouncementListView> createState() => _AnnouncementListViewState();
+  State<StatefulWidget> createState() {
+    return _AnnouncementFeedSliverListState();
+  }
 }
 
-class _AnnouncementListViewState extends State<AnnouncementListView> {
-  final List<AnnouncementModel> _data = [];
-  AnnouncementsRepository _announcementsRepository = AnnouncementsRepository();
-  bool _isLoading = true;
+class _AnnouncementFeedSliverListState
+    extends State<AnnouncementFeedSliverList> {
+  final AnnouncementsRepository _announcementRepo = AnnouncementsRepository();
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _fetchInitialAnnouncements();
   }
 
-  @override
-  void didUpdateWidget(covariant AnnouncementListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isForYouView != oldWidget.isForYouView) {
-      _fetchData();
+  void _fetchInitialAnnouncements() async {
+    var data = await _announcementRepo.getAnnouncements();
+    if (!context.mounted) {
+      return;
     }
-  }
-
-  Future<void> _fetchData() async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    var announcements = await _announcementsRepository.getAnnouncements();
-    setState(() {
-      _data.addAll(announcements);
-      _isLoading = false;
-    });
+    AnnouncementProvider.of(context).state.addAnnouncements(data);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Skeletonizer.sliver(
-      enabled: _isLoading,
-      child: AnnouncementSliverList(
-          data: _isLoading
-              ? List.generate(
-                  10,
-                  (int index) => AnnouncementModel(
-                      title: 'This is an example title, to act as a proxy for',
-                      body:
-                          'So I guess we are generating some random data! pretty cool if you ask me ngl, anyway. Cool package, cool Language',
-                      id: '',
-                      createdAt: DateTime(2024, 30, 6),
-                      author: AnnouncementAuthorModel(
-                          firstName: 'Foo', lastName: 'Bar', publicId: '1234'),
-                      scopes: []))
-              : _data),
-    );
-  }
-}
+    var state = AnnouncementProvider.of(context).state;
 
-class AnnouncementSliverList extends StatelessWidget {
-  const AnnouncementSliverList({
-    super.key,
-    required List<AnnouncementModel> data,
-  }) : _data = data;
-
-  final List<AnnouncementModel> _data;
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return Column(
-            children: [
-              AnnouncementListItem(announcement: _data[index]),
-              const Divider(
-                height: 1.0,
-                color: AppColor.subtitleLighter,
-                endIndent: Spacing.md,
-                indent: Spacing.md,
+    return ListenableBuilder(
+        listenable: state,
+        builder: (context, _) => SliverList.separated(
+              itemBuilder: (context, index) => AnnouncementListItem(
+                  announcement: state
+                      .announcements[state.announcements.length - 1 - index]),
+              separatorBuilder: (BuildContext context, int index) =>
+                  const Divider(
+                color: PaletteNeutral.shade050,
+                height: 1,
               ),
-            ],
-          );
-        },
-        childCount: _data.length,
-      ),
-    );
+              itemCount: state.announcements.length,
+            ));
   }
 }
+
+// class AnnouncementListView extends StatefulWidget {
+//   final bool isForYouView;
+
+//   const AnnouncementListView({super.key, this.isForYouView = false});
+
+//   @override
+//   State<AnnouncementListView> createState() => _AnnouncementListViewState();
+// }
+
+// class _AnnouncementListViewState extends State<AnnouncementListView> {
+//   final List<AnnouncementModel> _data = [];
+//   AnnouncementsRepository _announcementsRepository = AnnouncementsRepository();
+//   bool _isLoading = true;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _fetchData();
+//   }
+
+//   Future<void> _fetchData() async {
+//     await Future.delayed(const Duration(seconds: 2));
+//     var announcements = await _announcementsRepository.getAnnouncements();
+//     setState(() {
+//       _data.addAll(announcements);
+//       _isLoading = false;
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Skeletonizer.sliver(
+//       enabled: _isLoading,
+//       child: AnnouncementSliverList(
+//           data: _isLoading
+//               ? List.generate(
+//                   10,
+//                   (int index) => AnnouncementModel(
+//                       title: 'This is an example title, to act as a proxy for',
+//                       body:
+//                           'So I guess we are generating some random data! pretty cool if you ask me ngl, anyway. Cool package, cool Language',
+//                       id: '',
+//                       createdAt: DateTime(2024, 30, 6),
+//                       author: AnnouncementAuthorModel(
+//                           firstName: 'Foo', lastName: 'Bar', publicId: '1234'),
+//                       scopes: []))
+//               : _data),
+//     );
+//   }
+// }
+
+// class AnnouncementSliverList extends StatelessWidget {
+//   const AnnouncementSliverList({
+//     super.key,
+//     required List<AnnouncementModel> data,
+//   }) : _data = data;
+
+//   final List<AnnouncementModel> _data;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return SliverList(
+//       delegate: SliverChildBuilderDelegate(
+//         (BuildContext context, int index) {
+//           return Column(
+//             children: [
+// AnnouncementListItem(announcement: _data[index]),
+//               const Divider(
+//                 height: 1.0,
+//                 color: AppColor.subtitleLighter,
+//                 endIndent: Spacing.md,
+//                 indent: Spacing.md,
+//               ),
+//             ],
+//           );
+//         },
+//         childCount: _data.length,
+//       ),
+//     );
+//   }
+// }
+
+    // Skeletonizer(
+    //   enabled: _isLoading,
+    //   child: !_isLoading
+    //       ? ListView.separated(
+    //           itemBuilder: (context, index) =>
+    //               AnnouncementListItem(announcement: _announcementData[index]),
+    //           separatorBuilder: (BuildContext context, int index) =>
+    //               const Divider(
+    //             color: PaletteNeutral.shade050,
+    //             height: 1,
+    //           ),
+    //           itemCount: _announcementData.length,
+    //         )
+    //       : ListView.separated(
+    //           itemBuilder: (context, index) => AnnouncementListItem(
+    //             announcement: AnnouncementModel(
+    //               title: 'This is an example title, to act as a proxy for',
+    //               body:
+    //                   'So I guess we are generating some random data! pretty cool if you ask me ngl, anyway. Cool package, cool Language',
+    //               id: '',
+    //               createdAt: DateTime(2024, 3, 6), // corrected date
+    //               author: AnnouncementAuthorModel(
+    //                 firstName: 'Foo',
+    //                 lastName: 'Bar',
+    //                 publicId: '1234',
+    //               ),
+    //               scopes: [],
+    //             ),
+    //           ),
+    //           separatorBuilder: (BuildContext context, int index) =>
+    //               const Divider(
+    //             color: PaletteNeutral.shade050,
+    //             height: 1,
+    //           ),
+    //           itemCount: 10,
+    //         ),
+    // );

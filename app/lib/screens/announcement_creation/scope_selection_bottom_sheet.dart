@@ -346,28 +346,33 @@ class _ScopeSelectionBottomSheetState extends State<ScopeSelectionBottomSheet> {
                 .copyWith(color: AppColor.subtitle),
           ),
           const SizedBox(height: Spacing.sm),
-          SegmentedButton(
-              onSelectionChanged: (selection) =>
-                  handleScopeContextOptionSelect(selection.first),
-              expandedInsets: const EdgeInsets.only(bottom: Spacing.sm),
-              style: SegmentedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.black,
-                selectedBackgroundColor: AppColor.primaryColor,
-                selectedForegroundColor: Colors.white,
-                visualDensity: const VisualDensity(horizontal: 1, vertical: 1),
-                textStyle: Theme.of(context).textTheme.bodyMedium,
-                side: const BorderSide(color: AppColor.primaryColor),
-              ),
-              segments: const [
-                ButtonSegment(
-                    value: ScopeContext.student, label: Text("Student")),
-                ButtonSegment(
-                    value: ScopeContext.teacher, label: Text("Teacher")),
-              ],
-              selected: {
-                _scopeSelectionData.scopeType
-              }),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton(
+                onSelectionChanged: (selection) =>
+                    handleScopeContextOptionSelect(selection.first),
+                style: SegmentedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.black,
+                  selectedBackgroundColor: AppColor.primaryColor,
+                  selectedForegroundColor: Colors.white,
+                  visualDensity:
+                      const VisualDensity(horizontal: 1, vertical: 1),
+                  textStyle: Theme.of(context).textTheme.bodyMedium,
+                  side: const BorderSide(color: AppColor.primaryColor),
+                ),
+                emptySelectionAllowed: false,
+                segments: const [
+                  ButtonSegment(
+                      value: ScopeContext.student, label: Text("Student")),
+                  ButtonSegment(
+                      value: ScopeContext.teacher, label: Text("Teacher")),
+                ],
+                selected: {
+                  _scopeSelectionData.scopeType
+                }),
+          ),
+          const SizedBox(height: Spacing.md),
           if (_scopeSelectionData.scopeType == ScopeContext.teacher)
             Column(
               children: [

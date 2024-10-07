@@ -30,7 +30,7 @@ class VartaApp extends StatelessWidget {
         theme: VartaTheme().data,
         home: LoginProvider(
           loginState: LoginState(data: LoginData()),
-          child: const HomeScreen(),
+          child: const AnnouncementFeed(),
         ));
   }
 }
