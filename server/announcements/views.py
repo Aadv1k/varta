@@ -31,7 +31,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
     permission_classes = [ IsJWTAuthenticated, ]
 
     def get_permissions(self):
-        if self.action == "list_mine":
+        if self.action in { "list_mine" , "create" }:
             permission_classes = [IsJWTAuthenticated, IsTeacher]
         else:
             permission_classes = [IsJWTAuthenticated]
@@ -116,13 +116,41 @@ class AnnouncementViewSet(viewsets.ViewSet):
         return SuccessResponseBuilder() \
             .set_code(201) \
             .set_message("Created announcement successfully") \
-            .set_data(serializer.data) \
+            .set_data({
+                "id": serializer.data["id"],
+                "title": serializer.data["title"],
+                "scopes": serializer.data["scopes"],
+                "body": serializer.data["body"]
+            }) \
             .build()
         
 
     @action(detail=True, methods=['get'])
     def list_mine(self, request):
         return self._paginate_announcements(request, Announcement.objects.filter(author__id=request.user.id))
+    
+    @action(detail=True, methods=['get'])
+    def new_since(self, request):
+        try:
+            timestamp = request.query_params.get("t")
+            parsed_datetime = datetime.datetime.timestamp(timestamp)
+        except:
+            pass
+
+        serializer = AnnouncementOutputSerializer(data=[announcement for announcement in Announcement.objects.filter(
+            author__school__id=request.user.school.id,
+            created_at__gt=parsed_datetime
+        ) if announcement.for_user(request.user)], many=True)
+
+        assert(serializer.is_valid())
+
+        return SuccessResponseBuilder() \
+            .set_message("Successfully fetched new announcements since the provided timestamp") \
+            .set_data(serializer.data) \
+            .set_metadata({
+                "results": len(serializer.data),
+            }) \
+            .build()
 
     class SearchSerializer(serializers.Serializer):
         query = serializers.CharField(max_length=256, required=False, allow_blank=True)

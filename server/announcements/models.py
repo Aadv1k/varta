@@ -68,7 +68,7 @@ class AnnouncementScope(models.Model):
                 if (t_classroom.division == classroom.division and t_classroom.standard == classroom.standard):
                     return True
         elif self.filter == self.FilterType.T_DEPARTMENT:
-            if user.teacher_details.departments.filter(department_name=self.filter_data).exists():
+            if user.teacher_details.departments.filter(department_code=self.filter_data).exists():
                 return True
 
         return False

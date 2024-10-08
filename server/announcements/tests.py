@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase
 from django.urls import reverse
 from common.services.token import TokenService, TokenPayload
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 from schools.models import School, AcademicYear
 from accounts.models import User, Classroom, StudentDetail, TeacherDetail, Department
 from .models import Announcement, AnnouncementScope
@@ -26,7 +26,7 @@ class BaseAnnouncementTestCase(APITestCase):
         return user, token
 
     @staticmethod
-    def create_teacher_and_token(school, departments: List[str], subject_teacher_of: List[str] = [], class_teacher_of: List[str] = None):
+    def create_teacher_and_token(school, departments: List[str], subject_teacher_of: Optional[List[str]] = None, class_teacher_of: Optional[str] = None):
         user = User.objects.create(
             school=school,
             first_name="Li",
@@ -34,16 +34,18 @@ class BaseAnnouncementTestCase(APITestCase):
             last_name="Ma",
             user_type=User.UserType.TEACHER
         )
+        
+        
         details = TeacherDetail.objects.create(
             user=user,
-            class_teacher_of=class_teacher_of and Classroom.get_by_std_div_or_none(class_teacher_of),
+            class_teacher_of=None if not class_teacher_of else Classroom.get_by_std_div_or_none(class_teacher_of),
         )
 
-        for std_div in subject_teacher_of:
+        for std_div in subject_teacher_of or []:
             details.subject_teacher_of.add(Classroom.get_by_std_div_or_none(std_div))
 
         for dept in departments:
-            details.departments.add(Department.objects.get(department_name=dept))
+            details.departments.add(Department.objects.get(department_code=dept))
 
         token, _ = TokenService.generate_token_pair(TokenPayload(sub=str(user.public_id), iss="varta.test", role=user.user_type))
 
@@ -160,18 +162,18 @@ class TeacherAnnouncementTestCase(BaseAnnouncementTestCase):
             website="https://www.dpsrohini.com"
         )
 
-        self.english_class_teacher_12th = self.create_teacher_and_token(self.school, ["english"], subject_teacher_of=["12A", "12B", "12C", "12D"], class_teacher_of="12D")
+        self.english_class_teacher_12th = self.create_teacher_and_token(self.school, ["lang/english"], subject_teacher_of=["12A", "12B", "12C", "12D"], class_teacher_of="12D")
         self.math_class_teacher_12th = self.create_teacher_and_token(self.school, ["mathematics"], subject_teacher_of=["12B", "12C", "12D"], class_teacher_of="12A")
-        self.english_subject_teacher_12th_2nd = self.create_teacher_and_token(self.school, ["english"], subject_teacher_of=["12B", "12C", "12D"])
+        self.english_subject_teacher_12th_2nd = self.create_teacher_and_token(self.school, ["lang/english"], subject_teacher_of=["12B", "12C", "12D"])
 
         self.geography_class_teacher_10th = self.create_teacher_and_token(self.school, ["geography"], subject_teacher_of=["12D", "10A", "10B", "10C", "10D"], class_teacher_of="10C")
 
         self.mathematics_subject_teacher_10th = self.create_teacher_and_token(self.school, ["mathematics"], subject_teacher_of=["10A", "10B"])
         self.mathematics_subject_teacher_10th_2nd = self.create_teacher_and_token(self.school, ["mathematics"], subject_teacher_of=["10A", "10C"])
 
-        self.primary_english_class_teacher_4th = self.create_teacher_and_token(self.school, ["english"], subject_teacher_of=["4A", "4B", "4C"], class_teacher_of="4A")
+        self.primary_english_class_teacher_4th = self.create_teacher_and_token(self.school, ["lang/english"], subject_teacher_of=["4A", "4B", "4C"], class_teacher_of="4A")
 
-        self.admin = self.create_teacher_and_token(self.school, ["administration"])
+        self.admin = self.create_teacher_and_token(self.school, ["admin"])
 
     def test_announcements_for_all_teachers(self):
         cur_ann = Announcement.objects.create(
@@ -217,7 +219,7 @@ class MyAnnouncementsTestCase(BaseAnnouncementTestCase):
         )
 
         self.teacher_mathematics_9th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["mathematics"], ["9A", "9B"], class_teacher_of=None)
-        self.teacher_class_english_12th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["english"], ["12A", "12B", "12C", "12D"], class_teacher_of="12D")
+        self.teacher_class_english_12th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["lang/english"], ["12A", "12B", "12C", "12D"], class_teacher_of="12D")
         self.student_12D = BaseAnnouncementTestCase.create_student_and_token(self.school, "12D")
 
         
@@ -256,7 +258,7 @@ class PaginatedAnnouncementsTestCase(BaseAnnouncementTestCase):
         )
 
         self.teacher_mathematics_9th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["mathematics"], ["9A", "9B"], class_teacher_of=None)
-        self.teacher_class_english_12th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["english"], ["12A", "12B", "12C", "12D"], class_teacher_of="12D")
+        self.teacher_class_english_12th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["lang/english"], ["12A", "12B", "12C", "12D"], class_teacher_of="12D")
         self.student_12D = BaseAnnouncementTestCase.create_student_and_token(self.school, "12D")
 
         self.total_announcement = 50
@@ -297,7 +299,7 @@ class SearchAnnouncementsTestCase(BaseAnnouncementTestCase):
         )
 
         self.teacher_mathematics_9th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["mathematics"], ["9A", "9B"], class_teacher_of=None)
-        self.teacher_class_english_12th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["english"], ["12A", "12B", "12C", "12D"], class_teacher_of="12D")
+        self.teacher_class_english_12th = BaseAnnouncementTestCase.create_teacher_and_token(self.school, ["lang/english"], ["12A", "12B", "12C", "12D"], class_teacher_of="12D")
         self.student_12D = BaseAnnouncementTestCase.create_student_and_token(self.school, "12D")
 
         self.total_announcement = 50
@@ -364,7 +366,7 @@ class CreateAnnouncementTests(BaseAnnouncementTestCase):
         )
 
         self.teacher = self.create_teacher_and_token(self.school, ["mathematics"], ["9A", "9B"])
-        self.admin = self.create_teacher_and_token(self.school, ["administration"])
+        self.admin = self.create_teacher_and_token(self.school, ["admin"])
         self.student = self.create_student_and_token(self.school, "12D")
 
 
@@ -408,6 +410,20 @@ class CreateAnnouncementTests(BaseAnnouncementTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("scopes", [error["field"] for error in response.data["errors"]])
 
+    def test_cannot_create_announcement_with_illegal_departments(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        url = reverse("announcement_list")
+        response = self.client.post(url, {
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.T_DEPARTMENT, "filter_data": "whatever"},
+            ]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("scopes", [error["field"] for error in response.data["errors"]])
+
     def test_create_announcement_invalid_filter_content(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
         url = reverse("announcement_list")
@@ -422,76 +438,77 @@ class CreateAnnouncementTests(BaseAnnouncementTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("scopes", [error["field"] for error in response.data["errors"]])
 
-    # def test_create_announcement_for_specific_standard(self):
-    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-    #     url = reverse("announcement_list")
-    #     response = self.client.post(url, {
-    #         "title": "Announcement for 9th Standard",
-    #         "body": "This is an announcement for 9th standard students",
-    #         "scopes": [
-    #             {"filter_type": AnnouncementScope.FilterType.STU_STANDARD, "filter_data": "9"}
-    #         ]
-    #     }, format="json")
+    def test_create_announcement_for_specific_standard(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        url = reverse("announcement_list")
+        response = self.client.post(url, {
+            "title": "Announcement for 9th Standard",
+            "body": "This is an announcement for 9th standard students",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.STU_STANDARD, "filter_data": "9"}
+            ]
+        }, format="json")
 
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertEqual(response.data["title"], "Announcement for 9th Standard")
-    #     self.assertIn("id", response.data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["data"]["title"], "Announcement for 9th Standard")
+        self.assertIn("id", response.data["data"])
 
-    # def test_create_announcement_for_all_teachers(self):
-    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
-    #     url = reverse("announcement_list")
-    #     response = self.client.post(url, {
-    #         "title": "Announcement for All Teachers",
-    #         "body": "This is an announcement for all teachers",
-    #         "scopes": [
-    #             {"filter_type": AnnouncementScope.FilterType.ALL_TEACHERS}
-    #         ]
-    #     }, format="json")
+    def test_create_announcement_for_all_teachers(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
+        url = reverse("announcement_list")
+        response = self.client.post(url, {
+            "title": "Announcement for All Teachers",
+            "body": "This is an announcement for all teachers",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.ALL_TEACHERS}
+            ]
+        }, format="json")
 
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertEqual(response.data["title"], "Announcement for All Teachers")
-    #     self.assertIn("id", response.data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["data"]["title"], "Announcement for All Teachers")
+        self.assertIn("id", response.data["data"])
 
-    # def test_create_announcement_for_specific_department(self):
-    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
-    #     url = reverse("announcement_list")
-    #     response = self.client.post(url, {
-    #         "title": "Announcement for Mathematics Department",
-    #         "body": "This is an announcement for the mathematics department",
-    #         "scopes": [
-    #             {"filter_type": AnnouncementScope.FilterType.T_DEPARTMENT, "filter_data": "mathematics"}
-    #         ]
-    #     }, format="json")
+    def test_create_announcement_for_specific_department(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
+        url = reverse("announcement_list")
+        response = self.client.post(url, {
+            "title": "Announcement for Mathematics Department",
+            "body": "This is an announcement for the mathematics department",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.T_DEPARTMENT, "filter_data": "mathematics"}
+            ]
+        }, format="json")
 
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertEqual(response.data["title"], "Announcement for Mathematics Department")
-    #     self.assertIn("id", response.data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["data"]["title"], "Announcement for Mathematics Department")
+        self.assertIn("id", response.data["data"])
 
-    # def test_create_announcement_with_multiple_scopes(self):
-    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
-    #     url = reverse("announcement_list")
-    #     response = self.client.post(url, {
-    #         "title": "Announcement for Multiple Scopes",
-    #         "body": "This is an announcement for multiple scopes",
-    #         "scopes": [
-    #             {"filter_type": AnnouncementScope.FilterType.STU_STANDARD, "filter_data": "9"},
-    #             {"filter_type": AnnouncementScope.FilterType.T_DEPARTMENT, "filter_data": "mathematics"}
-    #         ]
-    #     }, format="json")
+    def test_create_announcement_with_multiple_scopes(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
+        url = reverse("announcement_list")
+        response = self.client.post(url, {
+            "title": "Announcement for Multiple Scopes",
+            "body": "This is an announcement for multiple scopes",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.STU_STANDARD, "filter_data": "9"},
+                {"filter": AnnouncementScope.FilterType.T_DEPARTMENT, "filter_data": "mathematics"}
+            ]
+        }, format="json")
 
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertEqual(response.data["title"], "Announcement for Multiple Scopes")
-    #     self.assertIn("id", response.data)
 
-    # def test_student_cannot_create_announcement(self):
-    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
-    #     url = reverse("announcement_list")
-    #     response = self.client.post(url, {
-    #         "title": "Unauthorized Announcement",
-    #         "body": "This announcement should not be created",
-    #         "scopes": [
-    #             {"filter_type": AnnouncementScope.FilterType.EVERYONE}
-    #         ]
-    #     }, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["data"]["title"], "Announcement for Multiple Scopes")
+        self.assertIn("id", response.data["data"])
 
-    #     self.assertEqual(response.status_code, 403)
+    def test_student_cannot_create_announcement(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
+        url = reverse("announcement_list")
+        response = self.client.post(url, {
+            "title": "Unauthorized Announcement",
+            "body": "This announcement should not be created",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE}
+            ]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 403)

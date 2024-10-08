@@ -37,6 +37,7 @@ class Classroom(models.Model):
 
 # NOTE: this is a reference table data at ./fixtures/initial_departments.json
 class Department(models.Model):
+    department_code = models.CharField(max_length=32, unique=True)
     department_name = models.CharField(max_length=64)
 
     def __str__(self):

@@ -35,7 +35,7 @@ def user_login(request):
         contact_data=serializer.validated_data.get("input_data")
     )
 
-    # either the user odesn't exist or the contact doesn't exist
+    # either the user doest't exist or the contact doesn't exist
     if not user_contact_query.exists():
         return ErrorResponseBuilder() \
                 .set_code(400)        \
@@ -55,16 +55,23 @@ def user_login(request):
             .build()
 
     if user_contact.contact_type == UserContact.ContactType.EMAIL:
-        was_sent_successfully, error_message = send_verification_email(user_contact.contact_data, "Your Varta verification code", f"Your one time login code for varta is <h2>{otp}</h2>")
-        if not was_sent_successfully:
+
+        
+        try:
+            send_verification_email(
+                user_contact.contact_data, 
+                "Your Varta verification code", 
+                f"Your one time login code for varta is <h2>{otp}</h2>"
+            )
+        except Exception as e:
             return ErrorResponseBuilder() \
                         .set_code(500)     \
-                        .set_message("Failed to send verification email at the moment") \
-                        .set_details({ "error_detail": error_message }) \
+                        .set_message("Failed to send verification email at the moment. Please try again later.") \
+                        .set_details({ "error_detail": str(e) }) \
                         .build()
 
     elif user_contact.contact_type == UserContact.ContactType.PHONE_NUMBER:
-        assert False, "This isn't implemented yet and hence we should ignore it"
+        assert False, "PHONE_NUMBER verification Not Implemented"
 
     return SuccessResponseBuilder() \
                 .set_message(f"Sent an OTP to {user_contact.contact_data}") \
@@ -82,7 +89,6 @@ def user_verify(request):
                 .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
                 .build()
    
-
     contact_data, provided_otp = serializer.validated_data["input_data"], serializer.validated_data["otp"]
     is_otp_valid = otp_service.verify_otp(contact_data, provided_otp)
 

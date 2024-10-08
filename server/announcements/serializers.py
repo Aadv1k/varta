@@ -26,9 +26,9 @@ def validate_standard_division(data: str):
 
 def validate_department(data: str):
     try:
-        Department.objects.get(department_name=data.lower())
+        Department.objects.get(department_code=data)
     except Department.DoesNotExist:
-        raise ValidationError(f"{data} is not a valid department.")
+        raise ValidationError(f"Couldn't find a department of code \"{data}\".")
 
 class AnnouncementScopeSerializer(serializers.ModelSerializer):
     filter = serializers.ChoiceField(required=True, choices=AnnouncementScope.FilterType.choices)
@@ -52,11 +52,12 @@ class AnnouncementScopeSerializer(serializers.ModelSerializer):
         }:
             if not filter_data:
                 raise serializers.ValidationError({"filter_data": "This field is required for the selected filter type."})
-            if filter_type in {AnnouncementScope.FilterType.STU_STANDARD, AnnouncementScope.FilterType.T_SUBJECT_TEACHER_OF_STANDARD}:
+
+        if filter_type in {AnnouncementScope.FilterType.STU_STANDARD, AnnouncementScope.FilterType.T_SUBJECT_TEACHER_OF_STANDARD}:
                 validate_standard(filter_data)
-            elif filter_type in {AnnouncementScope.FilterType.STU_STANDARD_DIVISION, AnnouncementScope.FilterType.T_CLASS_TEACHER_OF_STANDARD_DIVISION, AnnouncementScope.FilterType.T_SUBJECT_TEACHER_OF_STANDARD_DIVISION}:
+        elif filter_type in {AnnouncementScope.FilterType.STU_STANDARD_DIVISION, AnnouncementScope.FilterType.T_CLASS_TEACHER_OF_STANDARD_DIVISION, AnnouncementScope.FilterType.T_SUBJECT_TEACHER_OF_STANDARD_DIVISION}:
                 validate_standard_division(filter_data)
-            elif filter_type == AnnouncementScope.FilterType.T_DEPARTMENT:
+        elif filter_type == AnnouncementScope.FilterType.T_DEPARTMENT:
                 validate_department(filter_data)
 
         return data
@@ -73,7 +74,7 @@ class AnnouncementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Announcement 
-        fields = ["title", "body", "scopes", "author"]
+        fields = ["id", "title", "body", "scopes", "author"]
 
     def validate_scopes(self, scopes_data):
         if len(scopes_data) == 0:

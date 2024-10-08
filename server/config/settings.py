@@ -137,10 +137,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # == Custom Configuration == #
 # ========================== #
 
+import os
+
 from dotenv import load_dotenv
 load_dotenv() 
-
-import os
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -150,11 +150,11 @@ FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS=30
 OTP_EXPIRY_IN_SECONDS = 300
 OTP_LENGTH = 6 
 
-MJ_APIKEY_PUBLIC = os.getenv("MJ_APIKEY_PUBLIC")
-MJ_APIKEY_PRIVATE = os.getenv("MJ_APIKEY_PRIVATE")
+# MJ_APIKEY_PUBLIC = os.getenv("MJ_APIKEY_PUBLIC")
+# MJ_APIKEY_PRIVATE = os.getenv("MJ_APIKEY_PRIVATE")
 
-if not MJ_APIKEY_PUBLIC or not MJ_APIKEY_PRIVATE:
-    raise Exception("BAD CONFIG mailjet MJ_APIKEY_PUBLIC and MJ_APIKEY_PRIVATE configuration for email required")
+# if not MJ_APIKEY_PUBLIC or not MJ_APIKEY_PRIVATE:
+#     raise Exception("BAD CONFIG mailjet MJ_APIKEY_PUBLIC and MJ_APIKEY_PRIVATE configuration for email required")
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (       

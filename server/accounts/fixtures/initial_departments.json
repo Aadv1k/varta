@@ -1,6 +1,17 @@
 [
-    {"model": "accounts.department", "pk": 0, "fields": {"department_name": "mathematics"}},
-    {"model": "accounts.department", "pk": 2, "fields": {"department_name": "english"}},
-    {"model": "accounts.department", "pk": 3, "fields": {"department_name": "geography"}},
-    {"model": "accounts.department", "pk": 4, "fields": {"department_name": "administration"}}
+    {"model": "accounts.department", "pk": 1, "fields": {"department_name": "Mathematics", "department_code": "mathematics"}},
+    {"model": "accounts.department", "pk": 2, "fields": {"department_name": "Geography", "department_code": "geography"}},
+    {"model": "accounts.department", "pk": 3, "fields": {"department_name": "History", "department_code": "history"}},
+    {"model": "accounts.department", "pk": 4, "fields": {"department_name": "Political Science", "department_code": "pol_sci"}},
+    {"model": "accounts.department", "pk": 5, "fields": {"department_name": "English", "department_code": "lang/english"}},
+    {"model": "accounts.department", "pk": 6, "fields": {"department_name": "Hindi", "department_code": "lang/hindi"}},
+    {"model": "accounts.department", "pk": 7, "fields": {"department_name": "Sanskrit", "department_code": "lang/sanskrit"}},
+    {"model": "accounts.department", "pk": 8, "fields": {"department_name": "Marathi", "department_code": "lang/marathi"}},
+    {"model": "accounts.department", "pk": 9, "fields": {"department_name": "Administration", "department_code": "admin"}},
+    {"model": "accounts.department", "pk": 10, "fields": {"department_name": "Physics", "department_code": "science/physics"}},
+    {"model": "accounts.department", "pk": 11, "fields": {"department_name": "Chemistry", "department_code": "science/chemistry"}},
+    {"model": "accounts.department", "pk": 12, "fields": {"department_name": "Robotics", "department_code": "robotics"}},
+    {"model": "accounts.department", "pk": 13, "fields": {"department_name": "Information Technology", "department_code": "it"}},
+    {"model": "accounts.department", "pk": 14, "fields": {"department_name": "Biology", "department_code": "science/biology"}},
+    {"model": "accounts.department", "pk": 15, "fields": {"department_name": "Science", "department_code": "science"}}
 ]
