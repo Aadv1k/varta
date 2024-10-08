@@ -1,9 +1,15 @@
 from abc import ABC
 from typing import Optional
 
+from django.conf import settings
+
 import redis 
 
-REDIS_INST = redis.Redis()
+REDIS_INST = redis.Redis( 
+    host=settings.REDIS_HOST,
+    port=settings.REDIS_PORT,
+    password=settings.REDIS_PASSWORD
+)
 
 class GenericKVStore(ABC):
     def store(self, key: str, value: str) -> None:
@@ -20,7 +26,10 @@ class RedisKVStore(GenericKVStore):
         REDIS_INST.set(key, value)
 
     def retrieve(self, key: str) -> str | None:
-        return (REDIS_INST.get(key) or "").decode("utf8")
+        if not (value := REDIS_INST.get(key)):
+            return None
+
+        return value.decode("utf-8")
     
     def delete(self, key: str) -> None:
         REDIS_INST.delete(key)
