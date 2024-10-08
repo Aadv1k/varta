@@ -9,8 +9,13 @@ class AnnouncementsRepository {
     return Future.delayed(const Duration(seconds: 1), () => mockAnnouncements);
   }
 
-  Future<List<AnnouncementModel>> getMyAnnouncements({int page = 1}) {
-    throw UnimplementedError();
+  Future<List<AnnouncementModel>> getNewestAnnouncements() {
+    // Here access the last cached data and based on that make a api call
+    return Future.delayed(const Duration(seconds: 2), () => mockAnnouncements3);
+  }
+
+  Future<List<AnnouncementModel>> getUserAnnouncements({int page = 1}) {
+    return Future.delayed(const Duration(seconds: 1), () => mockAnnouncements2);
   }
 
   Future<AnnouncementModel> createAnnouncement() {
@@ -278,6 +283,117 @@ final List<AnnouncementModel> mockAnnouncements2 = [
       firstName: 'Neha',
       lastName: 'Singh',
       publicId: 'n105',
+    ),
+    scopes: [
+      AnnouncementScope(
+        filter: 'stu_standard_division',
+        filterData: 'All',
+      ),
+    ],
+  ),
+];
+
+final List<AnnouncementModel> mockAnnouncements3 = [
+  AnnouncementModel(
+    title: 'School Health Check-up',
+    body:
+        'A health check-up for all students will be conducted on November 12th. Parents are requested to ensure their children are present.',
+    id: 'a015',
+    createdAt: DateTime(2024, 11, 1, 9, 0),
+    author: AnnouncementAuthorModel(
+      firstName: 'Dr. Priya',
+      lastName: 'Sharma',
+      publicId: 'd110',
+    ),
+    scopes: [
+      AnnouncementScope(
+        filter: 'stu_standard_division',
+        filterData: 'All',
+      ),
+    ],
+  ),
+  AnnouncementModel(
+    title: 'Music Concert Invitation',
+    body:
+        'You are invited to a music concert on November 15th at 6 PM in the auditorium. Come and enjoy performances by our talented students.',
+    id: 'a016',
+    createdAt: DateTime(2024, 11, 3, 16, 0),
+    author: AnnouncementAuthorModel(
+      firstName: 'Rahul',
+      lastName: 'Khan',
+      publicId: 'r111',
+    ),
+    scopes: [
+      AnnouncementScope(
+        filter: 'stu_standard_division',
+        filterData: 'All',
+      ),
+    ],
+  ),
+  AnnouncementModel(
+    title: 'Basketball Tournament',
+    body:
+        'A basketball tournament will take place on November 20th. Interested teams should register by November 15th with the PE teacher.',
+    id: 'a017',
+    createdAt: DateTime(2024, 11, 5, 14, 30),
+    author: AnnouncementAuthorModel(
+      firstName: 'Vikram',
+      lastName: 'Joshi',
+      publicId: 'v112',
+    ),
+    scopes: [
+      AnnouncementScope(
+        filter: 'stu_standard_division',
+        filterData: '9th to 12th',
+      ),
+    ],
+  ),
+  AnnouncementModel(
+    title: 'Diwali Decoration Competition',
+    body:
+        'Students are invited to participate in the Diwali decoration competition on November 10th. Winners will receive prizes!',
+    id: 'a018',
+    createdAt: DateTime(2024, 11, 7, 11, 15),
+    author: AnnouncementAuthorModel(
+      firstName: 'Poonam',
+      lastName: 'Rani',
+      publicId: 'p113',
+    ),
+    scopes: [
+      AnnouncementScope(
+        filter: 'stu_standard_division',
+        filterData: 'All',
+      ),
+    ],
+  ),
+  AnnouncementModel(
+    title: 'School Play Auditions',
+    body:
+        'Auditions for the annual school play will be held on November 25th. Interested students should sign up with the drama teacher.',
+    id: 'a019',
+    createdAt: DateTime(2024, 11, 10, 10, 0),
+    author: AnnouncementAuthorModel(
+      firstName: 'Nitin',
+      lastName: 'Chopra',
+      publicId: 'n114',
+    ),
+    scopes: [
+      AnnouncementScope(
+        filter: 'stu_standard_division',
+        filterData: '7th to 12th',
+      ),
+    ],
+  ),
+  AnnouncementModel(
+    title: 'Community Service Day',
+    body:
+        'Join us for Community Service Day on November 30th. Students will volunteer at local shelters. Sign up with your class teacher.',
+    id: 'a020',
+    createdAt: DateTime(2024, 11, 15, 9, 45),
+    author: AnnouncementAuthorModel(
+      firstName: 'Kiran',
+      lastName: 'Bansal',
+      publicId: 'k115',
     ),
     scopes: [
       AnnouncementScope(

@@ -42,46 +42,50 @@ class AnnouncementListItem extends StatelessWidget {
   @override
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          vertical: Spacing.md, horizontal: Spacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                '${announcement.author.firstName} ${announcement.author.lastName}',
+    return InkWell(
+      onTap: onPressed,
+      splashColor: PaletteNeutral.shade030,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            vertical: Spacing.md, horizontal: Spacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  '${announcement.author.firstName} ${announcement.author.lastName}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: AppColor.subtitle),
+                ),
+                const Spacer(),
+                Text(
+                  formatDate(announcement.createdAt),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold, color: AppColor.subtitle),
+                ),
+              ],
+            ),
+            const SizedBox(height: Spacing.md),
+            Text(announcement.title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColor.subheading, fontWeight: FontWeight.bold)),
+            Padding(
+              padding: const EdgeInsets.only(right: Spacing.lg),
+              child: Text(
+                announcement.body,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context)
                     .textTheme
-                    .bodySmall
-                    ?.copyWith(color: AppColor.subtitle),
+                    .bodyMedium
+                    ?.copyWith(color: AppColor.body),
               ),
-              const Spacer(),
-              Text(
-                formatDate(announcement.createdAt),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold, color: AppColor.subtitle),
-              ),
-            ],
-          ),
-          const SizedBox(height: Spacing.md),
-          Text(announcement.title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: AppColor.subheading, fontWeight: FontWeight.bold)),
-          Padding(
-            padding: const EdgeInsets.only(right: Spacing.lg),
-            child: Text(
-              announcement.body,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: AppColor.body),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

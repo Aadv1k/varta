@@ -4,20 +4,26 @@ import 'package:flutter/material.dart';
 
 class AnnouncementState extends ChangeNotifier {
   List<AnnouncementModel> announcements = [];
-  List<AnnouncementModel> yourAnnouncements = [];
+  bool announcementsLoaded = false;
+
+  List<AnnouncementModel> userAnnouncements = [];
+  bool userAnnouncementsLoaded = false;
 
   void addAnnouncements(List<AnnouncementModel> announcement) {
     announcements.addAll(announcement);
     notifyListeners();
   }
 
-  void deleteLatestYourAnnouncement() {
-    yourAnnouncements.removeLast();
-    notifyListeners();
+  void setAnnouncementsLoaded() {
+    announcementsLoaded = true;
   }
 
-  void addYourAnnouncements(List<AnnouncementModel> announcement) {
-    yourAnnouncements.addAll(announcement);
+  void setUserAnouncementsLoaded() {
+    userAnnouncementsLoaded = true;
+  }
+
+  void addUserAnnouncements(List<AnnouncementModel> announcement) {
+    userAnnouncements.addAll(announcement);
     notifyListeners();
   }
 
