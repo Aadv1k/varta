@@ -15,8 +15,10 @@ class ApiService {
     if (isAuthenticated) {
       String? accessToken = await _tokenService.getAccessToken();
 
-      assert(accessToken != null,
-          "Can't make an authenticated request when an access token isn't set. This is due to invalid call");
+      if (accessToken == null ||
+          _tokenService.tokenExpiredOrInvalid(accessToken)) {
+        throw ApiTokenExpiredException();
+      }
 
       // TODO: handle token renewal
       // if (_tokenService.tokenExpired(accessToken)) {

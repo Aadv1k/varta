@@ -130,9 +130,12 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
         ),
         const SizedBox(height: Spacing.sm),
         widget.hasError
-            ? Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
-                child: ErrorText(text: widget.errorMessage!))
+            ? SizedBox(
+                width: 380,
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+                    child: ErrorText(text: widget.errorMessage!)),
+              )
             : const SizedBox.shrink(),
       ],
     );

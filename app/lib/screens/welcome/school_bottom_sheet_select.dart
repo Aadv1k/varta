@@ -26,7 +26,7 @@ class SchoolBottomSheetSelect extends StatelessWidget {
               showModalBottomSheet(
                 context: context,
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
                 builder: (BuildContext context) {
                   return Container(

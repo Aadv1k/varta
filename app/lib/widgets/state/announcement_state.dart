@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class AnnouncementState extends ChangeNotifier {
   List<AnnouncementModel> announcements = [];
-  bool announcementsLoaded = false;
+  bool announcementsLoading = false;
 
   List<AnnouncementModel> userAnnouncements = [];
   bool userAnnouncementsLoaded = false;
@@ -15,7 +15,12 @@ class AnnouncementState extends ChangeNotifier {
   }
 
   void setAnnouncementsLoaded() {
-    announcementsLoaded = true;
+    announcementsLoading = true;
+  }
+
+  void setAnnouncementLoadingStatus(bool value) {
+    announcementsLoading = value;
+    notifyListeners();
   }
 
   void setUserAnouncementsLoaded() {

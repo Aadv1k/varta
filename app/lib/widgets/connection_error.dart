@@ -30,7 +30,7 @@ class GenericError extends StatelessWidget {
         messageStyle = Theme.of(context).textTheme.bodySmall!;
         break;
       case ErrorSize.large:
-        imageSize = 240;
+        imageSize = 280;
         messageStyle = Theme.of(context).textTheme.bodyLarge!;
         break;
       case ErrorSize.medium:
@@ -50,8 +50,8 @@ class GenericError extends StatelessWidget {
           height: imageSize,
         ),
         const SizedBox(height: Spacing.md),
-        SizedBox(
-          width: 320,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
           child: Text(
             errorMessage,
             textAlign: TextAlign.center,

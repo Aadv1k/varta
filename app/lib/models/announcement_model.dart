@@ -47,4 +47,8 @@ class AnnouncementModel {
   String toString() {
     return 'Title: $title\nBody: $body\nID: $id\nCreated At: $createdAt\nAuthor: $author\nScopes: ${scopes.join(", ")}';
   }
+
+  static AnnouncementModel? fromJson(dynamic data) {
+    return null;
+  }
 }

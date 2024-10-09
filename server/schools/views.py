@@ -10,6 +10,7 @@ from .serializers import SchoolSerializer
 
 class SchoolList(APIView):
     def get(self, request, format=None):
+        print(School.objects.all())
         serializer = SchoolSerializer(data=School.objects.all(), many=True)
         serializer.is_valid()
 

@@ -1,4 +1,5 @@
 import 'package:app/common/colors.dart';
+import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/models/school_model.dart';
@@ -31,16 +32,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     });
     try {
       final data = await _schoolRepository.getSchools();
-      if (data.isEmpty) {
-        /* This should NOT have happened and is an error */
-        throw Exception();
-      }
-
       setState(() {
         _schoolList = data;
         isLoading = false;
       });
     } catch (e) {
+      if (e is ApiException) {
+        setState(() {
+          errorMessage = e.message;
+          isLoading = false;
+        });
+        return;
+      }
       setState(() {
         errorMessage = 'Failed to load schools. Please try again later.';
         isLoading = false;

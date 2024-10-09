@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/common/exceptions.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/services/api_service.dart';
@@ -9,49 +11,57 @@ class AuthService {
   final ApiService _apiService = ApiService();
   final TokenService _tokenService = TokenService();
 
-  Future<bool> isLoggedIn() async {
-    String? accessToken = await _tokenService.getAccessToken();
-    if (accessToken == null) return false;
-    if (!_tokenService.tokenValid(accessToken)) return false;
-    return true;
-  }
+  Future<void> verifyOtp(LoginData data) async {
+    final response = await _apiService.makeRequest(
+      HTTPMethod.POST,
+      "/me/verify",
+      body: {
+        // TODO: ideally there would be a proper implementation for selecting the country code on the front-end. Currently this has to do
+        "input_data": "+91${data.inputData}",
+        "school_id": data.schoolIDAndName!.$1,
+        "otp": data.otp
+      },
+    );
 
-  Future<bool> isFirstTimeLogin() async {
-    return await SharedPrefService.sharedPrefs.getBool("firstTimeLogin") ??
-        true;
+    if (response.statusCode != 200) {
+      throw ApiException.fromResponse(response);
+    }
+
+    try {
+      final data = jsonDecode(response.body);
+
+      _tokenService.storeAccessToken(data["data"]["access_token"]);
+      _tokenService.storeRefreshToken(data["data"]["refresh_token"]);
+    } catch (_) {
+      throw ApiException(
+          "We received an unexpected response from the server. Please try again later, or contact support if the issue persists.",
+          {});
+    }
   }
 
   Future<void> sendOtp(LoginData data) async {
-    Response response;
+    final response = await _apiService.makeRequest(
+      HTTPMethod.POST,
+      "/me/login",
+      body: {
+        // TODO: ideally there would be a proper implementation for selecting the country code on the front-end. Currently this has to do
+        "input_data": "+91${data.inputData}",
+        "input_format":
+            data.inputType == LoginType.email ? "email" : "phone_number",
+        "school_id": data.schoolIDAndName!.$1
+      },
+    );
 
-    try {
-      response = await _apiService.makeRequest(
-        HTTPMethod.POST,
-        "/me/login",
-        body: {
-          "input_data": data.inputData,
-          "input_format":
-              data.inputType == LoginType.email ? "email" : "phone_number",
-          "school_id": data.schoolIDAndName!.$1
-        },
-      );
-
-      if (response.statusCode != 200) {
-        throw ApiException.fromResponse(response);
-      }
-    } on ApiClientException catch (_) {
-      rethrow;
+    if (response.statusCode != 200) {
+      throw ApiException.fromResponse(response);
     }
-
-    throw UnimplementedError(
-        "If you got to this point, then well atleast some code worked lol ");
   }
 
   bool tokenExpired(String token) {
-    return _tokenService.tokenExpired(token);
+    return _tokenService.tokenExpiredOrInvalid(token);
   }
 
   Future<void> renewToken() {
-    throw UnimplementedError();
+    throw UnimplementedError("AUTH SERVICE RENWEW TOKEN NOT IMPLEMENTED");
   }
 }

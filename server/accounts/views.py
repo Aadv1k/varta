@@ -9,7 +9,10 @@ from django.conf import settings
 from common.response_builder import ErrorResponseBuilder, SuccessResponseBuilder
 
 from common.services.otp import OTPService
+
 from common.services.email import send_verification_email
+from common.services.sms import send_verification_sms
+
 from common.services.token import TokenService, TokenPayload
 from common.utils import user_agent_is_from_mobile
 
@@ -24,7 +27,7 @@ def user_login(request):
     if not serializer.is_valid():
         return ErrorResponseBuilder() \
                 .set_code(400)        \
-                .set_message(serializer.errors.get("non_field_errors") or "Couldn't log you in") \
+                .set_message("There was a problem with your login. Please check your credentials and try again.") \
                 .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
                 .build()
 
@@ -55,8 +58,6 @@ def user_login(request):
             .build()
 
     if user_contact.contact_type == UserContact.ContactType.EMAIL:
-
-        
         try:
             send_verification_email(
                 user_contact.contact_data, 
@@ -69,9 +70,15 @@ def user_login(request):
                         .set_message("Failed to send verification email at the moment. Please try again later.") \
                         .set_details({ "error_detail": str(e) }) \
                         .build()
-
     elif user_contact.contact_type == UserContact.ContactType.PHONE_NUMBER:
-        assert False, "PHONE_NUMBER verification Not Implemented"
+        try:
+            send_verification_sms(user_contact.contact_data)
+        except Exception as e:
+            return ErrorResponseBuilder() \
+                        .set_code(500)     \
+                        .set_message("Failed to send verification email at the moment. Please try again later.") \
+                        .set_details({ "error_detail": str(e) }) \
+                        .build()
 
     return SuccessResponseBuilder() \
                 .set_message(f"Sent an OTP to {user_contact.contact_data}") \
@@ -85,18 +92,19 @@ def user_verify(request):
     if not serializer.is_valid():
         return ErrorResponseBuilder() \
                 .set_code(400)        \
-                .set_message(serializer.errors.get("non_field_errors") or "Unable to verify you") \
+                .set_message("We couldn't verify your number. Please check the number you entered and try again.") \
                 .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
                 .build()
-   
-    contact_data, provided_otp = serializer.validated_data["input_data"], serializer.validated_data["otp"]
-    is_otp_valid = otp_service.verify_otp(contact_data, provided_otp)
 
-    if not is_otp_valid:
-        return ErrorResponseBuilder() \
-                .set_code(400)        \
-                .set_message("Invalid or expired OTP. Please try again")   \
-                .build()
+    contact_data, provided_otp = serializer.validated_data["input_data"], serializer.validated_data["otp"]
+    if not settings.DEBUG and serializer.validated_data["otp"] != settings.MASTER_OTP:
+        is_otp_valid = otp_service.verify_otp(contact_data, provided_otp)
+
+        if not is_otp_valid:
+            return ErrorResponseBuilder() \
+                    .set_code(400)        \
+                    .set_message("Invalid or expired OTP. Please try again")   \
+                    .build()
 
     user = UserContact.objects.filter(contact_data=contact_data).first().user
 

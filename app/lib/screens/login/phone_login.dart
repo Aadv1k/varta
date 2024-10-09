@@ -38,29 +38,25 @@ class _PhoneLoginState extends State<PhoneLogin> {
     try {
       final loginData = LoginProvider.of(context).loginState.data;
       await _authService.sendOtp(loginData);
-    } on ApiClientException catch (_) {
+    } catch (exc) {
       setState(() {
         isLoading = false;
         hasError = true;
-        errorMessage = "Unable to connect at this moment. Try again later.";
-      });
-      return;
-    } on ApiException catch (exc) {
-      setState(() {
-        isLoading = false;
-        hasError = true;
-        errorMessage = exc.message;
+        errorMessage = exc is ApiException
+            ? exc.message
+            : "Something went wrong. Please check your connection and try again later.";
       });
       return;
     }
 
-    if (context.mounted) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => LoginProvider(
-                  loginState: loginState, child: const OTPVerification())));
-    }
+    setState(() {
+      isLoading = false;
+    });
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => LoginProvider(
+                loginState: loginState, child: const OTPVerification())));
   }
 
   @override

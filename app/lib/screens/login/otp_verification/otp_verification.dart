@@ -4,6 +4,7 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/login_data.dart';
+import 'package:app/screens/announcement_inbox/mobile/announcement_feed.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 // import 'package:app/screens/announcement_inbox/mobile/announcement_feed.dart';
 import 'package:app/screens/login/otp_verification/timed_text_button.dart';
@@ -42,12 +43,12 @@ class _OTPVerificationState extends State<OTPVerification> {
     final loginData = LoginProvider.of(context).loginState.data;
 
     try {
-      // await _authService.sendOtp(loginData);
-      // Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => const HomeScreen(),
-      //     ));
+      await _authService.verifyOtp(loginData);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AnnouncementInbox(),
+          ));
     } on ApiException catch (exc) {
       setState(() {
         isLoading = false;

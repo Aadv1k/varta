@@ -12,27 +12,17 @@ class TokenService {
 
   TokenService._internal();
 
-  bool tokenExpired(String token) {
-    final JWT data = JWT.decode(token);
-    final int exp = int.parse(data.payload!["exp"]);
-
-    if (exp >= DateTime.now().millisecondsSinceEpoch) return false;
-
-    return true;
-  }
-
-  bool tokenValid(String token) {
+  bool tokenExpiredOrInvalid(String token) {
     final JWT? data = JWT.tryDecode(token);
 
-    if (data == null) return false;
+    if (data == null) return true;
 
-    final int? exp = int.tryParse(data.payload!["exp"]);
+    final exp = data.payload["exp"];
+    if (exp == null || exp is! int) {
+      return true;
+    }
 
-    if (exp == null) return false;
-
-    if (exp >= DateTime.now().millisecondsSinceEpoch) return false;
-
-    return true;
+    return (exp >= DateTime.now().millisecondsSinceEpoch);
   }
 
   Future<String?> getAccessToken() {
@@ -41,5 +31,13 @@ class TokenService {
 
   Future<void> storeAccessToken(String token) {
     return _secureStorage.write(key: "accessToken", value: token);
+  }
+
+  Future<String?> getRefreshToken() {
+    return _secureStorage.read(key: "refreshToken");
+  }
+
+  Future<void> storeRefreshToken(String token) {
+    return _secureStorage.write(key: "refreshToken", value: token);
   }
 }

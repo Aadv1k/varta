@@ -10,6 +10,8 @@ class ApiServiceException implements Exception {
   String toString() => "ApiServiceException: $message";
 }
 
+class ApiTokenExpiredException implements Exception {}
+
 class ApiClientException implements Exception {
   final String message;
   ApiClientException(this.message);
@@ -24,11 +26,12 @@ class ApiException implements Exception {
   ApiException(this.message, this.errors);
 
   static ApiException fromResponse(Response response) {
-    final dynamic errorResponse = jsonEncode(response.body);
-    final Map<String, String> errorResponseDetails = {
-      for (final errorField in errorResponse["errors"])
-        errorField["field"]: errorField["error"]
-    };
-    return ApiException(errorResponse["message"], errorResponseDetails);
+    final dynamic errorResponse = jsonDecode(response.body);
+
+    // final Map<String, String> errorResponseDetails = {
+    //   for (final errorField in errorResponse["errors"])
+    //     errorField["field"]: errorField["error"]
+    // };
+    return ApiException(errorResponse["message"], {});
   }
 }

@@ -1,12 +1,32 @@
+import 'dart:convert';
+
+import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/search_data.dart';
 import 'package:app/services/api_service.dart';
 
+import 'package:http/http.dart' as http;
+
 class AnnouncementsRepository {
   final ApiService _apiService = ApiService();
 
-  Future<List<AnnouncementModel>> getAnnouncements({int page = 1}) {
-    return Future.delayed(const Duration(seconds: 1), () => mockAnnouncements);
+  Future<List<AnnouncementModel>> getAnnouncements({int page = 1}) async {
+    http.Response response;
+    response = await _apiService.makeRequest(HTTPMethod.GET, "/announcements",
+        isAuthenticated: true);
+
+    print(response.body);
+    if (response.statusCode != 200) {
+      throw ApiException.fromResponse(response);
+    }
+
+    var data = jsonDecode(response.body);
+
+    List<AnnouncementModel> parsedData = (data["data"] as List)
+        .map((element) => AnnouncementModel.fromJson(element)!)
+        .toList();
+
+    return parsedData;
   }
 
   Future<List<AnnouncementModel>> getNewestAnnouncements() {

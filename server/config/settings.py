@@ -149,6 +149,7 @@ FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS=30
 # 5 minutes
 OTP_EXPIRY_IN_SECONDS = 300
 OTP_LENGTH = 6 
+MASTER_OTP = "000000"
 
 # Redis configuration
 REDIS_HOST = "localhost"

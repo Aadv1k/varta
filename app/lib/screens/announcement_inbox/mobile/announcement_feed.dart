@@ -148,7 +148,7 @@ class _AnnouncementInboxState extends State<AnnouncementInbox> {
           ),
         ),
         body: Builder(builder: (context) {
-          return ForYouAnnouncementFeed();
+          return const ForYouAnnouncementFeed();
         }),
       ),
     );
