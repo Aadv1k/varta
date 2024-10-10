@@ -4,7 +4,8 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/login_data.dart';
-import 'package:app/screens/announcement_inbox/mobile/announcement_feed.dart';
+import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
+import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 // import 'package:app/screens/announcement_inbox/mobile/announcement_feed.dart';
 import 'package:app/screens/login/otp_verification/timed_text_button.dart';
@@ -12,6 +13,7 @@ import 'package:app/services/auth_service.dart';
 import 'package:app/widgets/basic_app_bar.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/error_text.dart';
+import 'package:app/widgets/state/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
@@ -40,14 +42,18 @@ class _OTPVerificationState extends State<OTPVerification> {
       errorMessage = null;
     });
 
-    final loginData = LoginProvider.of(context).loginState.data;
+    final loginData = LoginProvider.of(context).state.data;
 
     try {
       await _authService.verifyOtp(loginData);
+
+      final appState = await AppState.initialize();
+
       Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const AnnouncementInbox(),
+            builder: (context) => AppProvider(
+                state: appState, child: const AnnouncementInboxScreen()),
           ));
     } on ApiException catch (exc) {
       setState(() {
@@ -60,7 +66,7 @@ class _OTPVerificationState extends State<OTPVerification> {
 
   @override
   Widget build(BuildContext context) {
-    final loginData = LoginProvider.of(context).loginState.data;
+    final loginData = LoginProvider.of(context).state.data;
 
     return Scaffold(
       backgroundColor: AppColor.primaryBg,
@@ -108,7 +114,7 @@ class _OTPVerificationState extends State<OTPVerification> {
             ),
             const SizedBox(height: Spacing.lg),
             ListenableBuilder(
-                listenable: LoginProvider.of(context).loginState,
+                listenable: LoginProvider.of(context).state,
                 builder: (context, child) {
                   return OtpTextField(
                     numberOfFields: 6,
@@ -122,14 +128,14 @@ class _OTPVerificationState extends State<OTPVerification> {
                     cursorColor: AppColor.body,
                     onCodeChanged: (String code) {
                       LoginProvider.of(context)
-                          .loginState
+                          .state
                           .setLoginData(loginData.copyWith(otp: code));
                     },
                     onSubmit: (String verificationCode) {
                       if (!validateOtp(verificationCode)) {
                         return;
                       }
-                      LoginProvider.of(context).loginState.setLoginData(
+                      LoginProvider.of(context).state.setLoginData(
                           loginData.copyWith(otp: verificationCode));
                       handleVerificationClick(context);
                     },

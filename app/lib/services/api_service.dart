@@ -1,6 +1,7 @@
 import "dart:io";
 import "package:app/common/exceptions.dart";
 import "package:app/services/token_service.dart";
+import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 
 enum HTTPMethod { GET, POST, DELETE }
@@ -17,14 +18,10 @@ class ApiService {
 
       if (accessToken == null ||
           _tokenService.tokenExpiredOrInvalid(accessToken)) {
+        debugPrint(
+            "TODO: handle renewing the access token right here. Only throw this exception when the referesh token is expired as well");
         throw ApiTokenExpiredException();
       }
-
-      // TODO: handle token renewal
-      // if (_tokenService.tokenExpired(accessToken)) {
-      //   throw ApiServiceException("Token has expired. Implement token renewal.");
-      //   //accessToken = await _tokenService.getAccessToken();
-      // }
 
       headers[HttpHeaders.authorizationHeader] = "Bearer $accessToken";
     }

@@ -2,10 +2,9 @@ import 'package:app/widgets/state/login_state.dart';
 import 'package:flutter/material.dart';
 
 class LoginProvider extends InheritedWidget {
-  final LoginState loginState;
+  final LoginState state;
 
-  const LoginProvider(
-      {super.key, required this.loginState, required super.child});
+  const LoginProvider({super.key, required this.state, required super.child});
 
   static LoginProvider of(BuildContext context) {
     final provider = context.getInheritedWidgetOfExactType<LoginProvider>();
@@ -18,6 +17,6 @@ class LoginProvider extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant LoginProvider oldWidget) {
-    return oldWidget.loginState.data != loginState.data;
+    return oldWidget.state.data != state.data;
   }
 }

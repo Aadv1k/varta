@@ -2,7 +2,7 @@ import 'package:app/models/user_model.dart';
 import 'package:collection/collection.dart';
 
 class SearchData {
-  final List<TeacherModel>? postedBy;
+  final List<UserModel>? postedBy;
   final DateTime? dateFrom;
   final DateTime? dateTo;
   final String? query;
@@ -15,7 +15,7 @@ class SearchData {
   });
 
   SearchData copyWith({
-    List<TeacherModel>? postedBy,
+    List<UserModel>? postedBy,
     DateTime? dateFrom,
     DateTime? dateTo,
     String? query,

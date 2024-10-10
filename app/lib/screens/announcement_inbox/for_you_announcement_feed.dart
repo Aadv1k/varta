@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'package:app/common/exceptions.dart';
+import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/repository/announcements_repo.dart';
 import 'package:app/screens/announcement_inbox/mobile/placeholder_announcement_list_view.dart';
 import 'package:app/screens/announcement_inbox/view_announcement_readonly_screen.dart';
-import 'package:app/screens/login/phone_login.dart';
 import 'package:app/screens/welcome/welcome.dart';
+import 'package:app/services/simple_cache_service.dart';
 import 'package:app/widgets/connection_error.dart';
-import 'package:app/widgets/error_box.dart';
 import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/providers/announcement_provider.dart';
+import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/widgets/state/login_state.dart';
 import 'package:flutter/material.dart';
@@ -30,52 +31,61 @@ class ForYouAnnouncementFeed extends StatefulWidget {
 class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   final AnnouncementsRepository _announcementRepo = AnnouncementsRepository();
   late Timer _pollingTimer;
-  bool hasError = false;
+  bool _hasError = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     _fetchInitial();
     _pollingTimer =
-        Timer.periodic(const Duration(minutes: 5), (_) => _handlePoll());
+        Timer.periodic(const Duration(minutes: 10), (_) => _handlePoll());
     super.initState();
   }
 
   void _fetchInitial() async {
-    if (!context.mounted) return;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      var state = AnnouncementProvider.of(context).state;
-      state.setAnnouncementLoadingStatus(true);
-      List<AnnouncementModel> data;
-      try {
-        data = await _announcementRepo.getAnnouncements();
-      } on (ApiException, ApiClientException) {
-        setState(() => hasError = true);
-        return;
-      } on ApiTokenExpiredException {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (context) => LoginProvider(
-                    loginState: LoginState(data: LoginData()),
-                    child: const WelcomeScreen())),
-            (_) => false);
+      var state = AppProvider.of(context).state;
+      SimpleCacheService cacheService = SimpleCacheService();
+
+      final cachedAnnouncements =
+          await cacheService.fetchOrNull("announcements");
+
+      if (cachedAnnouncements != null) {
+        _handlePoll();
         return;
       }
-      state.addAnnouncements(data);
-      state.setAnnouncementLoadingStatus(false);
+
+      try {
+        List<AnnouncementModel> data =
+            await _announcementRepo.getAnnouncements();
+        state.addAnnouncements(data);
+        SimpleCacheService cacheService = SimpleCacheService();
+        cacheService.store("announcements", data);
+      } on (ApiException, ApiClientException) {
+        setState(() => _hasError = true);
+      } on ApiTokenExpiredException {
+        clearAndNavigateBackToLogin(context);
+      } finally {
+        setState(() => _isLoading = false);
+      }
     });
   }
 
   void _handlePoll() async {
-    if (!context.mounted) return;
+    print("POLL NOW for newest announcements");
+
+    var cache = await SimpleCacheService().fetchOrNull("announcements");
+    var state = AppProvider.of(context).state;
 
     try {
-      var newest = await _announcementRepo.getNewestAnnouncements();
-      AnnouncementProvider.of(context).state.addAnnouncements(newest);
-    } catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(const ErrorSnackbar(
-              innerText: "Something went wrong. Please try again later.")
-          as SnackBar);
+      var data =
+          await _announcementRepo.getNewestAnnouncements(cache!.cachedAt);
+      state.addAnnouncements(data);
+    } on (ApiException, ApiClientException) catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(ErrorSnackbar(innerText: e.toString()) as SnackBar);
+    } on ApiTokenExpiredException {
+      clearAndNavigateBackToLogin(context);
     }
   }
 
@@ -86,7 +96,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   }
 
   Widget _showErrorGraphic() {
-    if (hasError) {
+    if (_hasError) {
       return Center(
         child: GenericError(
             onTryAgain: () => _fetchInitial(),
@@ -96,6 +106,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
       );
     }
     return const Center(
+      heightFactor: 0.75,
       child: GenericError(
           size: ErrorSize.large,
           svgPath: "relax.svg",
@@ -106,13 +117,13 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
 
   @override
   Widget build(BuildContext context) {
-    var state = AnnouncementProvider.of(context).state;
+    var state = AppProvider.of(context).state;
 
-    return (hasError || state.announcements.isEmpty)
-        ? _showErrorGraphic()
-        : ListenableBuilder(
-            listenable: state,
-            builder: (context, _) => RefreshIndicator(
+    return ListenableBuilder(
+      listenable: state,
+      builder: (context, _) => (_hasError || state.announcements.isEmpty)
+          ? _showErrorGraphic()
+          : RefreshIndicator(
               color: AppColor.primaryColor,
               backgroundColor: PaletteNeutral.shade000,
               onRefresh: () async {
@@ -122,12 +133,12 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
                   physics: const BouncingScrollPhysics(),
                   slivers: [
                     Skeletonizer.sliver(
-                      enabled: state.announcementsLoading,
+                      enabled: state.announcements.isEmpty && _isLoading,
                       effect: const ShimmerEffect(
                         baseColor: PaletteNeutral.shade040,
                         highlightColor: PaletteNeutral.shade020,
                       ),
-                      child: state.announcementsLoading
+                      child: state.announcements.isEmpty && _isLoading
                           ? const PlaceholderAnnouncementListView()
                           : SliverList.separated(
                               itemCount: state.announcements.length,
@@ -155,6 +166,6 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
                     ),
                   ]),
             ),
-          );
+    );
   }
 }

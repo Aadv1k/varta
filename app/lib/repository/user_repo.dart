@@ -8,7 +8,7 @@ class UserRepo {
 
   UserRepo();
 
-  Future<List<TeacherModel>> getTeachers() async {
-    return mockTeacherData;
+  Future<List<UserModel>> getTeachers() async {
+    return [];
   }
 }

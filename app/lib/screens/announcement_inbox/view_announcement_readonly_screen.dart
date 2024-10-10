@@ -72,8 +72,6 @@ class _ViewAnnouncementReadonlyScreenState
                                 size: VartaChipSize.small);
                           }).toList(),
                         ),
-                        if (widget.announcement.scopes.isNotEmpty)
-                          const SizedBox(height: Spacing.sm),
                       ]),
                   const SizedBox(height: Spacing.md),
                   const Divider(height: 1, color: AppColor.subtitleLighter),

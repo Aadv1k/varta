@@ -27,11 +27,11 @@ class AnnouncementListItem extends StatelessWidget {
     if (date.year == today.year &&
         date.month == today.month &&
         date.day == today.day) {
-      return 'Today, \${DateFormat.jm().format(date)}';
+      return 'Today, ${DateFormat.jm().format(date)}';
     } else if (date.year == yesterday.year &&
         date.month == yesterday.month &&
         date.day == yesterday.day) {
-      return 'Yesterday, \${DateFormat.jm().format(date)}';
+      return 'Yesterday, ${DateFormat.jm().format(date)}';
     } else if (date.isAfter(startOfWeek) && date.isBefore(endOfWeek)) {
       return '${DateFormat.EEEE().format(date)}, ${DateFormat.jm().format(date)}';
     } else {
@@ -39,7 +39,6 @@ class AnnouncementListItem extends StatelessWidget {
     }
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return InkWell(

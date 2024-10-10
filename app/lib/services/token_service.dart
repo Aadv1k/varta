@@ -1,8 +1,18 @@
+import 'package:app/services/shared_pref_service.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'dart:io' show Platform;
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 class TokenService {
-  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  static const FlutterSecureStorage secureStorage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
+
+  static SharedPreferencesAsync sharedPrefs = SharedPreferencesAsync();
 
   static final TokenService instance = TokenService._internal();
 
@@ -25,19 +35,32 @@ class TokenService {
     return (exp >= DateTime.now().millisecondsSinceEpoch);
   }
 
-  Future<String?> getAccessToken() {
-    return _secureStorage.read(key: "accessToken");
+  Future<String?> getAccessToken() async {
+    if (kIsWeb) {
+      return sharedPrefs.getString("accessToken");
+    }
+
+    return secureStorage.read(key: "accessToken");
   }
 
   Future<void> storeAccessToken(String token) {
-    return _secureStorage.write(key: "accessToken", value: token);
+    if (kIsWeb) {
+      return sharedPrefs.setString("accessToken", token);
+    }
+    return secureStorage.write(key: "accessToken", value: token);
   }
 
   Future<String?> getRefreshToken() {
-    return _secureStorage.read(key: "refreshToken");
+    if (kIsWeb) {
+      return sharedPrefs.getString("refreshToken");
+    }
+    return secureStorage.read(key: "refreshToken");
   }
 
   Future<void> storeRefreshToken(String token) {
-    return _secureStorage.write(key: "refreshToken", value: token);
+    if (kIsWeb) {
+      return sharedPrefs.setString("refreshToken", token);
+    }
+    return secureStorage.write(key: "refreshToken", value: token);
   }
 }

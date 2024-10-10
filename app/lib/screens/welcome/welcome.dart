@@ -59,7 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loginState = LoginProvider.of(context).loginState;
+    final loginState = LoginProvider.of(context).state;
 
     /* This is a comfort feature. Since for an unknown amount of duration the app
      * will likely only have a single school, so we make it so the ID is
@@ -94,7 +94,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 SizedBox(
                     width: 380,
                     child: Text(
-                        "You won't miss another update from your school again.",
+                        "Never miss another update from your school again.",
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -103,53 +103,48 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ],
             ),
             const Spacer(),
-            if (isLoading)
-              const CircularProgressIndicator()
-            else
-              Column(
-                children: [
-                  ListenableBuilder(
-                      listenable: loginState,
-                      builder: (context, child) {
-                        return SchoolBottomSheetSelect(
-                          disabled: _schoolList.isEmpty,
-                          schools: _schoolList,
-                          selectedSchool:
-                              _schoolList.isNotEmpty ? _schoolList.first : null,
-                          onSelect: (school) {
-                            loginState.setLoginData(loginState.data.copyWith(
-                                schoolIDAndName: (
-                                  school.schoolId.toString(),
-                                  school.schoolName
-                                )));
-                          },
-                        );
-                      }),
-                  if (errorMessage != null)
-                    Padding(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: Spacing.sm),
-                        child: ErrorText(text: errorMessage!)),
-                  const SizedBox(height: Spacing.sm),
-                  PrimaryButton(
-                    text: "Get Started",
-                    isDisabled: errorMessage != null,
-                    onPressed: _schoolList.isNotEmpty && errorMessage == null
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LoginProvider(
-                                    loginState: loginState,
-                                    child: const PhoneLogin()),
-                              ),
-                            );
-                          }
-                        : null,
-                    isLight: true,
-                  ),
-                ],
-              ),
+            Column(
+              children: [
+                ListenableBuilder(
+                    listenable: loginState,
+                    builder: (context, child) {
+                      return SchoolBottomSheetSelect(
+                        disabled: isLoading || _schoolList.isEmpty,
+                        schools: isLoading ? [] : _schoolList,
+                        selectedSchool:
+                            _schoolList.isNotEmpty ? _schoolList.first : null,
+                        onSelect: (school) {
+                          loginState.setLoginData(loginState.data.copyWith(
+                              schoolIDAndName: (
+                                school.schoolId.toString(),
+                                school.schoolName
+                              )));
+                        },
+                      );
+                    }),
+                if (errorMessage != null)
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
+                      child: ErrorText(text: errorMessage!)),
+                const SizedBox(height: Spacing.sm),
+                PrimaryButton(
+                  text: "Get Started",
+                  isDisabled: errorMessage != null,
+                  onPressed: _schoolList.isNotEmpty && errorMessage == null
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginProvider(
+                                  state: loginState, child: const PhoneLogin()),
+                            ),
+                          );
+                        }
+                      : null,
+                  isLight: true,
+                ),
+              ],
+            ),
           ],
         ),
       ),

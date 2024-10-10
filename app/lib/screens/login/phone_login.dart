@@ -36,7 +36,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
     });
 
     try {
-      final loginData = LoginProvider.of(context).loginState.data;
+      final loginData = LoginProvider.of(context).state.data;
       await _authService.sendOtp(loginData);
     } catch (exc) {
       setState(() {
@@ -56,13 +56,13 @@ class _PhoneLoginState extends State<PhoneLogin> {
         context,
         MaterialPageRoute(
             builder: (context) => LoginProvider(
-                loginState: loginState, child: const OTPVerification())));
+                state: loginState, child: const OTPVerification())));
   }
 
   @override
   Widget build(BuildContext context) {
-    final loginState = LoginProvider.of(context).loginState;
-    final shouldBeCompact = MediaQuery.of(context).size.height <= 920;
+    final loginState = LoginProvider.of(context).state;
+    final shouldBeCompact = MediaQuery.of(context).size.width <= 480;
 
     final contentGap = shouldBeCompact ? Spacing.md : Spacing.xl;
     final headingStyle = shouldBeCompact

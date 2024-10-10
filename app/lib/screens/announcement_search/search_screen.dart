@@ -35,7 +35,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _doSearchRequest();
   }
 
-  void _setSelectedAuthors(List<TeacherModel> authors) {
+  void _setSelectedAuthors(List<UserModel> authors) {
     setState(() {
       _data = _data.copyWith(postedBy: authors);
     });
@@ -173,12 +173,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
                   if (snapshot.data!.isNotEmpty) {
                     return const Center(
+                        heightFactor: 0.8,
                         child: GenericError(
-                      size: ErrorSize.large,
-                      svgPath: "falling.svg",
-                      errorMessage:
-                          "Welp! it looks like your search didn't yield any results.",
-                    ));
+                          size: ErrorSize.large,
+                          svgPath: "falling.svg",
+                          errorMessage:
+                              "Welp! it looks like your search didn't yield any results.",
+                        ));
                   }
 
                   return Padding(
@@ -210,8 +211,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   );
                 })
             : Center(
-                child: SizedBox(
-                width: 340,
+                child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
                 child: Text(
                     "Nothing here yet! Begin searching to view announcements",
                     textAlign: TextAlign.center,
@@ -382,8 +383,8 @@ class _DateSelectionBottomSheetState extends State<DateSelectionBottomSheet> {
 }
 
 class PostedByBottomSheet extends StatefulWidget {
-  final Function(List<TeacherModel>) onChange;
-  final List<TeacherModel> selectedTeachers;
+  final Function(List<UserModel>) onChange;
+  final List<UserModel> selectedTeachers;
 
   const PostedByBottomSheet({
     super.key,
@@ -398,18 +399,18 @@ class PostedByBottomSheet extends StatefulWidget {
 class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
   final _userRepo = UserRepo();
 
-  late final Set<TeacherModel> _initiallySelectedTeachers;
-  final List<TeacherModel> _selectedTeachers = [];
-  late final Future<List<TeacherModel>> _fetchTeachersFuture;
+  late final Set<UserModel> _initiallySelectedTeachers;
+  final List<UserModel> _selectedTeachers = [];
+  late final Future<List<UserModel>> _fetchTeachersFuture;
 
-  void _handleChipDelete(TeacherModel teacher) {
+  void _handleChipDelete(UserModel teacher) {
     setState(() {
       _selectedTeachers.remove(teacher);
     });
     widget.onChange(_selectedTeachers);
   }
 
-  void _handleTileClick(TeacherModel teacher) {
+  void _handleTileClick(UserModel teacher) {
     setState(() {
       if (_selectedTeachers.contains(teacher)) {
         _selectedTeachers.remove(teacher);
@@ -420,7 +421,7 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
     widget.onChange(_selectedTeachers);
   }
 
-  Future<List<TeacherModel>> _fetchTeachers() async {
+  Future<List<UserModel>> _fetchTeachers() async {
     await Future.delayed(const Duration(milliseconds: 1));
     return _userRepo.getTeachers();
   }
@@ -474,7 +475,7 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
           const SizedBox(height: Spacing.md),
           const Divider(color: AppColor.subtitleLighter, height: 1),
           Expanded(
-            child: FutureBuilder<List<TeacherModel>>(
+            child: FutureBuilder<List<UserModel>>(
               future: _fetchTeachersFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -483,6 +484,7 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
 
                 if (snapshot.hasError) {
                   return const Center(
+                      heightFactor: 0.8,
                       child: GenericError(size: ErrorSize.medium));
                 }
 
@@ -511,7 +513,7 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
 }
 
 class AnnouncementPostedBySelectionTile extends StatelessWidget {
-  final TeacherModel teacher;
+  final UserModel teacher;
   final bool isActive;
   final VoidCallback onTap;
 
@@ -549,10 +551,14 @@ class AnnouncementPostedBySelectionTile extends StatelessWidget {
                   .bodySmall
                   ?.copyWith(color: AppColor.body),
               children: [
-                ...teacher.departments.asMap().entries.map(
+                ...(teacher.details as TeacherDetails)
+                    .departments
+                    .asMap()
+                    .entries
+                    .map(
                       (entry) => TextSpan(
                         text:
-                            "${entry.value.deptName}${entry.key == teacher.departments.length - 1 ? '' : ', '}",
+                            "${entry.value.deptName}${entry.key == teacher.details.departments.length - 1 ? '' : ', '}",
                         style: Theme.of(context)
                             .textTheme
                             .bodySmall
@@ -569,13 +575,13 @@ class AnnouncementPostedBySelectionTile extends StatelessWidget {
                   .textTheme
                   .bodySmall
                   ?.copyWith(color: AppColor.subtitle),
-              children: teacher.subjectTeacherOf
+              children: teacher.details.subjectTeacherOf
                   .asMap()
                   .entries
                   .map(
                     (entry) => TextSpan(
                       text:
-                          "${entry.value.standard}${entry.value.division}${entry.key == teacher.subjectTeacherOf.length - 1 ? '' : ', '}",
+                          "${entry.value.standard}${entry.value.division}${entry.key == teacher.details.length - 1 ? '' : ', '}",
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall

@@ -51,7 +51,7 @@ class GenericError extends StatelessWidget {
         ),
         const SizedBox(height: Spacing.md),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.xl),
           child: Text(
             errorMessage,
             textAlign: TextAlign.center,

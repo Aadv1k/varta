@@ -25,6 +25,11 @@ class ApiException implements Exception {
   final String message;
   ApiException(this.message, this.errors);
 
+  @override
+  String toString() {
+    return message;
+  }
+
   static ApiException fromResponse(Response response) {
     final dynamic errorResponse = jsonDecode(response.body);
 
