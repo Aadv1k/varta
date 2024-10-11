@@ -2,6 +2,10 @@ from rest_framework import serializers
 
 from rest_framework.exceptions import ValidationError
 
+from datetime import datetime
+
+import pytz
+
 from accounts.models import User
 from .models import Announcement, AnnouncementScope
 
@@ -102,11 +106,14 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         instance.title = validated_data.get("title", instance.title)
         instance.body = validated_data.get("body", instance.body)
 
-        instance.scopes.all().delete()
+        new_scopes = validated_data.get("scopes", []) 
 
-        for scope in validated_data.get("scopes", []):
-            AnnouncementScope.objects.create(announcement=instance, **scope)
+        if len(new_scopes) > 0:
+            instance.scopes.all().delete()
+            for scope in new_scopes:
+                AnnouncementScope.objects.create(announcement=instance, **scope)
 
+        instance.updated_at = datetime.now(tz=pytz.utc)
         instance.save()
 
         return instance

@@ -5,6 +5,8 @@ from rest_framework.request import Request
 from django.core.paginator import Paginator
 import datetime
 
+import pytz
+
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from .models import Announcement
@@ -151,7 +153,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
     def updated_since(self, request):
         t_param = request.query_params.get("timestamp")
         try:
-            timestamp = datetime.datetime.fromtimestamp(int(t_param))
+            timestamp = datetime.datetime.fromtimestamp(int(t_param), tz=pytz.utc)
         except Exception as e:
             return ErrorResponseBuilder() \
                     .set_message("Invalid or Insufficient query parameters.") \
@@ -159,21 +161,27 @@ class AnnouncementViewSet(viewsets.ViewSet):
                     .set_details([{"field": "t", "error": str(e)}]) \
                     .build()
 
-        deleted_announcements = [
-            announcement for announcement in Announcement.objects.filter(
-                author__school__id=request.user.school.id,
-            ) if announcement.for_user(request.user)
-        ]
-
+        
+        base_query = Announcement.objects.filter(author=request.user)
+        deleted_announcements = base_query.filter(deleted_at__isnull=False, deleted_at__gte=timestamp)
+        updated_announcements = base_query.filter(updated_at__isnull=False, updated_at__gte=timestamp)
+        created_announcements = base_query.filter(created_at__isnull=False, created_at__gte=timestamp)
+        
         deleted_serializer = AnnouncementOutputSerializer(data=deleted_announcements, many=True)
         deleted_serializer.is_valid()
+
+        updated_serializer = AnnouncementOutputSerializer(data=updated_announcements, many=True)
+        updated_serializer.is_valid()
+
+        created_serializer = AnnouncementOutputSerializer(data=created_announcements, many=True)
+        created_serializer.is_valid()
 
         return SuccessResponseBuilder() \
             .set_message("Fetched the updates since the provided timestamp") \
             .set_data({
-                "new": [],
+                "new": created_serializer.data,
                 "deleted": deleted_serializer.data,
-                "updated": []
+                "updated": updated_serializer.data,
             }) \
             .build()
 
@@ -244,7 +252,8 @@ class AnnouncementViewSet(viewsets.ViewSet):
             .build()
 
     def update(self, request, pk=None):
-        serializer = AnnouncementSerializer(Announcement.objects.get(id=pk), data=request.data, partial=True)
+        old_announcement = Announcement.objects.get(id=pk)
+        serializer = AnnouncementSerializer(old_announcement, data=request.data, partial=True)
 
         if not serializer.is_valid():
             return ErrorResponseBuilder() \
@@ -252,7 +261,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
                     .set_code(400) \
                     .set_details([{"field": key, "error": str(value[0])} for key, value in serializer.errors.items()]) \
                     .build()
-        
+
         serializer.save()
 
         # TOOD: handle re-notification here 

@@ -634,13 +634,57 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response.data["data"]["deleted"]), 0)
+        self.assertEqual(len(response.data["data"]["updated"]), 0)
+        self.assertEqual(len(response.data["data"]["new"]), 0)
         self.assertEqual(response.data["data"]["deleted"][0]["id"], created_announcement_id)
 
-    def test_new_since_timestamp_returns_updated_announcements(self):
-        pass
+    def test_updated_since_timestamp_returns_updated_announcements(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        
+        response = self.client.post(reverse("announcement_list"), {
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ]
+        }, format="json")
 
-    def test_new_since_timestamp_returns_new_announcements(self):
-        pass
+        self.assertEqual(response.status_code, 201)
 
-    def test_new_since_timestamp_returns_all_updates(self):
-        pass
+        announcement_id = response.data["data"]["id"]
+
+        self.client.put(reverse("announcement_detail", kwargs={"pk": announcement_id}), {
+            "title": "Updated test announcement",
+        }, format="json")
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
+        response = self.client.get(reverse("announcement_updated_since") + f"?timestamp={int(datetime.datetime.now().timestamp()) - 10_000}")  
+
+        self.assertEqual(len(response.data["data"]["updated"]), 1)
+        self.assertEqual(len(response.data["data"]["deleted"]), 0)
+        self.assertEqual(len(response.data["data"]["new"]), 0)
+        self.assertEqual(response.data["data"]["updated"][0]["id"], announcement_id)
+
+    def test_updated_since_timestamp_returns_new_announcements(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        
+        response = self.client.post(reverse("announcement_list"), {
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ]
+        }, format="json")
+
+        announcement_id = response.data["data"]["id"]
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
+        response = self.client.get(reverse("announcement_updated_since") + f"?timestamp={int(datetime.datetime.now().timestamp()) - 1000}")  
+
+        self.assertEqual(len(response.data["data"]["deleted"]), 0)
+        self.assertEqual(len(response.data["data"]["updated"]), 0)
+        self.assertEqual(len(response.data["data"]["new"]), 1)
+        self.assertEqual(response.data["data"]["new"][0]["id"], announcement_id)
+
+    # def test_updated_since_timestamp_returns_all_updates(self):
+    #     pass
