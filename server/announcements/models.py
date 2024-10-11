@@ -1,18 +1,28 @@
+from typing import Any
 from django.db import models
 import uuid
 
 from accounts.models import User, Classroom
 from schools.models import AcademicYear
 
+from datetime import datetime
+
+import pytz
+
 class Announcement(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(null=True, auto_now=True)
+    deleted_at = models.DateTimeField(null=True)
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.DO_NOTHING, default=AcademicYear.get_current_academic_year)
     author = models.ForeignKey(User, related_name="announcements", on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=255)
     body = models.TextField()
+
+    def soft_delete(self):
+        self.deleted_at = datetime.now(tz=pytz.utc)
+        self.save()
 
     def with_scope(self, filter_type, filter_data = None):
         AnnouncementScope.objects.create(
@@ -47,7 +57,7 @@ class AnnouncementScope(models.Model):
     filter = models.CharField(max_length=48, choices=FilterType.choices)
 
     # NOTE: at the time of writing this I assume this means the field needs to explicitly be set to null
-    filter_data = models.CharField(max_length=255, null=True, blank=False) 
+    filter_data = models.CharField(max_length=255, null=True, blank=True) 
 
     def matches_for_user(self, user: User) -> bool:
         if self.filter == self.FilterType.EVERYONE:

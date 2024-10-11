@@ -7,6 +7,15 @@ urlpatterns = [
         "post": "create"
     }), name="announcement_list"),
 
+    path("announcements/<uuid:pk>", AnnouncementViewSet.as_view({
+        "delete": "destroy",
+        "put": "update"
+    }), name="announcement_detail"),
+
+    path("announcements/updated-since", AnnouncementViewSet.as_view({
+        "get": "updated_since",
+    }), name="announcement_updated_since"),
+
     path("announcements/search", AnnouncementViewSet.as_view({
         "get": "search",
     }), name="announcement_search"),

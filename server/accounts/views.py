@@ -27,7 +27,7 @@ def user_login(request):
     if not serializer.is_valid():
         return ErrorResponseBuilder() \
                 .set_code(400)        \
-                .set_message("There was a problem with your login. Please check your credentials and try again.") \
+                .set_message("Login failed. Please verify your credentials and try again.") \
                 .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
                 .build()
 
@@ -42,7 +42,7 @@ def user_login(request):
     if not user_contact_query.exists():
         return ErrorResponseBuilder() \
                 .set_code(400)        \
-                .set_message("The specified user, or the user contact does not exist") \
+                .set_message("User or contact information not found.") \
                 .set_details([{"field": "input_data", "error": "Couldn't find the user in the system"}]) \
                 .build()
 
@@ -76,13 +76,14 @@ def user_login(request):
         except Exception as e:
             return ErrorResponseBuilder() \
                         .set_code(500)     \
-                        .set_message("Failed to send verification email at the moment. Please try again later.") \
+                        .set_message("Failed to send verification SMS at the moment. Please try again later.") \
                         .set_details({ "error_detail": str(e) }) \
                         .build()
 
     return SuccessResponseBuilder() \
                 .set_message(f"Sent an OTP to {user_contact.contact_data}") \
-                .set_metadata({"otp_length": settings.OTP_LENGTH, "otp_expires_in": f"{settings.OTP_EXPIRY_IN_SECONDS / 60} mins"}).build()
+                .set_metadata({"otp_length": settings.OTP_LENGTH, "otp_expires_in": f"{settings.OTP_EXPIRY_IN_SECONDS / 60} mins"}) \
+                .build()
 
 
 @api_view(["POST"])
@@ -156,7 +157,7 @@ def user_device(request):
     if not serializer.is_valid():
         return ErrorResponseBuilder() \
                 .set_code(400)        \
-                .set_message("Could not register the user device") \
+                .set_message("We couldn't register your device. Please check the details you entered and try again.") \
                 .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
                 .build()
     

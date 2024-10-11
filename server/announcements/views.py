@@ -15,9 +15,7 @@ from rest_framework import serializers
 
 from rest_framework.exceptions import ValidationError
 
-
 from .serializers import AnnouncementOutputSerializer, AnnouncementSerializer
-
 
 from schools.models import AcademicYear
 
@@ -27,16 +25,33 @@ import re
 
 from accounts.permissions import IsTeacher
 
+from rest_framework.permissions import BasePermission
+
+class IsOwner(BasePermission):
+    def has_permission(self, request, view):
+        announcement_id = view.kwargs.get("pk")
+
+        try:
+            Announcement.objects.get(id=announcement_id, author=request.user)
+        except Announcement.DoesNotExist:
+            return False
+        
+        return True
+
 class AnnouncementViewSet(viewsets.ViewSet):
     permission_classes = [ IsJWTAuthenticated, ]
 
     def get_permissions(self):
-        if self.action in { "list_mine" , "create" }:
-            permission_classes = [IsJWTAuthenticated, IsTeacher]
-        else:
-            permission_classes = [IsJWTAuthenticated]
+        perms = []
 
-        return [perm() for perm in permission_classes]
+        if self.action in { "list_mine" , "create", }:
+            perms = [ IsJWTAuthenticated, IsTeacher ]
+        elif self.action in { "destroy" , "update" }:
+            perms = [ IsJWTAuthenticated, IsTeacher, IsOwner ]
+        else:
+            perms = [ IsJWTAuthenticated, ]
+
+        return [perm() for perm in perms]
 
     class PaginationSerializer(serializers.Serializer):
         page = serializers.IntegerField(required=False, min_value=1)
@@ -102,7 +117,10 @@ class AnnouncementViewSet(viewsets.ViewSet):
         return self._paginate_announcements(request, Announcement.objects.all().exclude(author__id=request.user.id))
 
     def create(self, request):
-        serializer = AnnouncementSerializer(data=request.data)
+        serializer = AnnouncementSerializer(data={
+            "author": request.user.id,
+            **request.data
+        })
 
         if not serializer.is_valid():
             return ErrorResponseBuilder() \
@@ -130,25 +148,32 @@ class AnnouncementViewSet(viewsets.ViewSet):
         return self._paginate_announcements(request, Announcement.objects.filter(author__id=request.user.id))
     
     @action(detail=True, methods=['get'])
-    def new_since(self, request):
+    def updated_since(self, request):
+        t_param = request.query_params.get("timestamp")
         try:
-            timestamp = request.query_params.get("t")
-            parsed_datetime = datetime.datetime.timestamp(timestamp)
-        except:
-            pass
+            timestamp = datetime.datetime.fromtimestamp(int(t_param))
+        except Exception as e:
+            return ErrorResponseBuilder() \
+                    .set_message("Invalid or Insufficient query parameters.") \
+                    .set_code(400) \
+                    .set_details([{"field": "t", "error": str(e)}]) \
+                    .build()
 
-        serializer = AnnouncementOutputSerializer(data=[announcement for announcement in Announcement.objects.filter(
-            author__school__id=request.user.school.id,
-            created_at__gt=parsed_datetime
-        ) if announcement.for_user(request.user)], many=True)
+        deleted_announcements = [
+            announcement for announcement in Announcement.objects.filter(
+                author__school__id=request.user.school.id,
+            ) if announcement.for_user(request.user)
+        ]
 
-        assert(serializer.is_valid())
+        deleted_serializer = AnnouncementOutputSerializer(data=deleted_announcements, many=True)
+        deleted_serializer.is_valid()
 
         return SuccessResponseBuilder() \
-            .set_message("Successfully fetched new announcements since the provided timestamp") \
-            .set_data(serializer.data) \
-            .set_metadata({
-                "results": len(serializer.data),
+            .set_message("Fetched the updates since the provided timestamp") \
+            .set_data({
+                "new": [],
+                "deleted": deleted_serializer.data,
+                "updated": []
             }) \
             .build()
 
@@ -204,3 +229,42 @@ class AnnouncementViewSet(viewsets.ViewSet):
                 "results": len(output_serializer.data),
             }) \
             .build()
+
+    def destroy(self, request, pk=None):
+        announcement = Announcement.objects.get(id=pk)
+
+        announcement.soft_delete()
+
+        return SuccessResponseBuilder() \
+            .set_message("Successfully Deleted the announcement. It may take a while for the changes to be reflected.") \
+            .set_data({
+                "id": announcement.id
+            }) \
+            .set_code(204) \
+            .build()
+
+    def update(self, request, pk=None):
+        serializer = AnnouncementSerializer(Announcement.objects.get(id=pk), data=request.data, partial=True)
+
+        if not serializer.is_valid():
+            return ErrorResponseBuilder() \
+                    .set_message("Could not update announcement. Please verify your input and try again.") \
+                    .set_code(400) \
+                    .set_details([{"field": key, "error": str(value[0])} for key, value in serializer.errors.items()]) \
+                    .build()
+        
+        serializer.save()
+
+        # TOOD: handle re-notification here 
+
+        return SuccessResponseBuilder() \
+            .set_code(200) \
+            .set_message("Successfully updated announcement") \
+            .set_data({
+                "id": serializer.data["id"],
+                "title": serializer.data["title"],
+                "scopes": serializer.data["scopes"],
+                "body": serializer.data["body"]
+            }) \
+            .build()
+    

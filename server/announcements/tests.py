@@ -263,7 +263,10 @@ class PaginatedAnnouncementsTestCase(BaseAnnouncementTestCase):
 
         self.total_announcement = 50
         self.announcements = [
-            Announcement.objects.create(author=self.teacher_mathematics_9th[0], title=f"Announcement {i}", academic_year=AcademicYear.get_current_academic_year())\
+            Announcement.objects.create(
+                author=self.teacher_mathematics_9th[0], 
+                title=f"Announcement {i}", 
+                academic_year=AcademicYear.get_current_academic_year())
                 .with_scope(AnnouncementScope.FilterType.EVERYONE)
             for i in range(self.total_announcement)
         ]
@@ -353,7 +356,7 @@ class SearchAnnouncementsTestCase(BaseAnnouncementTestCase):
         self.assertIn(str(self.announcement_of_aug.id), ids)
         self.assertIn(str(self.announcement_of_sep.id), ids)
 
-class CreateAnnouncementTests(BaseAnnouncementTestCase):
+class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
     fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
 
     def setUp(self):
@@ -512,3 +515,132 @@ class CreateAnnouncementTests(BaseAnnouncementTestCase):
         }, format="json")
 
         self.assertEqual(response.status_code, 403)
+
+class ModifyAnnouncementTestCase(BaseAnnouncementTestCase):
+    fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
+
+    def tearDown(self):
+        Announcement.objects.all().delete()
+
+    def setUp(self):
+        self.tearDown()
+        self.school = School.objects.create(
+            name="Delhi Public School",
+            address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
+            phone_number="+911123456789",
+            email="info@dpsrohini.com",
+            website="https://www.dpsrohini.com"
+        )
+
+        self.teacher_9B = self.create_teacher_and_token(class_teacher_of="9B", departments=["lang/english"], school=self.school, subject_teacher_of=["9A", "9B", "9C"])
+        self.teacher_12D = self.create_teacher_and_token(class_teacher_of="12D", departments=["lang/english"], school=self.school, subject_teacher_of=["12A", "12B", "12C", "12D"])
+
+        self.student = self.create_student_and_token(school=self.school, std_div="9B")
+
+        self.announcement_by_teacher_9B = Announcement.objects.create(
+                author=self.teacher_9B[0], 
+                title=f"Announcement for TESTING", 
+                academic_year=AcademicYear.get_current_academic_year()) \
+                    .with_scope(AnnouncementScope.FilterType.EVERYONE)
+
+
+    def test_announcement_cannot_be_deleted_by_anyone_not_the_author(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
+        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}))
+
+        self.assertEqual(response.status_code, 403)
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_12D[1])
+        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}))
+
+        self.assertEqual(response.status_code, 403)
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_9B[1])
+        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}))
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.data["data"]["id"], self.announcement_by_teacher_9B.id)
+    
+    def test_announcements_are_soft_deleted(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_9B[1])
+        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}))
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.data["data"]["id"], self.announcement_by_teacher_9B.id)
+
+        self.assertTrue(Announcement.objects.filter(id=self.announcement_by_teacher_9B.id).exists())
+        self.assertIsNotNone(Announcement.objects.get(id=self.announcement_by_teacher_9B.id).deleted_at)
+
+    def test_announcements_can_be_updated_by_author(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_9B[1])
+        response = self.client.put(
+            reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}), 
+            data={
+                "title": "This announcement is now only for teachers",
+                "body": "This announcement was initialyl for everyone but now is only for teachers",
+                "scopes": [{ "filter": AnnouncementScope.FilterType.ALL_TEACHERS,  }]
+            },
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(str(self.announcement_by_teacher_9B.id), response.data["data"]["id"])
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
+        response = self.client.get(
+            reverse("announcement_list"),
+        )
+
+        self.assertEqual(len(response.data["data"]), 0)
+
+class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
+    fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
+
+    def tearDown(self):
+        Announcement.objects.all().delete()
+
+    def setUp(self):
+        self.tearDown()
+        self.school = School.objects.create(
+            name="Delhi Public School",
+            address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
+            phone_number="+911123456789",
+            email="info@dpsrohini.com",
+            website="https://www.dpsrohini.com"
+        )
+
+        self.teacher = self.create_teacher_and_token(class_teacher_of="9B", departments=["lang/english"], school=self.school, subject_teacher_of=["9A", "9B", "9C"])
+        self.student = self.create_student_and_token(school=self.school, std_div="9B")
+
+
+    def test_updated_since_timestamp_returns_deleted_announcements(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        response = self.client.post(reverse("announcement_list"), {
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ]
+        }, format="json")
+
+        created_announcement_id = response.data["data"]["id"]
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
+        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": created_announcement_id}))
+        self.assertEqual(response.status_code, 204)
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
+        response = self.client.get(reverse("announcement_updated_since") + f"?timestamp={int(datetime.datetime.now().timestamp()) - 1000}")  
+
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(len(response.data["data"]["deleted"]), 0)
+        self.assertEqual(response.data["data"]["deleted"][0]["id"], created_announcement_id)
+
+    def test_new_since_timestamp_returns_updated_announcements(self):
+        pass
+
+    def test_new_since_timestamp_returns_new_announcements(self):
+        pass
+
+    def test_new_since_timestamp_returns_all_updates(self):
+        pass

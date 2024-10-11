@@ -61,6 +61,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -138,6 +139,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ========================== #
 
 import os
+import sys
 
 from dotenv import load_dotenv
 load_dotenv() 
@@ -145,6 +147,10 @@ load_dotenv()
 CORS_ALLOW_ALL_ORIGINS = True
 
 FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS=30
+
+# https://stackoverflow.com/questions/6957016/detect-django-testing-mode
+TESTING = sys.argv[1:2] == ['test']
+
 
 # 5 minutes
 OTP_EXPIRY_IN_SECONDS = 300

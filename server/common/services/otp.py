@@ -1,5 +1,4 @@
 import random
-import redis
 from django.conf import settings
 from typing import Tuple, Optional
 
