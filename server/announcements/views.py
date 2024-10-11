@@ -116,7 +116,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
 
     def list(self, request):
-        return self._paginate_announcements(request, Announcement.objects.all().exclude(author__id=request.user.id))
+        return self._paginate_announcements(request, Announcement.objects.belong_to_user_school(request.user).exclude(author__id=request.user.id))
 
     def create(self, request):
         serializer = AnnouncementSerializer(data={
@@ -147,10 +147,11 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=['get'])
     def list_mine(self, request):
-        return self._paginate_announcements(request, Announcement.objects.filter(author__id=request.user.id))
+        return self._paginate_announcements(request,  Announcement.objects.get_by_user(request.user))
     
     @action(detail=True, methods=['get'])
     def updated_since(self, request):
+
         t_param = request.query_params.get("timestamp")
         try:
             timestamp = datetime.datetime.fromtimestamp(int(t_param), tz=pytz.utc)
@@ -162,26 +163,27 @@ class AnnouncementViewSet(viewsets.ViewSet):
                     .build()
 
         
-        base_query = Announcement.objects.filter(author=request.user)
-        deleted_announcements = base_query.filter(deleted_at__isnull=False, deleted_at__gte=timestamp)
-        updated_announcements = base_query.filter(updated_at__isnull=False, updated_at__gte=timestamp)
-        created_announcements = base_query.filter(created_at__isnull=False, created_at__gte=timestamp)
-        
+        base_query = Announcement.objects.belong_to_user_school(request.user)
+
+        deleted_announcements = Announcement.objects.deleted_belong_to_user_school(request.user).filter(deleted_at__gte=timestamp)
         deleted_serializer = AnnouncementOutputSerializer(data=deleted_announcements, many=True)
         deleted_serializer.is_valid()
 
+        created_announcements = base_query.filter(created_at__gte=timestamp).exclude(updated_at__isnull=False)
+        created_serializer = AnnouncementOutputSerializer(data=created_announcements, many=True)
+        created_serializer.is_valid()
+
+        updated_announcements = base_query.filter(updated_at__gte=timestamp)
         updated_serializer = AnnouncementOutputSerializer(data=updated_announcements, many=True)
         updated_serializer.is_valid()
 
-        created_serializer = AnnouncementOutputSerializer(data=created_announcements, many=True)
-        created_serializer.is_valid()
 
         return SuccessResponseBuilder() \
             .set_message("Fetched the updates since the provided timestamp") \
             .set_data({
                 "new": created_serializer.data,
                 "deleted": deleted_serializer.data,
-                "updated": updated_serializer.data,
+                "updated": updated_serializer.data
             }) \
             .build()
 
@@ -211,9 +213,9 @@ class AnnouncementViewSet(viewsets.ViewSet):
         validated_data = search_serializer.validated_data
         
         if len(validated_data["posted_by"]) >= 1:
-            base_query = Announcement.objects.filter(author__school__id=request.user.school.id, author__public_id__in=validated_data["posted_by"])
+            base_query = Announcement.objects.filter(author__school__id=request.user.school.id, author__public_id__in=validated_data["posted_by"], deleted_at__isnull=True)
         else:
-            base_query = Announcement.objects.filter(author__school__id=request.user.school.id)
+            base_query = Announcement.objects.filter(author__school__id=request.user.school.id, deleted_at__isnull=True)
 
 
         if validated_data.get("query"):

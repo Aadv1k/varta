@@ -9,7 +9,19 @@ from datetime import datetime
 
 import pytz
 
+class AnnouncementManager(models.Manager):
+    def belong_to_user_school(self, user):
+        return self.filter(author__school__id=user.school.id, deleted_at__isnull=True)
+
+    def get_by_user(self, user):
+        return self.filter(author=user, deleted_at__isnull=True)
+    
+    def deleted_belong_to_user_school(self, user):
+        return self.filter(author__school__id=user.school.id, deleted_at__isnull=False)
+
 class Announcement(models.Model):
+    objects = AnnouncementManager()
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     deleted_at = models.DateTimeField(null=True)
