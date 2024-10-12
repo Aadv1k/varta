@@ -12,10 +12,10 @@ from common.services.token import TokenService, TokenPayload
 from .models import User, StudentDetail, TeacherDetail, UserContact, Classroom
 from schools.models import School
 
+from announcements.tests import BaseAnnouncementTestCase
+
 class UserActionTest(APITestCase):
     def setUp(self):
-        settings.DEBUG = True
-
         self.kv_store = KVStoreFactory()
         self.otp_service = OTPService()
 
@@ -104,6 +104,7 @@ class UserActionTest(APITestCase):
             "otp": "123456"
         }, format="json")
 
+
         self.assertEqual(response.status_code, 400)
 
     def test_user_can_verify_self_with_otp(self):
@@ -176,3 +177,35 @@ class UserActionTest(APITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("logged_in_through", map(lambda x: x["field"], response.data["errors"]))
+
+class UserSelfActionTestCase(BaseAnnouncementTestCase):
+    fixtures = ["initial_classrooms.json", "initial_departments.json"]
+    def setUp(self):
+        self.school = School.objects.create(
+            name="Delhi Public School",
+            address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
+            phone_number="+911123456789",
+            email="info@dpsrohini.com",
+            website="https://www.dpsrohini.com"
+        )
+
+        self.student = self.create_student_and_token(
+            school=self.school,
+            std_div="12D"
+        )
+
+    def test_student_can_fetch_their_own_details_correctly(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.student[1]}") 
+
+        response = self.client.get(reverse("user_details"))
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIn("first_name", response.data["data"])
+        self.assertIn("last_name", response.data["data"])
+        self.assertIn("details", response.data["data"])
+        self.assertIn("contacts", response.data["data"])
+
+
+    def test_teacher_can_fetch_their_own_details_correctly(self):
+        pass

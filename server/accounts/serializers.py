@@ -1,9 +1,8 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-
 from schools.models import School
-from .models import UserContact, UserDevice
+from .models import UserContact, UserDevice, User, StudentDetail, TeacherDetail, Classroom
 import re
 
 email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
@@ -65,7 +64,6 @@ class UserDeviceSerializer(serializers.ModelSerializer):
         
         return value
 
-
     def save(self, **kwargs):
         logged_in_through = self.validated_data.pop("logged_in_through")
         contact_instance = UserContact.objects.get(user=self.validated_data["user"], contact_data=logged_in_through)
@@ -75,3 +73,54 @@ class UserDeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDevice
         exclude = ["created_at", "id"]
+
+
+class UserContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserContact
+        exclude = ["id", "user"]
+
+class TeacherDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TeacherDetail
+        exclude = ["id", "user"]
+
+class ClassroomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classroom
+        exclude = ["id"]
+    
+
+class StudentDetailSerializer(serializers.ModelSerializer):
+    classroom = ClassroomSerializer()
+    class Meta:
+        model = StudentDetail
+        exclude = ["id", "user"]
+
+class UserSerializer(serializers.ModelSerializer): 
+    contacts = UserContactSerializer(many=True)
+    class Meta:
+        model = User
+        exclude = ["id", "school"]
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+    
+        try:
+            if self.instance.user_type == User.UserType.STUDENT:
+                serializer = StudentDetailSerializer(instance.student_details)
+            elif self.instance.user_type == User.UserType.TEACHER:
+                serializer = TeacherDetailSerializer(instance.teacher_details)  
+            else:
+                assert False, "Unreachable"
+
+        except TeacherDetail.RelatedObjectDoesNotExist | StudentDetail.RelatedObjectDoesNotExist:
+            repr["details"]  = {}
+            return repr
+
+        # if not serializer.is_valid():
+        #     raise ValueError("Unexpectedly found an details to be invalid within UserSerializer, this isn't intended to happen and is likely because the serializer is being misused in some way")
+
+        repr["details"] = serializer.data
+
+        return repr

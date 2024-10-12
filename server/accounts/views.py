@@ -1,10 +1,11 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
-from .serializers import UserLoginSerializer, UserVerificationSerializer, UserDeviceSerializer
+from .serializers import UserLoginSerializer, UserVerificationSerializer, UserDeviceSerializer, UserSerializer
 
 from .models import UserContact
 
 from django.conf import settings
+
 
 from common.response_builder import ErrorResponseBuilder, SuccessResponseBuilder
 
@@ -98,7 +99,9 @@ def user_verify(request):
                 .build()
 
     contact_data, provided_otp = serializer.validated_data["input_data"], serializer.validated_data["otp"]
-    if not settings.DEBUG and serializer.validated_data["otp"] != settings.MASTER_OTP:
+    if (settings.TESTING or settings.DEBUG) and serializer.validated_data["otp"] == settings.MASTER_OTP:
+        pass
+    else:
         is_otp_valid = otp_service.verify_otp(contact_data, provided_otp)
 
         if not is_otp_valid:
@@ -166,4 +169,16 @@ def user_device(request):
     return SuccessResponseBuilder() \
                 .set_code(204) \
                 .set_message(None) \
+                .build()
+
+
+@api_view(["GET"])
+@permission_classes([IsJWTAuthenticated])
+def user_details(request):
+    serializer = UserSerializer(request.user)
+
+    return SuccessResponseBuilder() \
+                .set_code(200) \
+                .set_data(serializer.data) \
+                .set_message("Successfully fetched the user details") \
                 .build()
