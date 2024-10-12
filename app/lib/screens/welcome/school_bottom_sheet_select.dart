@@ -100,7 +100,7 @@ class SchoolBottomSheetSelect extends StatelessWidget {
             }
           : null,
       child: Opacity(
-        opacity: disabled ? 0.6 : 1.0,
+        opacity: disabled ? 0.5 : 1.0,
         child: Container(
           width: double.infinity,
           height: AppSharedStyle.buttonHeight,

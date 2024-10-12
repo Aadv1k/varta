@@ -12,15 +12,16 @@ class VartaChip extends StatelessWidget {
   final VartaChipSize size;
   final VoidCallback? onPressed;
   final VoidCallback? onDeleted;
+  bool isDisabled = false;
 
-  const VartaChip({
-    Key? key,
-    required this.text,
-    this.variant = VartaChipVariant.primary,
-    this.size = VartaChipSize.medium,
-    this.onPressed,
-    this.onDeleted,
-  }) : super(key: key);
+  VartaChip(
+      {super.key,
+      required this.text,
+      this.variant = VartaChipVariant.primary,
+      this.size = VartaChipSize.medium,
+      this.onPressed,
+      this.onDeleted,
+      this.isDisabled = false});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +43,11 @@ class VartaChip extends StatelessWidget {
       case VartaChipVariant.outlined:
         bg = Colors.transparent;
         fg = AppColor.primaryColor;
-        border = const BorderSide(color: AppColor.primaryColor, width: 1);
+        border = BorderSide(
+            color: isDisabled
+                ? AppColor.primaryColor.withOpacity(0.4)
+                : AppColor.primaryColor,
+            width: 1);
         break;
     }
 
@@ -68,7 +73,7 @@ class VartaChip extends StatelessWidget {
     }
 
     return Opacity(
-      opacity: onPressed == null && onDeleted == null ? 0.6 : 1.0,
+      opacity: isDisabled ? 0.4 : 1.0,
       child: RawChip(
         side: border,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

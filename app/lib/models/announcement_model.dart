@@ -1,3 +1,5 @@
+import 'package:app/common/utils.dart';
+
 class AnnouncementModel {
   final String title;
   final String body;
@@ -95,6 +97,32 @@ class AnnouncementScope {
       filter: data['filter'] as String,
       filterData: data['filter_data'] as String?,
     );
+  }
+
+  String toUserFriendlyLabel() {
+    switch (filter) {
+      case "t_class_teacher_of":
+        return "${filterData} Class teacher";
+      case "t_subject_teacher_of_standard":
+        return "${filterData}${ordinal(int.parse(filterData!))} Subject teacher";
+      case "t_subject_teacher_of_standard_division":
+        return "${filterData} Subject teacher";
+      case "t_department":
+        /* TODO: do a reverse key to label look up here */
+        return "${filterData} Department";
+      case "stu_standard":
+        return "${filterData}${ordinal(int.parse(filterData!))} Students";
+      case "stu_standard_division":
+        return "${filterData} Students";
+      case "stu_all":
+        return "All Students";
+      case "t_all":
+        return "All Teachers";
+      case "everyone":
+        return "Everyone";
+    }
+
+    return "Unknown";
   }
 
   Map<String, dynamic> toJson() {

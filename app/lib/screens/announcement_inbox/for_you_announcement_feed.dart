@@ -58,7 +58,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
       try {
         List<AnnouncementModel> data =
             await _announcementRepo.getAnnouncements();
-        state.addAnnouncements(data);
+        state.setAnnouncements([...state.announcements, ...data]);
         SimpleCacheService cacheService = SimpleCacheService();
         cacheService.store("announcements", data);
       } on (ApiException, ApiClientException) {
@@ -72,15 +72,21 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   }
 
   void _handlePoll() async {
-    print("POLL NOW for newest announcements");
-
     var cache = await SimpleCacheService().fetchOrNull("announcements");
     var state = AppProvider.of(context).state;
 
     try {
-      var data =
-          await _announcementRepo.getNewestAnnouncements(cache!.cachedAt);
-      state.addAnnouncements(data);
+      var changes = await _announcementRepo.fetchLatestChanges(cache!.cachedAt);
+
+      List<AnnouncementModel> changedAnnouncements = [];
+      for (final ann in state.announcements) {
+        if (changes.deleted.contains(ann)) {
+          continue;
+        }
+        /* TODO: handle logic for deleted and updated right here */
+        changedAnnouncements.add(ann);
+      }
+      state.setAnnouncements(changedAnnouncements);
     } on (ApiException, ApiClientException) catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(ErrorSnackbar(innerText: e.toString()) as SnackBar);

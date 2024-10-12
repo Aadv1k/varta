@@ -3,11 +3,20 @@ import 'dart:convert';
 import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/search_data.dart';
+import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
 import 'package:app/services/api_service.dart';
-import 'package:app/services/shared_pref_service.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+
+class AnnouncementIncrementalChange {
+  int timeStamp;
+  List<AnnouncementModel> created;
+  List<AnnouncementModel> deleted;
+  List<AnnouncementModel> updated;
+
+  AnnouncementIncrementalChange(
+      this.timeStamp, this.created, this.deleted, this.updated);
+}
 
 class AnnouncementsRepository {
   final ApiService _apiService = ApiService();
@@ -30,29 +39,57 @@ class AnnouncementsRepository {
     return parsedData;
   }
 
-  Future<List<AnnouncementModel>> getNewestAnnouncements(int timeSince) async {
+  Future<AnnouncementIncrementalChange> fetchLatestChanges(
+      int timeSince) async {
     http.Response response = await _apiService.makeRequest(
-        HTTPMethod.GET, "/announcements/new-since?t=$timeSince",
+        HTTPMethod.GET, "/announcements/updated-since?timestamp=$timeSince",
         isAuthenticated: true);
     if (response.statusCode != 200) {
       throw ApiException.fromResponse(response);
     }
 
-    var data = jsonDecode(response.body);
+    var data = jsonDecode(response.body)["data"];
 
-    List<AnnouncementModel> parsedData = (data["data"] as List)
-        .map((element) => AnnouncementModel.fromJson(element)!)
-        .toList();
-
-    return parsedData;
+    return AnnouncementIncrementalChange(
+      timeSince,
+      (data["new"] as List)
+          .map((elem) => AnnouncementModel.fromJson(elem))
+          .toList(),
+      (data["deleted"] as List)
+          .map((elem) => AnnouncementModel.fromJson(elem))
+          .toList(),
+      (data["updated"] as List)
+          .map((elem) => AnnouncementModel.fromJson(elem))
+          .toList(),
+    );
   }
 
   Future<List<AnnouncementModel>> getUserAnnouncements({int page = 1}) {
     return Future.delayed(const Duration(seconds: 1), () => mockAnnouncements2);
   }
 
-  Future<AnnouncementModel> createAnnouncement() {
-    throw UnimplementedError();
+  Future<AnnouncementModel> createAnnouncement(
+      AnnouncementCreationData creationData) async {
+    try {
+      http.Response response = await _apiService.makeRequest(
+          HTTPMethod.POST, "/announcements/",
+          isAuthenticated: true,
+          body: {
+            "title": creationData.title,
+            "body": creationData.body,
+            "scopes": creationData.scopes
+                .map((scope) => scope.toAnnouncementScope().toJson())
+                .toList(),
+          });
+      if (response.statusCode != 201) {
+        ApiException.fromResponse(response);
+      }
+
+      var data = jsonDecode(response.body)["data"];
+      return AnnouncementModel.fromJson(data);
+    } on ApiClientException catch (_) {
+      rethrow;
+    }
   }
 
   Future<void> deleteAnnouncement() {

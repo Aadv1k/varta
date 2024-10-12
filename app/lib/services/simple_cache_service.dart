@@ -30,6 +30,10 @@ class SimpleCacheService {
     return _sharedPref.setString(key, value);
   }
 
+  Future<void> delete(String key) {
+    return _sharedPref.remove(key);
+  }
+
   Future<SimpleCacheServiceData?> fetchOrNull(String key,
       {Duration? exp}) async {
     String? data;

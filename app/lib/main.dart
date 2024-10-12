@@ -1,8 +1,7 @@
-import 'dart:js_interop_unsafe';
-
 import 'package:app/common/varta_theme.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
+import 'package:app/screens/user_profile/user_profile_screen.dart';
 import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/services/token_service.dart';
 import 'package:app/widgets/connection_error.dart';

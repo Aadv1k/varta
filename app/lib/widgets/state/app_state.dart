@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/services/simple_cache_service.dart';
@@ -15,23 +17,32 @@ class AppState extends ChangeNotifier {
   })  : announcements = announcements ?? [],
         userAnnouncements = userAnnouncements ?? [];
 
-  void setUser(UserModel newUser) {
+  void setUser(UserModel? newUser) {
     user = newUser;
     notifyListeners();
   }
 
-  void addAnnouncements(List<AnnouncementModel> announcement,
+  void setAnnouncements(List<AnnouncementModel> newAnnouncements,
       {bool isUserAnnouncement = false}) {
     if (isUserAnnouncement) {
-      userAnnouncements.addAll(announcement);
+      userAnnouncements = newAnnouncements;
     } else {
-      announcements.addAll(announcement);
+      announcements = newAnnouncements;
     }
     notifyListeners();
   }
 
-  static Future<AppState> initialize() async {
+  static Future<AppState> initialize({UserModel? user}) async {
     SimpleCacheService cacheService = SimpleCacheService();
+
+    UserModel? foundUser;
+    if (user == null) {
+      final userCache = await cacheService.fetchOrNull("user");
+
+      if (userCache != null) {
+        foundUser = UserModel.fromJson(jsonDecode(userCache.data));
+      }
+    }
 
     final announcementCache = await cacheService.fetchOrNull("announcements");
     List<AnnouncementModel> announcementData = [];
@@ -42,8 +53,6 @@ class AppState extends ChangeNotifier {
           .toList();
     }
 
-    return AppState(
-      announcements: announcementData,
-    );
+    return AppState(announcements: announcementData, user: foundUser ?? user);
   }
 }

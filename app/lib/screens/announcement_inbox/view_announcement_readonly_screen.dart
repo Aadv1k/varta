@@ -1,5 +1,6 @@
 import 'package:app/common/sizes.dart';
 import 'package:app/common/colors.dart';
+import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +52,15 @@ class _ViewAnnouncementReadonlyScreenState
                           .textTheme
                           .headlineLarge!
                           .copyWith(color: AppColor.heading)),
+                  const SizedBox(height: Spacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Spacer(),
+                      Text(formatDate(widget.announcement.createdAt),
+                          style: Theme.of(context).textTheme.bodyMedium),
+                    ],
+                  ),
                   const SizedBox(height: Spacing.md),
                   const Divider(height: 1, color: AppColor.subtitleLighter),
                   const SizedBox(height: Spacing.md),
@@ -62,13 +72,10 @@ class _ViewAnnouncementReadonlyScreenState
                           runSpacing: Spacing.sm,
                           spacing: Spacing.sm,
                           children: widget.announcement.scopes
-                              .asMap()
-                              .entries
-                              .map((entry) {
-                            return const VartaChip(
+                              .map((AnnouncementScope entry) {
+                            return VartaChip(
                                 variant: VartaChipVariant.secondary,
-                                text:
-                                    "Todo", //scopeData.getUserFriendlyLabel(),
+                                text: entry.toUserFriendlyLabel(),
                                 size: VartaChipSize.small);
                           }).toList(),
                         ),

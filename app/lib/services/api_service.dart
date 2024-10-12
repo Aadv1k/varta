@@ -1,3 +1,4 @@
+import "dart:convert";
 import "dart:io";
 import "package:app/common/exceptions.dart";
 import "package:app/services/token_service.dart";
@@ -12,7 +13,7 @@ class ApiService {
 
   Future<http.Response> makeRequest(HTTPMethod method, String endpoint,
       {dynamic body, bool isAuthenticated = false}) async {
-    Map<String, String> headers = {};
+    Map<String, String> headers = {"Content-Type": "application/json"};
     if (isAuthenticated) {
       String? accessToken = await _tokenService.getAccessToken();
 
@@ -33,7 +34,7 @@ class ApiService {
               headers: headers);
         case HTTPMethod.POST:
           return await http.post(Uri.parse("$baseApiUrl$endpoint"),
-              body: body, headers: headers);
+              body: jsonEncode(body), headers: headers);
         case HTTPMethod.DELETE:
           // TODO: Implement DELETE request handling
           throw ApiServiceException("DELETE method is not yet implemented.");
@@ -51,6 +52,7 @@ class ApiService {
       throw ApiClientException(
           "An error occurred while processing your request. Please try again.");
     } catch (e) {
+      debugPrint(e.toString());
       throw ApiClientException("Something went wrong. Please try again.");
     }
   }

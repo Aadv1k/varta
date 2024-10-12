@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 
 from django.core.paginator import Paginator
-import datetime
+from datetime import datetime
 
 import pytz
 
@@ -151,15 +151,14 @@ class AnnouncementViewSet(viewsets.ViewSet):
     
     @action(detail=True, methods=['get'])
     def updated_since(self, request):
-
         t_param = request.query_params.get("timestamp")
         try:
-            timestamp = datetime.datetime.fromtimestamp(int(t_param), tz=pytz.utc)
+            timestamp = datetime.fromtimestamp(int(t_param) / 1000, tz=pytz.utc)
         except Exception as e:
             return ErrorResponseBuilder() \
                     .set_message("Invalid or Insufficient query parameters.") \
                     .set_code(400) \
-                    .set_details([{"field": "t", "error": str(e)}]) \
+                    .set_details([{"field": "timestamp", "error": str(e)}]) \
                     .build()
 
         

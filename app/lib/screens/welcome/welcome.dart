@@ -124,8 +124,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     }),
                 if (errorMessage != null)
                   Padding(
-                      padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
-                      child: ErrorText(text: errorMessage!)),
+                      padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
+                      child: ErrorText(text: errorMessage!, center: true)),
                 const SizedBox(height: Spacing.sm),
                 PrimaryButton(
                   text: "Get Started",

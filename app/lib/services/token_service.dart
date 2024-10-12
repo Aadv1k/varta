@@ -57,6 +57,15 @@ class TokenService {
     return secureStorage.read(key: "refreshToken");
   }
 
+  void removeAllTokens() async {
+    if (kIsWeb) {
+      sharedPrefs.remove("refreshToken");
+      sharedPrefs.remove("accessToken");
+    }
+    secureStorage.delete(key: "refreshToken");
+    secureStorage.delete(key: "accessToken");
+  }
+
   Future<void> storeRefreshToken(String token) {
     if (kIsWeb) {
       return sharedPrefs.setString("refreshToken", token);

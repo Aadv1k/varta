@@ -25,6 +25,7 @@ dependencies:
 
 
   async: any
+  screenshot: ^3.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -48,41 +49,47 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/data/departments.json
-    - assets/data/classroom_standard.json
-    - assets/data/classroom_standard_division.json
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/assets-and-images/#resolution-aware
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/assets-and-images/#from-packages
-
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
   fonts:
     - family: Geist
       fonts:
-        - asset: assets/fonts/Geist-Black.ttf
+        - asset: assets/fonts/Geist/Geist-Black.ttf
           weight: 900
-        - asset: assets/fonts/Geist-Bold.ttf
+        - asset: assets/fonts/Geist/Geist-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Geist-Light.ttf
+        - asset: assets/fonts/Geist/Geist-Light.ttf
           weight: 300
-        - asset: assets/fonts/Geist-Medium.ttf
+        - asset: assets/fonts/Geist/Geist-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Geist-Regular.ttf
+        - asset: assets/fonts/Geist/Geist-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Geist-SemiBold.ttf
+        - asset: assets/fonts/Geist/Geist-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Geist-Thin.ttf
+        - asset: assets/fonts/Geist/Geist-Thin.ttf
           weight: 100
-        - asset: assets/fonts/Geist-UltraBlack.ttf
+        - asset: assets/fonts/Geist/Geist-UltraBlack.ttf
           weight: 900
-        - asset: assets/fonts/Geist-UltraLight.ttf
+        - asset: assets/fonts/Geist/Geist-UltraLight.ttf
+          weight: 200
+
+    - family: GeistMono
+      fonts:
+        - asset: assets/fonts/GeistMono/GeistMono-Black.ttf
+          weight: 900
+        - asset: assets/fonts/GeistMono/GeistMono-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/GeistMono/GeistMono-Light.ttf
+          weight: 300
+        - asset: assets/fonts/GeistMono/GeistMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/GeistMono/GeistMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/GeistMono/GeistMono-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/GeistMono/GeistMono-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/GeistMono/GeistMono-UltraBlack.ttf
+          weight: 900
+        - asset: assets/fonts/GeistMono/GeistMono-UltraLight.ttf
           weight: 200
   #
   # For details regarding fonts from package dependencies,

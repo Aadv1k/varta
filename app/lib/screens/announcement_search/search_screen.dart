@@ -397,7 +397,7 @@ class PostedByBottomSheet extends StatefulWidget {
 }
 
 class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
-  final _userRepo = UserRepo();
+  final _userRepo = UserRepository();
 
   late final Set<UserModel> _initiallySelectedTeachers;
   final List<UserModel> _selectedTeachers = [];

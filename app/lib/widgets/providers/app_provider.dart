@@ -1,3 +1,4 @@
+import 'package:app/services/simple_cache_service.dart';
 import 'package:app/widgets/state/app_state.dart';
 import 'package:flutter/material.dart';
 
@@ -20,5 +21,17 @@ class AppProvider extends InheritedWidget {
     assert(provider != null,
         "Couldn't find AppProvider higher up in the tree. This is likely a bug");
     return provider!;
+  }
+
+  void logout() async {
+    SimpleCacheService cacheService = SimpleCacheService();
+
+    state.setUser(null);
+    state.setAnnouncements([]);
+    state.setAnnouncements([], isUserAnnouncement: true);
+
+    await cacheService.delete("announcements");
+    await cacheService.delete("userAnnouncements");
+    await cacheService.delete("user");
   }
 }

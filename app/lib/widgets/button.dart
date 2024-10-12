@@ -44,9 +44,8 @@ class PrimaryButton extends StatelessWidget {
                       child: CircularProgressIndicator(
                           color: foregroundColor, strokeWidth: 3)))
               : Text(text,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: foregroundColor,
-                      )),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: foregroundColor, fontWeight: FontWeight.w500)),
         ),
       ),
     );

@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:app/common/colors.dart';
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/login_data.dart';
+import 'package:app/models/user_model.dart';
+import 'package:app/repository/user_repo.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
+import 'package:app/services/simple_cache_service.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 // import 'package:app/screens/announcement_inbox/mobile/announcement_feed.dart';
@@ -30,6 +34,7 @@ class _OTPVerificationState extends State<OTPVerification> {
   String? errorMessage;
 
   final AuthService _authService = AuthService();
+  final UserRepository _userRepository = UserRepository();
 
   bool validateOtp(String otp) {
     return otp.length == 6 && RegExp(r'^\d{6}$').hasMatch(otp);
@@ -47,7 +52,13 @@ class _OTPVerificationState extends State<OTPVerification> {
     try {
       await _authService.verifyOtp(loginData);
 
-      final appState = await AppState.initialize();
+      UserModel user = await _userRepository.getUser();
+
+      SimpleCacheService cacheService = SimpleCacheService();
+
+      cacheService.store("user", jsonEncode(user));
+
+      final appState = await AppState.initialize(user: user);
 
       Navigator.push(
           context,
@@ -55,11 +66,14 @@ class _OTPVerificationState extends State<OTPVerification> {
             builder: (context) => AppProvider(
                 state: appState, child: const AnnouncementInboxScreen()),
           ));
-    } on ApiException catch (exc) {
+    } catch (exc) {
+      debugPrint(exc.toString());
       setState(() {
         isLoading = false;
         hasError = true;
-        errorMessage = exc.message;
+        errorMessage = exc is ApiException
+            ? exc.message
+            : "Looks like something went wrong, if this persists contact support.";
       });
     }
   }

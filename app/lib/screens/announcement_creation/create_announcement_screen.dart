@@ -181,7 +181,6 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                               .map((entry) {
                             int index = entry.key;
                             var scopeData = entry.value;
-
                             return VartaChip(
                                 variant: VartaChipVariant.secondary,
                                 text: scopeData.getUserFriendlyLabel(),
@@ -193,6 +192,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                           const SizedBox(height: Spacing.sm),
                         VartaChip(
                             variant: VartaChipVariant.outlined,
+                            isDisabled: shouldDisableAdd,
                             onPressed: shouldDisableAdd
                                 ? null
                                 : () {
@@ -215,7 +215,6 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                   const SizedBox(height: Spacing.sm),
                   Expanded(
                     child: TextField(
-                        maxLength: 3000,
                         maxLines: 999,
                         controller: _bodyController,
                         decoration: InputDecoration(
@@ -224,11 +223,13 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                             border: InputBorder.none,
                             hintText:
                                 "eg \"This is an announcement regarding...\"",
-                            hintStyle:
-                                Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                      color: AppColor.subtitle,
-                                    )),
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            hintStyle: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                  color: AppColor.subtitle,
+                                )),
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                               color: AppColor.heading,
                             )),
                   ),

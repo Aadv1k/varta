@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:app/common/exceptions.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/services/api_service.dart';
-import 'package:app/services/shared_pref_service.dart';
 import 'package:app/services/token_service.dart';
 import 'package:http/http.dart';
 
@@ -55,6 +54,10 @@ class AuthService {
     if (response.statusCode != 200) {
       throw ApiException.fromResponse(response);
     }
+  }
+
+  void logout() {
+    _tokenService.removeAllTokens();
   }
 
   bool tokenExpired(String token) {
