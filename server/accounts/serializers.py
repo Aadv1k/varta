@@ -5,6 +5,8 @@ from schools.models import School
 from .models import UserContact, UserDevice, User, StudentDetail, TeacherDetail, Classroom
 import re
 
+from django.core.exceptions import ObjectDoesNotExist
+
 email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 phone_number_regex = re.compile(r"^\+\d{10,15}$")
 
@@ -106,20 +108,18 @@ class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         repr = super().to_representation(instance)
     
-        try:
-            if self.instance.user_type == User.UserType.STUDENT:
-                serializer = StudentDetailSerializer(instance.student_details)
-            elif self.instance.user_type == User.UserType.TEACHER:
-                serializer = TeacherDetailSerializer(instance.teacher_details)  
-            else:
-                assert False, "Unreachable"
-
-        except TeacherDetail.RelatedObjectDoesNotExist | StudentDetail.RelatedObjectDoesNotExist:
+        if not hasattr(instance, "student_details") and not hasattr(instance, "teacher_details"):
             repr["details"]  = {}
             return repr
 
-        # if not serializer.is_valid():
-        #     raise ValueError("Unexpectedly found an details to be invalid within UserSerializer, this isn't intended to happen and is likely because the serializer is being misused in some way")
+
+        if self.instance.user_type == User.UserType.STUDENT:
+            serializer = StudentDetailSerializer(instance.student_details)
+        elif self.instance.user_type == User.UserType.TEACHER:
+            serializer = TeacherDetailSerializer(instance.teacher_details)  
+        else:
+            assert False, "Unreachable"
+
 
         repr["details"] = serializer.data
 

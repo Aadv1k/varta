@@ -35,6 +35,11 @@ class Classroom(models.Model):
     def __str__(self):
         return f"{self.standard}{self.division}"
 
+    class Meta:
+        unique_together = ('standard', 'division')
+        ordering = ['standard', 'division']
+
+
 # NOTE: this is a reference table data at ./fixtures/initial_departments.json
 class Department(models.Model):
     department_code = models.CharField(max_length=32, unique=True)
@@ -42,6 +47,9 @@ class Department(models.Model):
 
     def __str__(self):
         return f"{self.department_name[0].upper()}{self.department_name[1:]}"
+    
+    class Meta:
+        ordering = ['department_name']
 
 class User(models.Model):
     class UserType(models.TextChoices):
@@ -63,16 +71,36 @@ class User(models.Model):
 
     def is_authenticated():
         return True
+    
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+    
+    class Meta:
+        ordering = ['last_name', 'first_name']
 
 class StudentDetail(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_details")
     classroom = models.OneToOneField(Classroom, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        verbose_name = "Student Detail"
+        verbose_name_plural = "Student Details"
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}'s Student Details"
 
 class TeacherDetail(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_details")
     departments =  models.ManyToManyField(Department)
     subject_teacher_of = models.ManyToManyField(Classroom, related_name="subject_teacher_of")
     class_teacher_of = models.OneToOneField(Classroom, on_delete=models.SET_NULL, null=True, related_name="class_teacher_of")
+
+    class Meta:
+        verbose_name = "Teacher Detail"
+        verbose_name_plural = "Teacher Details"
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}'s Teacher Details"
 
 class UserContact(models.Model):
     class ContactImportance(models.TextChoices):
@@ -88,6 +116,15 @@ class UserContact(models.Model):
     contact_type = models.CharField(max_length=14, choices=ContactType.choices)
     contact_data = models.CharField(max_length=255)
 
+    class Meta:
+        verbose_name = "User Contact"
+        verbose_name_plural = "User Contacts"
+        unique_together = ('user', 'contact_type', 'contact_data')
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}'s - {self.contact_importance} {self.contact_type}"
+
+
 class UserDevice(models.Model):
     class DeviceType(models.TextChoices):
         ANDROID = "android", "Android"
@@ -101,8 +138,13 @@ class UserDevice(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_used_at = models.DateTimeField(auto_now=True)
 
+
     class Meta:
-        unique_together = ('user', 'device_token')
+        unique_together = ('user', 'device_token') 
+        verbose_name = "User Device"
+        verbose_name_plural = "User Devices"
+        ordering = ['-last_used_at']
+
 
     @property
     def is_expired(self):

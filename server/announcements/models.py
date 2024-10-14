@@ -46,6 +46,11 @@ class Announcement(models.Model):
 
     def for_user(self, user: User) -> bool:
         return any([ann_scope.matches_for_user(user) for ann_scope in self.scopes.all()])
+    
+    def __str__(self):
+        author_name = f"{self.author.first_name} {self.author.last_name}" if self.author else "Unknown Author"
+        body_snippet = self.body[:50] + '...' if len(self.body) > 50 else self.body
+        return f"Announcement: {self.title} by {author_name}"
 
 class AnnouncementScope(models.Model):
     class FilterType(models.TextChoices):
@@ -94,3 +99,9 @@ class AnnouncementScope(models.Model):
                 return True
 
         return False
+
+    def __str__(self):
+        filter_info = f"{self.get_filter_display()}"
+        if self.filter_data:
+            filter_info += f" ({self.filter_data})"
+        return f"Scope for {self.announcement.title}: {filter_info}"
