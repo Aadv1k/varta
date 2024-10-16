@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:app/common/sizes.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/models/announcement_model.dart';

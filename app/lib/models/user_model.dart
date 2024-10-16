@@ -55,6 +55,14 @@ class UserModel {
       'school': school.toJson()
     };
   }
+
+  @override
+  int get hashCode => publicId.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    return other is UserModel && other.publicId == publicId;
+  }
 }
 
 class UserContact {
@@ -165,6 +173,11 @@ class TeacherDepartment {
       deptCode: json['department_code'],
       deptName: json['department_name'],
     );
+  }
+
+  @override
+  String toString() {
+    return deptName;
   }
 
   Map<String, dynamic> toJson() {

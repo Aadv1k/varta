@@ -1,7 +1,9 @@
+import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/search_data.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/repository/announcements_repo.dart';
+import 'package:app/repository/school_repository.dart';
 import 'package:app/repository/user_repo.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_list_item.dart';
 import 'package:app/widgets/connection_error.dart';
@@ -423,8 +425,7 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
   }
 
   Future<List<UserModel>> _fetchTeachers() async {
-    await Future.delayed(const Duration(milliseconds: 1));
-    return _userRepo.getTeachers();
+    return SchoolRepository().getTeachers();
   }
 
   @override
@@ -484,9 +485,12 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
                 }
 
                 if (snapshot.hasError) {
-                  return const Center(
+                  return Center(
                       heightFactor: 0.8,
-                      child: GenericError(size: ErrorSize.medium));
+                      child: GenericError(
+                        size: ErrorSize.medium,
+                        errorMessage: snapshot.error.toString(),
+                      ));
                 }
 
                 if (!snapshot.hasData) {
@@ -544,53 +548,44 @@ class AnnouncementPostedBySelectionTile extends StatelessWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: Spacing.sm),
           RichText(
             text: TextSpan(
-              text: "Teaches ",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: AppColor.body),
-              children: [
-                ...(teacher.details as TeacherDetails)
-                    .departments
-                    .asMap()
-                    .entries
-                    .map(
-                      (entry) => TextSpan(
-                        text:
-                            "${entry.value.deptName}${entry.key == teacher.details.departments.length - 1 ? '' : ', '}",
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: AppColor.heading),
-                      ),
-                    ),
-              ],
-            ),
-          ),
-          RichText(
-            text: TextSpan(
-              text: "To ",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: AppColor.subtitle),
-              children: teacher.details.subjectTeacherOf
-                  .asMap()
-                  .entries
-                  .map(
-                    (entry) => TextSpan(
-                      text:
-                          "${entry.value.standard}${entry.value.division}${entry.key == teacher.details.length - 1 ? '' : ', '}",
+                text: "Teaches ",
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColor.body),
+                children: [
+                  TextSpan(
+                      text: (teacher.details as TeacherDetails)
+                          .departments
+                          .map((dept) => dept.toString())
+                          .join(", "),
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
-                          ?.copyWith(color: AppColor.heading),
-                    ),
-                  )
-                  .toList(),
-            ),
+                          ?.copyWith(color: AppColor.heading))
+                ]),
+          ),
+          RichText(
+            text: TextSpan(
+                text: "To ",
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColor.subtitle),
+                children: [
+                  TextSpan(
+                      text: (teacher.details as TeacherDetails)
+                          .subjectTeacherOf
+                          .map((classroom) => classroom.toString())
+                          .join(", "),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: AppColor.heading))
+                ]),
           ),
         ],
       ),
