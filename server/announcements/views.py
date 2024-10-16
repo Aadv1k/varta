@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage
 from datetime import datetime
 
 import pytz
@@ -99,7 +99,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
         paginator = Paginator(serializer.data, per_page)
         try:
             current_page = paginator.page(page_number)
-        except Paginator.EmptyPage:
+        except EmptyPage:
             return ErrorResponseBuilder() \
                     .set_message(f"Page {page_number} does not exist. There are only {paginator.num_pages} pages available.") \
                     .build()

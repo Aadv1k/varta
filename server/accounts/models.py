@@ -1,5 +1,6 @@
 from django.db import models
 from schools.models import School
+from schools.serializers import SchoolSerializer
 import uuid
 import re
 
@@ -91,7 +92,7 @@ class StudentDetail(models.Model):
 
 class TeacherDetail(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_details")
-    departments =  models.ManyToManyField(Department)
+    departments =  models.ManyToManyField(Department, related_name="departments")
     subject_teacher_of = models.ManyToManyField(Classroom, related_name="subject_teacher_of")
     class_teacher_of = models.OneToOneField(Classroom, on_delete=models.SET_NULL, null=True, related_name="class_teacher_of")
 

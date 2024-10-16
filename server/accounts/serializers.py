@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from schools.serializers import SchoolSerializer
+
 from schools.models import School
-from .models import UserContact, UserDevice, User, StudentDetail, TeacherDetail, Classroom
+from .models import UserContact, UserDevice, User, StudentDetail, TeacherDetail, Classroom, Department
 import re
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -82,16 +84,25 @@ class UserContactSerializer(serializers.ModelSerializer):
         model = UserContact
         exclude = ["id", "user"]
 
-class TeacherDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeacherDetail
-        exclude = ["id", "user"]
-
 class ClassroomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Classroom
-        exclude = ["id"]
+        fields = ["standard", "division"]
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = ["department_name", "department_code"]
     
+class TeacherDetailSerializer(serializers.ModelSerializer):
+    class_teacher_of = ClassroomSerializer()
+    subject_teacher_of = ClassroomSerializer(many=True)
+    departments = DepartmentSerializer(many=True)
+
+    class Meta:
+        model = TeacherDetail
+        exclude = ["id", "user",]
+
 
 class StudentDetailSerializer(serializers.ModelSerializer):
     classroom = ClassroomSerializer()
@@ -99,11 +110,14 @@ class StudentDetailSerializer(serializers.ModelSerializer):
         model = StudentDetail
         exclude = ["id", "user"]
 
+
+
 class UserSerializer(serializers.ModelSerializer): 
     contacts = UserContactSerializer(many=True)
+    school = SchoolSerializer()
     class Meta:
         model = User
-        exclude = ["id", "school"]
+        exclude = ["id"]
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)

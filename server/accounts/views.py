@@ -43,7 +43,7 @@ def user_login(request):
     if not user_contact_query.exists():
         return ErrorResponseBuilder() \
                 .set_code(400)        \
-                .set_message("User or contact information not found.") \
+                .set_message("User or contact information could not be found.") \
                 .set_details([{"field": "input_data", "error": "Couldn't find the user in the system"}]) \
                 .build()
 

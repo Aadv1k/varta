@@ -3,10 +3,10 @@ from .models import Classroom, Department, User, StudentDetail, TeacherDetail, U
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'middle_name', 'last_name', 'user_type', 'school')
-    search_fields = ('first_name', 'last_name', 'school__name')  # Allows search by name and school
-    list_filter = ('user_type', 'school')  # Filters by user type and school
-    ordering = ('last_name', 'first_name')  # Default ordering by last name and first name
+    list_display = ('public_id', 'first_name', 'middle_name', 'last_name', 'user_type', 'school')
+    search_fields = ('first_name', 'last_name', 'school__name') 
+    list_filter = ('user_type', 'school') 
+    ordering = ('last_name', 'first_name')
 
 admin.site.register(User, UserAdmin)
 

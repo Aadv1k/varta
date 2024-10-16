@@ -201,6 +201,7 @@ class UserSelfActionTestCase(BaseAnnouncementTestCase):
 
         self.assertEqual(response.status_code, 200)
 
+
         self.assertIn("first_name", response.data["data"])
         self.assertIn("last_name", response.data["data"])
         self.assertIn("details", response.data["data"])
