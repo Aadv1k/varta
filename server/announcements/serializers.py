@@ -15,7 +15,6 @@ from common.services.notification_service import send_notification
 
 from accounts.models import Department, Classroom
 
-
 def validate_standard(data: str):
     try:
         if not int(data) <= 12 and int(data) > 1:

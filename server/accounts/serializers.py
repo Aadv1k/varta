@@ -138,3 +138,29 @@ class UserSerializer(serializers.ModelSerializer):
         repr["details"] = serializer.data
 
         return repr
+
+class ConstrainedUserSerializer(serializers.ModelSerializer): 
+    school = SchoolSerializer()
+
+    class Meta:
+        model = User
+        exclude = ["id"]
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+
+        if (not hasattr(instance, "student_details") and not hasattr(instance, "teacher_details")):
+            repr["details"]  = {}
+            return repr
+
+        if instance.user_type == User.UserType.STUDENT:
+            serializer = StudentDetailSerializer(instance.student_details)
+        elif instance.user_type == User.UserType.TEACHER:
+            serializer = TeacherDetailSerializer(instance.teacher_details)  
+        else:
+            assert False, "Unreachable"
+
+
+        repr["details"] = serializer.data
+
+        return repr
