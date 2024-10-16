@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SimpleCacheServiceData {
   final int cachedAt;
-  final dynamic data;
+  final String data;
 
   SimpleCacheServiceData(this.cachedAt, this.data);
 
@@ -15,7 +15,7 @@ class SimpleCacheServiceData {
   static SimpleCacheServiceData fromJsonString(String value) {
     final parsedData = jsonDecode(value);
     final cachedAt = parsedData["cachedAt"] as int;
-    final data = parsedData["data"];
+    final data = parsedData["data"] as String;
     return SimpleCacheServiceData(cachedAt, data);
   }
 }
@@ -23,10 +23,10 @@ class SimpleCacheServiceData {
 class SimpleCacheService {
   final SharedPreferencesAsync _sharedPref = SharedPreferencesAsync();
 
-  Future<void> store(String key, dynamic data) {
+  Future<void> store(String key, String data, { int? cachedAt }) {
     final value =
-        SimpleCacheServiceData(DateTime.now().millisecondsSinceEpoch, data)
-            .toJsonString();
+        SimpleCacheServiceData(
+				cachedAt ?? DateTime.now().millisecondsSinceEpoch, data).toJsonString();
     return _sharedPref.setString(key, value);
   }
 

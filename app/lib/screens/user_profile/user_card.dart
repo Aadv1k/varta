@@ -11,6 +11,8 @@ class StudentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    StudentDetails userDetail = user.details as StudentDetails;
+
     var primaryPhoneNumber = user.contacts.firstWhereOrNull(
         (contact) => contact.contactType == ContactType.phoneNumber);
 
@@ -44,10 +46,7 @@ class StudentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    (StudentDetails.fromJson(user.details))
-                            .classroom
-                            ?.toString() ??
-                        "N/A",
+                    userDetail.classroom?.toString() ?? "N/A",
                     style: Theme.of(context).textTheme.displayLarge!.copyWith(
                           height: 0.8,
                           fontWeight: FontWeight.w900,
@@ -81,7 +80,7 @@ class StudentCard extends StatelessWidget {
                                 ),
                         children: [
                           TextSpan(
-                            text: " / Example School Name, Example City",
+                            text: " / Example School Name",
                             style:
                                 Theme.of(context).textTheme.bodySmall!.copyWith(
                                       fontFamily: "GeistMono",

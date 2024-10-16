@@ -1,12 +1,33 @@
+import 'package:app/models/user_model.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 
 class TeacherCard extends StatelessWidget {
-  const TeacherCard({Key? key}) : super(key: key);
+  final UserModel user;
+  const TeacherCard({Key? key, required this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    TeacherDetails userDetails = user.details as TeacherDetails;
+
+    String? primaryEmail = user.contacts
+        .firstWhereOrNull(
+          (contact) =>
+              contact.contactType == ContactType.email &&
+              contact.contactImportance == ContactImportance.primary,
+        )
+        ?.contactData;
+
+    String? primaryPhoneNumber = user.contacts
+        .firstWhereOrNull(
+          (contact) =>
+              contact.contactType == ContactType.phoneNumber &&
+              contact.contactImportance == ContactImportance.primary,
+        )
+        ?.contactData;
+
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(minHeight: 260, maxWidth: 420),
@@ -34,7 +55,9 @@ class TeacherCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    "10A",
+                    userDetails.classTeacherOf != null
+                        ? userDetails.classTeacherOf.toString()
+                        : "  ",
                     style: Theme.of(context).textTheme.displayLarge!.copyWith(
                           height: 0.8,
                           fontWeight: FontWeight.w900,
@@ -48,7 +71,9 @@ class TeacherCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          "CLASS TEACHER",
+                          userDetails.classTeacherOf != null
+                              ? "CLASS TEACHER"
+                              : "SUBJECT TEACHER",
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium!
@@ -58,26 +83,18 @@ class TeacherCard extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 0.5),
                         ),
-                        Text(
-                          "GEOGRAPHY",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(
-                                  color: AppColor.body,
-                                  fontFamily: "GeistMono",
-                                  letterSpacing: 0.5),
-                        ),
-                        Text(
-                          "ECONOMICS",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(
-                                  color: AppColor.body,
-                                  fontFamily: "GeistMono",
-                                  letterSpacing: 0.5),
-                        ),
+                        ...userDetails.departments.map(
+                          (department) => Text(
+                            department.deptName.toUpperCase(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall!
+                                .copyWith(
+                                    color: AppColor.body,
+                                    fontFamily: "GeistMono",
+                                    letterSpacing: 0.5),
+                          ),
+                        )
                       ],
                     ),
                   ),
@@ -107,7 +124,7 @@ class TeacherCard extends StatelessWidget {
                                     fontWeight: FontWeight.bold),
                             children: [
                           TextSpan(
-                              text: " / Example School Name, Example City",
+                              text: " / ${user.school.schoolName}",
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall!
@@ -121,7 +138,7 @@ class TeacherCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  "Rajat\nSharma",
+                  "${user.firstName}\n${user.lastName}",
                   style: Theme.of(context).textTheme.displayMedium!.copyWith(
                         color: AppColor.heading,
                         fontWeight: FontWeight.w700,
@@ -130,25 +147,28 @@ class TeacherCard extends StatelessWidget {
                       ),
                 ),
                 const SizedBox(height: Spacing.md),
-                Text(
-                  "PHONE +91 00000 00000",
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        fontFamily: "GeistMono",
-                        color: AppColor.body,
-                        letterSpacing: 0.5,
-                      ),
-                ),
+                if (primaryPhoneNumber != null)
+                  Text(
+                    "PHONE $primaryPhoneNumber",
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          fontFamily: "GeistMono",
+                          color: AppColor.body,
+                          letterSpacing: 0.5,
+                        ),
+                  ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "EMAIL JAMES.WEB@EXAMPLE.COM",
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            fontFamily: "GeistMono",
-                            color: AppColor.body,
-                            letterSpacing: 0.5,
-                          ),
-                    ),
+                    if (primaryEmail != null)
+                      Text(
+                        "EMAIL ${primaryEmail.toUpperCase()}",
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                              fontFamily: "GeistMono",
+                              color: AppColor.body,
+                              letterSpacing: 0.5,
+                            ),
+                      ),
+                    const Spacer(),
                     Text("TEACHER ID",
                         style: Theme.of(context).textTheme.bodySmall!.copyWith(
                               fontFamily: "GeistMono",

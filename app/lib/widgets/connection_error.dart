@@ -35,7 +35,7 @@ class GenericError extends StatelessWidget {
         break;
       case ErrorSize.medium:
       default:
-        imageSize = 180;
+        imageSize = 240;
         messageStyle = Theme.of(context).textTheme.bodyMedium!;
         break;
     }
@@ -50,14 +50,18 @@ class GenericError extends StatelessWidget {
           height: imageSize,
         ),
         const SizedBox(height: Spacing.md),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.xl),
-          child: Text(
-            errorMessage,
-            textAlign: TextAlign.center,
-            style: messageStyle,
+        SizedBox(
+          width: 320,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            child: Text(
+              errorMessage,
+              textAlign: TextAlign.center,
+              style: messageStyle,
+            ),
           ),
         ),
+        if (onTryAgain != null) const SizedBox(height: Spacing.md),
         if (onTryAgain != null)
           TextButton(
             onPressed: onTryAgain,

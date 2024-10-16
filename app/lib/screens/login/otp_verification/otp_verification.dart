@@ -18,6 +18,7 @@ import 'package:app/widgets/basic_app_bar.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/error_text.dart';
 import 'package:app/widgets/state/app_state.dart';
+import 'package:app/widgets/varta_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
@@ -56,25 +57,26 @@ class _OTPVerificationState extends State<OTPVerification> {
 
       SimpleCacheService cacheService = SimpleCacheService();
 
-      cacheService.store("user", jsonEncode(user));
+      cacheService.store("user", jsonEncode(user.toJson()));
 
       final appState = await AppState.initialize(user: user);
 
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => AppProvider(
                 state: appState, child: const AnnouncementInboxScreen()),
-          ));
+          ),
+          (_) => false);
     } catch (exc) {
-      debugPrint(exc.toString());
       setState(() {
-        isLoading = false;
         hasError = true;
         errorMessage = exc is ApiException
             ? exc.message
             : "Looks like something went wrong, if this persists contact support.";
       });
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
@@ -84,9 +86,8 @@ class _OTPVerificationState extends State<OTPVerification> {
 
     return Scaffold(
       backgroundColor: AppColor.primaryBg,
-      appBar: BasicAppBar(
-        title: loginData.schoolIDAndName!.$2,
-      ),
+      appBar:
+          BasicAppBar(title: loginData.schoolIDAndName?.$2 ?? "Unknown School"),
       body: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.only(
@@ -163,12 +164,15 @@ class _OTPVerificationState extends State<OTPVerification> {
               handleVerificationClick(context);
             }),
             const Spacer(),
-            PrimaryButton(
-              text: "Verify",
+            VartaButton(
+              variant: VartaButtonVariant.primary,
+              size: VartaButtonSize.large,
+              label: "Verify",
+              fullWidth: true,
               onPressed: () => handleVerificationClick(context),
-              isDisabled: true,
               isLoading: isLoading,
-            ),
+              // isDisabled: validateOtp(loginData.otp!) == false,
+            )
           ],
         ),
       ),

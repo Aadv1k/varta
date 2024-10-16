@@ -4,6 +4,7 @@ import 'package:app/data/dropdown_classroom_standard.dart';
 import 'package:app/data/dropdown_classroom_standard_division.dart';
 import 'package:app/data/dropdown_departments.dart';
 import 'package:app/models/search_data.dart';
+import 'package:app/widgets/varta_button.dart';
 import 'package:app/widgets/varta_checkbox.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
@@ -142,6 +143,39 @@ class ScopeSelectionData {
       filterType = "everyone";
     }
     return AnnouncementScope(filter: filterType, filterData: scopeFilterData);
+  }
+
+  static ScopeSelectionData fromAnnouncementScope(AnnouncementScope scope) {
+    return ScopeSelectionData(
+        isClassTeacher: scope.filter == "t_class_teacher_of",
+        isSubjectTeacher: scope.filter == "t_subject_teacher_of_standard",
+        scopeType: switch (scope.filter) {
+          "everyone" => ScopeContext.everyone,
+          "stu_all" => ScopeContext.student,
+          "stu_standard" => ScopeContext.student,
+          "stu_standard_division" => ScopeContext.student,
+          "t_all" => ScopeContext.teacher,
+          "t_department" => ScopeContext.teacher,
+          "t_class_teacher_of" => ScopeContext.teacher,
+          "t_subject_teacher_of_standard_division" => ScopeContext.teacher,
+          "t_subject_teacher_of_standard" => ScopeContext.teacher,
+          _ => throw AssertionError("Invalid filter type"),
+        },
+        scopeFilterType: switch (scope.filter) {
+          "everyone" => GenericFilterType.all,
+          "stu_all" => GenericFilterType.all,
+          "stu_standard" => GenericFilterType.standard,
+          "stu_standard_division" => GenericFilterType.standard,
+          "t_all" => GenericFilterType.all,
+          "t_department" => GenericFilterType.department,
+          "t_class_teacher_of" => GenericFilterType.standardDivision,
+          "t_class_teacher_of" => GenericFilterType.standardDivision,
+          "t_subject_teacher_of_standard_division" =>
+            GenericFilterType.standardDivision,
+          "t_subject_teacher_of_standard" => GenericFilterType.standard,
+          _ => throw AssertionError("Invalid filter type"),
+        },
+        scopeFilterData: scope.filterData ?? "");
   }
 }
 
@@ -453,8 +487,10 @@ class _ScopeSelectionBottomSheetState extends State<ScopeSelectionBottomSheet> {
           ),
           const Spacer(),
           Center(
-            child: PrimaryButton(
-                text: "Add Audience",
+            child: VartaButton(
+                variant: VartaButtonVariant.primary,
+                fullWidth: true,
+                label: "Add Audience",
                 isDisabled: false,
                 onPressed: () => handleScopeSubmit(null)),
           )

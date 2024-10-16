@@ -1,7 +1,6 @@
 import 'package:app/common/varta_theme.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
-import 'package:app/screens/user_profile/user_profile_screen.dart';
 import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/services/token_service.dart';
 import 'package:app/widgets/connection_error.dart';
@@ -15,21 +14,39 @@ void main() {
   runApp(const VartaApp());
 }
 
-class VartaApp extends StatelessWidget {
+class VartaApp extends StatefulWidget {
   const VartaApp({
     super.key,
   });
 
-  Future<bool> _shouldShowLogin() async {
+  @override
+  State<VartaApp> createState() => _VartaAppState();
+}
+
+class _VartaAppState extends State<VartaApp> {
+  late Future<AppState?> _initializedApp;
+
+  Future<AppState?> _initializeApp() async {
     var tokenService = TokenService();
     final accessToken = await tokenService.getAccessToken();
 
     if (accessToken == null ||
         tokenService.tokenExpiredOrInvalid(accessToken)) {
-      return true;
+      return null;
     }
 
-    return false;
+    try {
+      var appState = await AppState.initialize();
+      return appState;
+    } catch (exc) {
+      return null;
+    }
+  }
+
+  @override
+  void initState() {
+    _initializedApp = _initializeApp();
+    super.initState();
   }
 
   @override
@@ -38,9 +55,9 @@ class VartaApp extends StatelessWidget {
         title: 'Varta',
         theme: VartaTheme().data,
         home: FutureBuilder(
-            future: _shouldShowLogin(),
+            future: _initializedApp,
             builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Placeholder();
               }
 
@@ -50,31 +67,19 @@ class VartaApp extends StatelessWidget {
                 );
               }
 
-              final shouldShowLogin = snapshot.data!;
-              if (shouldShowLogin) {
+              final appState = snapshot.data;
+              if (appState == null) {
                 return LoginProvider(
                   state: LoginState(data: LoginData()),
                   child: const WelcomeScreen(),
                 );
               }
 
-              return FutureBuilder(
-                future: AppState.initialize(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const Placeholder();
-                  }
-                  if (snapshot.hasError) {
-                    return GenericError(
-                      errorMessage: snapshot.error.toString(),
-                    );
-                  }
-                  return AppProvider(
-                    state: snapshot.data!,
-                    child: const AnnouncementInboxScreen(),
-                  );
-                },
+              return AppProvider(
+                state: appState,
+                child: const AnnouncementInboxScreen(),
               );
+              ;
             }));
   }
 }

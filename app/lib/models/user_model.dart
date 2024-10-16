@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:app/models/school_model.dart';
+
 enum UserType { teacher, student }
 
 class UserModel {
@@ -9,6 +11,7 @@ class UserModel {
   final String lastName;
   final UserType userType;
   final List<UserContact> contacts;
+  final SchoolModel school;
   final dynamic details;
 
   UserModel({
@@ -19,6 +22,7 @@ class UserModel {
     required this.userType,
     required this.contacts,
     required this.details,
+    required this.school,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -27,11 +31,15 @@ class UserModel {
       firstName: json['first_name'],
       middleName: json['middle_name'],
       lastName: json['last_name'],
-      userType: UserType.values.byName(json['user_type']),
+      userType:
+          json["user_type"] == "student" ? UserType.student : UserType.teacher,
       contacts: (json['contacts'] as List)
           .map((contactJson) => UserContact.fromJson(contactJson))
           .toList(),
-      details: json['details'],
+      school: SchoolModel.fromJson(json['school']),
+      details: json["user_type"] == "student"
+          ? StudentDetails.fromJson(json['details'])
+          : TeacherDetails.fromJson(json["details"]),
     );
   }
 
@@ -44,15 +52,21 @@ class UserModel {
       'user_type': userType.name,
       'contacts': contacts.map((contact) => contact.toJson()).toList(),
       'details': details,
+      'school': school.toJson()
     };
   }
 }
 
 class UserContact {
   ContactType contactType;
+  ContactImportance contactImportance;
   String contactData;
 
-  UserContact({required this.contactType, required this.contactData});
+  UserContact({
+    required this.contactType,
+    required this.contactData,
+    required this.contactImportance,
+  });
 
   factory UserContact.fromJson(Map<String, dynamic> json) {
     return UserContact(
@@ -60,18 +74,27 @@ class UserContact {
           ? ContactType.phoneNumber
           : ContactType.email,
       contactData: json['contact_data'],
+      contactImportance: json["contact_importance"] == "primary"
+          ? ContactImportance.primary
+          : ContactImportance.secondary,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'contact_type': contactType == ContactType.phoneNumber ? 'phone_number' : 'email',
+      'contact_type':
+          contactType == ContactType.phoneNumber ? 'phone_number' : 'email',
       'contact_data': contactData,
+      'contact_importance': contactImportance == ContactImportance.primary
+          ? 'primary'
+          : 'secondary',
     };
   }
 }
 
 enum ContactType { email, phoneNumber }
+
+enum ContactImportance { primary, secondary }
 
 class TeacherDetails {
   final Classroom? classTeacherOf;
@@ -101,8 +124,10 @@ class TeacherDetails {
   Map<String, dynamic> toJson() {
     return {
       'class_teacher_of': classTeacherOf?.toJson(),
-      'subject_teacher_of': subjectTeacherOf.map((classroom) => classroom.toJson()).toList(),
-      'departments': departments.map((department) => department.toJson()).toList(),
+      'subject_teacher_of':
+          subjectTeacherOf.map((classroom) => classroom.toJson()).toList(),
+      'departments':
+          departments.map((department) => department.toJson()).toList(),
     };
   }
 }
@@ -137,15 +162,15 @@ class TeacherDepartment {
 
   factory TeacherDepartment.fromJson(Map<String, dynamic> json) {
     return TeacherDepartment(
-      deptCode: json['dept_code'],
-      deptName: json['dept_name'],
+      deptCode: json['department_code'],
+      deptName: json['department_name'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'dept_code': deptCode,
-      'dept_name': deptName,
+      'department_code': deptCode,
+      'department_name': deptName,
     };
   }
 }
@@ -155,6 +180,11 @@ class Classroom {
   final String division;
 
   Classroom({required this.standard, required this.division});
+
+  @override
+  String toString() {
+    return '$standard${division.toUpperCase()}';
+  }
 
   factory Classroom.fromJson(Map<String, dynamic> json) {
     return Classroom(

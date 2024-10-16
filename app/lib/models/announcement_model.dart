@@ -22,6 +22,13 @@ class AnnouncementModel {
     return 'Title: $title\nBody: $body\nID: $id\nCreated At: $createdAt\nAuthor: $author\nScopes: ${scopes.join(", ")}';
   }
 
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! AnnouncementModel) return false;
+    return id == other.id;
+  }
+
   static AnnouncementModel fromJson(Map<String, dynamic> data) {
     return AnnouncementModel(
       title: data['title'] as String,
@@ -47,6 +54,9 @@ class AnnouncementModel {
       'scopes': scopes.map((scope) => scope.toJson()).toList(),
     };
   }
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 class AnnouncementAuthorModel {

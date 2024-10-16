@@ -11,6 +11,7 @@ import 'package:app/widgets/state/login_state.dart';
 import 'package:app/widgets/basic_app_bar.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/phone_number_input.dart';
+import 'package:app/widgets/varta_button.dart';
 import 'package:flutter/material.dart';
 
 class PhoneLogin extends StatefulWidget {
@@ -113,15 +114,19 @@ class _PhoneLoginState extends State<PhoneLogin> {
                             ?.copyWith(color: TWColor.blue600))),
                 const Spacer(),
                 ListenableBuilder(
-                    listenable: loginState,
-                    builder: (context, child) => PrimaryButton(
-                          text: "Verify",
-                          onPressed: () =>
-                              handleVerificationClick(context, loginState),
-                          isDisabled: loginState.data.inputData == null ||
-                              loginState.data.inputData!.length != 10,
-                          isLoading: isLoading,
-                        ))
+                  listenable: loginState,
+                  builder: (context, child) => VartaButton(
+                    variant: VartaButtonVariant.primary,
+                    size: VartaButtonSize.large,
+                    label: "Verify",
+                    fullWidth: true,
+                    onPressed: () =>
+                        handleVerificationClick(context, loginState),
+                    isLoading: isLoading,
+                    isDisabled: loginState.data.inputData == null ||
+                        loginState.data.inputData?.length != 10,
+                  ),
+                )
               ],
             )));
   }

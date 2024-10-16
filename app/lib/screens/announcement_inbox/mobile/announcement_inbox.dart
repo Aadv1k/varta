@@ -6,6 +6,7 @@ import 'package:app/models/user_model.dart';
 import 'package:app/repository/announcements_repo.dart';
 import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/for_you_announcement_feed.dart';
+import 'package:app/screens/announcement_inbox/user_announcements_feed.dart';
 import 'package:app/screens/user_profile/user_profile_screen.dart';
 import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/providers/announcement_provider.dart';
@@ -27,8 +28,8 @@ class AnnouncementInboxScreen extends StatefulWidget {
 }
 
 class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
-  final ValueNotifier<bool> _isForYouView = ValueNotifier<bool>(false);
-  AnnouncementsRepository _announcementRepo = AnnouncementsRepository();
+  final ValueNotifier<bool> _isForYouView = ValueNotifier<bool>(true);
+  final AnnouncementsRepository _announcementRepo = AnnouncementsRepository();
 
   @override
   void initState() {
@@ -57,7 +58,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
   @override
   Widget build(BuildContext context) {
     var appState = AppProvider.of(context).state;
-    bool isTeacher = appState.user?.userType == UserType.student;
+    bool isTeacher = appState.user?.userType == UserType.teacher;
 
     return Scaffold(
       floatingActionButton: isTeacher
@@ -167,7 +168,9 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
         ),
       ),
       body: Builder(builder: (context) {
-        return const ForYouAnnouncementFeed();
+        return _isForYouView.value
+            ? const ForYouAnnouncementFeed()
+            : const UserAnnouncementFeed();
       }),
     );
   }

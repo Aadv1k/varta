@@ -141,7 +141,9 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Row(
               children: [
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                   icon: const Icon(Icons.chevron_left, size: IconSizes.iconLg),
                 ),
                 Expanded(
@@ -175,10 +177,10 @@ class _SearchScreenState extends State<SearchScreen> {
                     return const Center(
                         heightFactor: 0.8,
                         child: GenericError(
-                          size: ErrorSize.large,
+                          size: ErrorSize.medium,
                           svgPath: "falling.svg",
                           errorMessage:
-                              "Welp! it looks like your search didn't yield any results.",
+                              "It looks like your search didn't yield any results!",
                         ));
                   }
 
@@ -210,14 +212,13 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   );
                 })
-            : Center(
-                child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-                child: Text(
-                    "Nothing here yet! Begin searching to view announcements",
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge),
-              )));
+            : const Center(
+                heightFactor: 0.75,
+                child: GenericError(
+                  errorMessage:
+                      "Nothing here yet. Begin searching to see results.",
+                  svgPath: "abstract-1.svg",
+                )));
   }
 }
 

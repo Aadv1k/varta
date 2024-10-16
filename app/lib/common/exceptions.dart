@@ -17,7 +17,7 @@ class ApiClientException implements Exception {
   ApiClientException(this.message);
 
   @override
-  String toString() => "ApiClientException: $message";
+  String toString() => message;
 }
 
 class ApiException implements Exception {

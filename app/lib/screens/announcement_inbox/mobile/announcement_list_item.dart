@@ -50,6 +50,8 @@ class AnnouncementListItem extends StatelessWidget {
             ),
             const SizedBox(height: Spacing.md),
             Text(announcement.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: AppColor.subheading,
                     fontWeight: FontWeight.bold,
