@@ -3,7 +3,7 @@
         "model": "accounts.department",
         "pk": 1,
         "fields": {
-            "department_name": "Mathematics",
+            "department_name": "Maths",
             "department_code": "mathematics"
         }
     },

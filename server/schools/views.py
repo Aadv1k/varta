@@ -19,7 +19,7 @@ class TeacherList(APIView):
         serializer = ConstrainedUserSerializer(User.objects.filter(
                     school__id=request.user.school.id,
                     user_type=User.UserType.TEACHER, 
-                ), many=True)
+                ).order_by("first_name"), many=True)
 
         return SuccessResponseBuilder() \
                     .set_code(200) \
