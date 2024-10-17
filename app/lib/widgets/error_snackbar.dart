@@ -15,22 +15,21 @@ class ErrorSnackbar {
 
   SnackBar build(BuildContext context) {
     return SnackBar(
-      backgroundColor: TWColor.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
-        side: BorderSide(color: TWColor.red600),
+      backgroundColor: const Color(0xFFfeeeec),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: Colors.red.shade400),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
-      elevation: 0,
       padding: const EdgeInsets.symmetric(
         horizontal: Spacing.md,
         vertical: Spacing.md,
       ),
+      elevation: 0,
       behavior: SnackBarBehavior.floating,
       content: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Icon(Icons.error,
-              color: TWColor.red600, size: IconSizes.iconMd),
+          Icon(Icons.error, color: Colors.red.shade600, size: IconSizes.iconMd),
           const SizedBox(width: Spacing.sm),
           Expanded(
             child: Text(
@@ -38,7 +37,7 @@ class ErrorSnackbar {
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium!
-                  .copyWith(color: TWColor.red600),
+                  .copyWith(color: Colors.black),
             ),
           ),
           if (action != null && actionLabel != null)

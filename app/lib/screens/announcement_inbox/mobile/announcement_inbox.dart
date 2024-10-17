@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class AnnouncementInboxScreen extends StatefulWidget {
   const AnnouncementInboxScreen({super.key});
@@ -36,23 +37,52 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
     super.initState();
   }
 
-  void _handleCreateAnnouncement(AnnouncementCreationData data) {
-    if (!context.mounted) return;
+  void _handleCreateAnnouncement(AnnouncementCreationData data) async {
+    setState(() {
+      _isForYouView.value = false;
+    });
 
     var appState = AppProvider.of(context).state;
 
-    assert(false,
-        "NOT IMPLEMENTED: logic for converting the AnnouncementCreationData to the AnnouncementModel");
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text("Announcement created successfully"),
-        action: SnackBarAction(label: "Undo", onPressed: () {}),
-      ),
+    var initialAnnouncements =
+        List<AnnouncementModel>.from(appState.userAnnouncements);
+    var optimisticAnnouncement = AnnouncementModel(
+      author: AnnouncementAuthorModel(
+          firstName: appState.user!.firstName,
+          lastName: appState.user!.lastName,
+          publicId: appState.user!.publicId),
+      title: data.title,
+      body: data.body,
+      createdAt: DateTime.now(),
+      id: "OPTMISTIC-${const Uuid().v1()}",
+      scopes: data.scopes
+          .map((rawScope) => rawScope.toAnnouncementScope())
+          .toList(),
     );
-    setState(() {
-      _isForYouView.value = true;
-    });
+
+    appState
+        .addAnnouncements([optimisticAnnouncement], isUserAnnouncement: true);
+
+    try {
+      AnnouncementModel announcement =
+          await _announcementRepo.createAnnouncement(data);
+
+      appState.setAnnouncements([
+        optimisticAnnouncement.copyWith(id: announcement.id),
+        ...initialAnnouncements
+      ], isUserAnnouncement: true);
+    } catch (exc) {
+      ErrorSnackbar(innerText: "Couldn't create announcement.").show(context);
+      appState.setAnnouncements(initialAnnouncements, isUserAnnouncement: true);
+    }
+  }
+
+  void _handleFloatingButtonPress(context) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                CreateAnnouncementScreen(onCreate: _handleCreateAnnouncement)));
   }
 
   @override
@@ -65,28 +95,13 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           ? LayoutBuilder(
               builder: (context, constraints) => constraints.maxWidth <= 600
                   ? FloatingActionButton(
-                      onPressed: () {},
+                      onPressed: () => _handleFloatingButtonPress(context),
                       backgroundColor: AppColor.primaryColor,
                       child: const Icon(Icons.add,
                           color: AppColor.primaryBg, size: IconSizes.iconLg),
                     )
                   : FloatingActionButton.extended(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CreateAnnouncementScreen(
-                                        onCreate: (data) async {
-                                      try {
-                                        await _announcementRepo
-                                            .createAnnouncement(data);
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
-                                                content: Text(e.toString())));
-                                      }
-                                    })));
-                      },
+                      onPressed: () => _handleFloatingButtonPress(context),
                       backgroundColor: AppColor.primaryColor,
                       label: const Text("Create Announcement",
                           style: TextStyle(

@@ -22,11 +22,33 @@ class AnnouncementModel {
     return 'Title: $title\nBody: $body\nID: $id\nCreated At: $createdAt\nAuthor: $author\nScopes: ${scopes.join(", ")}';
   }
 
+  bool isOptimistic() {
+    return id.startsWith("OPTMISTIC-");
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! AnnouncementModel) return false;
     return id == other.id;
+  }
+
+  AnnouncementModel copyWith({
+    String? title,
+    String? body,
+    String? id,
+    DateTime? createdAt,
+    AnnouncementAuthorModel? author,
+    List<AnnouncementScope>? scopes,
+  }) {
+    return AnnouncementModel(
+      title: title ?? this.title,
+      body: body ?? this.body,
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      author: author ?? this.author,
+      scopes: scopes ?? this.scopes,
+    );
   }
 
   static AnnouncementModel fromJson(Map<String, dynamic> data) {
@@ -73,6 +95,18 @@ class AnnouncementAuthorModel {
   @override
   String toString() => '$firstName $lastName';
 
+  AnnouncementAuthorModel copyWith({
+    String? firstName,
+    String? lastName,
+    String? publicId,
+  }) {
+    return AnnouncementAuthorModel(
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      publicId: publicId ?? this.publicId,
+    );
+  }
+
   static AnnouncementAuthorModel fromJson(Map<String, dynamic> data) {
     return AnnouncementAuthorModel(
       firstName: data['first_name'] as String,
@@ -102,6 +136,16 @@ class AnnouncementScope {
   @override
   String toString() => 'Filter: $filter, Data: ${filterData ?? "None"}';
 
+  AnnouncementScope copyWith({
+    String? filter,
+    String? filterData,
+  }) {
+    return AnnouncementScope(
+      filter: filter ?? this.filter,
+      filterData: filterData ?? this.filterData,
+    );
+  }
+
   static AnnouncementScope fromJson(Map<String, dynamic> data) {
     return AnnouncementScope(
       filter: data['filter'] as String,
@@ -118,7 +162,6 @@ class AnnouncementScope {
       case "t_subject_teacher_of_standard_division":
         return "${filterData} Subject teacher";
       case "t_department":
-        /* TODO: do a reverse key to label look up here */
         return "${filterData} Department";
       case "stu_standard":
         return "${filterData}${ordinal(int.parse(filterData!))} Students";
