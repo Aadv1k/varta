@@ -25,6 +25,14 @@ class UserModel {
     required this.school,
   });
 
+  String getFriendlyName() {
+    if (lastName.isEmpty) {
+      return "$firstName ${middleName != null ? "$middleName." : ""}";
+    }
+
+    return "$firstName $lastName";
+  }
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       publicId: json['public_id'],

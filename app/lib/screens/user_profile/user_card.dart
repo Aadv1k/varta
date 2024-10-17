@@ -80,7 +80,7 @@ class StudentCard extends StatelessWidget {
                                 ),
                         children: [
                           TextSpan(
-                            text: " / Example School Name",
+                            text: " / ${user.school.schoolName}",
                             style:
                                 Theme.of(context).textTheme.bodySmall!.copyWith(
                                       fontFamily: "GeistMono",
@@ -98,7 +98,7 @@ class StudentCard extends StatelessWidget {
                   "${user.firstName}\n${user.lastName}",
                   style: Theme.of(context).textTheme.displayMedium!.copyWith(
                         color: Colors.white,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w900,
                         height: 1,
                         fontSize: FontSize.text3xl,
                       ),

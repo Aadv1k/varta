@@ -118,7 +118,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             ? VartaChipVariant.primary
                             : VartaChipVariant.secondary,
                         text: (_data.postedBy?.isNotEmpty ?? false)
-                            ? "${_data.postedBy![0].firstName} ${_data.postedBy![0].lastName} ${_data.postedBy!.length > 1 ? '+${_data.postedBy!.length - 1}' : ''}"
+                            ? "${_data.postedBy![0].getFriendlyName()} ${_data.postedBy!.length > 1 ? '+${_data.postedBy!.length - 1}' : ''}"
                             : "Posted By",
                         onPressed: () => _handlePostedByChipClick(context),
                       ),
@@ -466,7 +466,7 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
                   children: _selectedTeachers
                       .map((elem) => VartaChip(
                             variant: VartaChipVariant.primary,
-                            text: "${elem.firstName} ${elem.lastName}",
+                            text: elem.getFriendlyName(),
                             onDeleted: () => _handleChipDelete(elem),
                           ))
                       .toList(),
@@ -474,7 +474,7 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
               ),
             ),
           ),
-          const SizedBox(height: Spacing.md),
+          if (_selectedTeachers.isNotEmpty) const SizedBox(height: Spacing.md),
           const Divider(color: AppColor.subtitleLighter, height: 1),
           Expanded(
             child: FutureBuilder<List<UserModel>>(
@@ -590,7 +590,7 @@ class AnnouncementPostedBySelectionTile extends StatelessWidget {
         ],
       ),
       title: Text(
-        "${teacher.firstName} ${teacher.lastName}",
+        teacher.getFriendlyName(),
         style: Theme.of(context).textTheme.titleSmall,
       ),
     );

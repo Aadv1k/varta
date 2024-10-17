@@ -33,8 +33,8 @@ class TeacherCard extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 260, maxWidth: 420),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
           colors: [
             PaletteNeutral.shade030,
             PaletteNeutral.shade050,
@@ -54,19 +54,23 @@ class TeacherCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    userDetails.classTeacherOf != null
-                        ? userDetails.classTeacherOf.toString()
-                        : "  ",
-                    style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                          height: 0.8,
-                          fontWeight: FontWeight.w900,
-                          color: PaletteNeutral.shade100.withOpacity(0.5),
-                          fontSize: FontSize.text5xl * 2,
-                        ),
-                  ),
+                  userDetails.classTeacherOf != null
+                      ? Text(
+                          userDetails.classTeacherOf.toString(),
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayLarge!
+                              .copyWith(
+                                height: 0.8,
+                                fontWeight: FontWeight.w900,
+                                color: PaletteNeutral.shade100.withOpacity(0.5),
+                                fontSize: FontSize.text5xl * 2,
+                              ),
+                        )
+                      : const SizedBox(height: 60),
                   Padding(
-                    padding: const EdgeInsets.only(left: Spacing.md),
+                    padding: const EdgeInsets.only(
+                        left: Spacing.md, right: Spacing.md),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -138,10 +142,10 @@ class TeacherCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  "${user.firstName}\n${user.lastName}",
+                  "${user.firstName}\n${user.lastName.isEmpty ? (user.middleName != null ? "${user.middleName}." : "") : user.lastName}",
                   style: Theme.of(context).textTheme.displayMedium!.copyWith(
                         color: AppColor.heading,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w900,
                         height: 1,
                         fontSize: FontSize.text3xl,
                       ),
