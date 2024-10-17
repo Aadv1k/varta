@@ -1,8 +1,18 @@
 from django.contrib import admin
 from .models import Classroom, Department, User, StudentDetail, TeacherDetail, UserContact, UserDevice
+from django.forms import BaseInlineFormSet
 
+class TeacherDetailsInlineFormset(BaseInlineFormSet):
+    model = TeacherDetail
+    readonly_fields = ["class_teacher_of", "subject_teacher_of", "departments"]
+
+class TeacherDetailInline(admin.TabularInline):
+    model = TeacherDetail
+    formset = TeacherDetailsInlineFormset
+    extra = 0
 
 class UserAdmin(admin.ModelAdmin):
+    inlines = [TeacherDetailInline]
     list_display = ('public_id', 'first_name', 'middle_name', 'last_name', 'user_type', 'school')
     search_fields = ('first_name', 'last_name', 'school__name') 
     list_filter = ('user_type', 'school') 
@@ -10,7 +20,6 @@ class UserAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserAdmin)
 
-# Customizing the UserContact admin
 class UserContactAdmin(admin.ModelAdmin):
     list_display = ('user', 'contact_importance', 'contact_type', 'contact_data')
     search_fields = ('user__first_name', 'user__last_name', 'contact_data')  
@@ -57,10 +66,3 @@ class UserDeviceAdmin(admin.ModelAdmin):
     ordering = ('-last_used_at',)  
 
 admin.site.register(UserDevice, UserDeviceAdmin)
-
-
-# from django.contrib.auth.models import User
-# from django.contrib.auth.models import Group
-
-# admin.site.unregister(User)
-# admin.site.unregister(Group)

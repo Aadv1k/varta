@@ -52,6 +52,13 @@ class Department(models.Model):
     class Meta:
         ordering = ['department_name']
 
+    @staticmethod
+    def get_by_name_or_none(dept_name):
+        try:
+            return Department.objects.get(department_name=dept_name)
+        except Department.DoesNotExist:
+            return None
+
 class User(models.Model):
     class UserType(models.TextChoices):
         TEACHER = "teacher", "Teacher"
@@ -62,7 +69,7 @@ class User(models.Model):
 
     first_name = models.CharField(max_length=255)
     middle_name = models.CharField(max_length=255, blank=True, null=True)
-    last_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255, blank=True)
 
     user_type = models.CharField(choices=UserType.choices, max_length=8, default=UserType.STUDENT)
 
@@ -74,7 +81,7 @@ class User(models.Model):
         return True
     
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.first_name} {"" if not self.middle_name else self.middle_name + "."} {self.last_name or ""}"
     
     class Meta:
         ordering = ['last_name', 'first_name']
@@ -88,20 +95,20 @@ class StudentDetail(models.Model):
         verbose_name_plural = "Student Details"
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}'s Student Details"
+        return f"{self.user}'s Details"
 
 class TeacherDetail(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_details")
     departments =  models.ManyToManyField(Department, related_name="departments")
     subject_teacher_of = models.ManyToManyField(Classroom, related_name="subject_teacher_of")
-    class_teacher_of = models.OneToOneField(Classroom, on_delete=models.SET_NULL, null=True, related_name="class_teacher_of")
+    class_teacher_of = models.OneToOneField(Classroom, on_delete=models.SET_NULL, null=True, related_name="class_teacher_of", blank=True)
 
     class Meta:
         verbose_name = "Teacher Detail"
         verbose_name_plural = "Teacher Details"
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}'s Teacher Details"
+        return f"{self.user}'s Teacher Details"
 
 class UserContact(models.Model):
     class ContactImportance(models.TextChoices):

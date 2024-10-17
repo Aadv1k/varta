@@ -1,17 +1,186 @@
 [
-    {"model": "accounts.department", "pk": 1, "fields": {"department_name": "Mathematics", "department_code": "mathematics"}},
-    {"model": "accounts.department", "pk": 2, "fields": {"department_name": "Geography", "department_code": "geography"}},
-    {"model": "accounts.department", "pk": 3, "fields": {"department_name": "History", "department_code": "history"}},
-    {"model": "accounts.department", "pk": 4, "fields": {"department_name": "Political Science", "department_code": "pol_sci"}},
-    {"model": "accounts.department", "pk": 5, "fields": {"department_name": "English", "department_code": "lang/english"}},
-    {"model": "accounts.department", "pk": 6, "fields": {"department_name": "Hindi", "department_code": "lang/hindi"}},
-    {"model": "accounts.department", "pk": 7, "fields": {"department_name": "Sanskrit", "department_code": "lang/sanskrit"}},
-    {"model": "accounts.department", "pk": 8, "fields": {"department_name": "Marathi", "department_code": "lang/marathi"}},
-    {"model": "accounts.department", "pk": 9, "fields": {"department_name": "Administration", "department_code": "admin"}},
-    {"model": "accounts.department", "pk": 10, "fields": {"department_name": "Physics", "department_code": "science/physics"}},
-    {"model": "accounts.department", "pk": 11, "fields": {"department_name": "Chemistry", "department_code": "science/chemistry"}},
-    {"model": "accounts.department", "pk": 12, "fields": {"department_name": "Robotics", "department_code": "robotics"}},
-    {"model": "accounts.department", "pk": 13, "fields": {"department_name": "Information Technology", "department_code": "it"}},
-    {"model": "accounts.department", "pk": 14, "fields": {"department_name": "Biology", "department_code": "science/biology"}},
-    {"model": "accounts.department", "pk": 15, "fields": {"department_name": "Science", "department_code": "science"}}
+    {
+        "model": "accounts.department",
+        "pk": 1,
+        "fields": {
+            "department_name": "Mathematics",
+            "department_code": "mathematics"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 2,
+        "fields": {
+            "department_name": "General Knowledge",
+            "department_code": "general_knowledge"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 3,
+        "fields": {
+            "department_name": "Geography",
+            "department_code": "geography"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 4,
+        "fields": {
+            "department_name": "History and Civics",
+            "department_code": "history_civics"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 5,
+        "fields": {
+            "department_name": "Physical Education",
+            "department_code": "physical_education"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 6,
+        "fields": {
+            "department_name": "Library",
+            "department_code": "library"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 7,
+        "fields": {
+            "department_name": "Arts and Crafts",
+            "department_code": "arts_crafts"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 8,
+        "fields": {
+            "department_name": "Performing Arts",
+            "department_code": "performing_arts"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 9,
+        "fields": {
+            "department_name": "Economics",
+            "department_code": "economics"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 10,
+        "fields": {
+            "department_name": "Business Studies",
+            "department_code": "business_studies"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 11,
+        "fields": {
+            "department_name": "Accounts",
+            "department_code": "accounts"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 12,
+        "fields": {
+            "department_name": "Political Science",
+            "department_code": "pol_sci"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 13,
+        "fields": {
+            "department_name": "English",
+            "department_code": "lang/english"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 14,
+        "fields": {
+            "department_name": "Hindi",
+            "department_code": "lang/hindi"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 15,
+        "fields": {
+            "department_name": "Sanskrit",
+            "department_code": "lang/sanskrit"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 16,
+        "fields": {
+            "department_name": "Marathi",
+            "department_code": "lang/marathi"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 17,
+        "fields": {
+            "department_name": "Administration",
+            "department_code": "admin"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 18,
+        "fields": {
+            "department_name": "Physics",
+            "department_code": "science/physics"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 19,
+        "fields": {
+            "department_name": "Chemistry",
+            "department_code": "science/chemistry"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 20,
+        "fields": {
+            "department_name": "Robotics",
+            "department_code": "robotics"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 21,
+        "fields": {
+            "department_name": "Information Technology",
+            "department_code": "it"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 22,
+        "fields": {
+            "department_name": "Biology",
+            "department_code": "science/biology"
+        }
+    },
+    {
+        "model": "accounts.department",
+        "pk": 23,
+        "fields": {
+            "department_name": "Science",
+            "department_code": "science"
+        }
+    }
 ]
