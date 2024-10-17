@@ -105,6 +105,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   }
 
   void _handlePoll() async {
+    if (_isLoading) setState(() => _isLoading = false);
     if (!context.mounted) return;
 
     var cacheService = SimpleCacheService();
@@ -114,6 +115,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     if (cache == null) {
       return;
     }
+
     var state = AppProvider.of(context).state;
 
     try {
@@ -132,7 +134,6 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
         clearAndNavigateBackToLogin(context);
         return;
       }
-
       ErrorSnackbar(
               innerText: exc is ApiException
                   ? exc.toString()

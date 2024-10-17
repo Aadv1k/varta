@@ -3,6 +3,7 @@ import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/styles.dart';
 import 'package:app/models/school_model.dart';
+import 'package:app/screens/login/email_login.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/repository/school_repository.dart';
 import 'package:app/screens/login/phone_login.dart';
@@ -136,7 +137,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => LoginProvider(
-                                  state: loginState, child: const PhoneLogin()),
+                                  state: loginState, child: const EmailLogin()),
                             ),
                           );
                         }

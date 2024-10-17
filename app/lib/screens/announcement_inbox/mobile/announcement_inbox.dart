@@ -46,6 +46,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
 
     var initialAnnouncements =
         List<AnnouncementModel>.from(appState.userAnnouncements);
+
     var optimisticAnnouncement = AnnouncementModel(
       author: AnnouncementAuthorModel(
           firstName: appState.user!.firstName,
@@ -64,15 +65,16 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
         .addAnnouncements([optimisticAnnouncement], isUserAnnouncement: true);
 
     try {
-      AnnouncementModel announcement =
-          await _announcementRepo.createAnnouncement(data);
+      String announcementId = await _announcementRepo.createAnnouncement(data);
 
       appState.setAnnouncements([
-        optimisticAnnouncement.copyWith(id: announcement.id),
+        optimisticAnnouncement.copyWith(id: announcementId),
         ...initialAnnouncements
       ], isUserAnnouncement: true);
+      appState.saveAnnouncementState(isUserAnnouncement: true);
     } catch (exc) {
-      ErrorSnackbar(innerText: "Couldn't create announcement.").show(context);
+      const ErrorSnackbar(innerText: "Couldn't create announcement.")
+          .show(context);
       appState.setAnnouncements(initialAnnouncements, isUserAnnouncement: true);
     }
   }

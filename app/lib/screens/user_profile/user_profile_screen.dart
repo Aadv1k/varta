@@ -45,7 +45,7 @@ class UserProfileScreen extends StatelessWidget {
       ),
       body: Container(
         padding: const EdgeInsets.only(
-            left: Spacing.md, right: Spacing.md, bottom: Spacing.md),
+            left: Spacing.sm, right: Spacing.sm, bottom: Spacing.md),
         child: Column(
           children: [
             if (appState.user != null)

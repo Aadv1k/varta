@@ -5,10 +5,10 @@ import "package:app/services/token_service.dart";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 
-enum HTTPMethod { GET, POST, DELETE }
+enum HTTPMethod { GET, POST, DELETE, PUT }
 
 class ApiService {
-  static const String baseApiUrl = "http://localhost:8000/api/v1";
+  static const String baseApiUrl = "http://192.168.1.6:8000/api/v1";
   final TokenService _tokenService = TokenService();
 
   Future<http.Response> makeRequest(HTTPMethod method, String endpoint,
@@ -35,9 +35,12 @@ class ApiService {
         case HTTPMethod.POST:
           return await http.post(Uri.parse("$baseApiUrl$endpoint"),
               body: jsonEncode(body), headers: headers);
+        case HTTPMethod.PUT:
+          return await http.put(Uri.parse("$baseApiUrl$endpoint"),
+              body: jsonEncode(body), headers: headers);
         case HTTPMethod.DELETE:
-          // TODO: Implement DELETE request handling
-          throw ApiServiceException("DELETE method is not yet implemented.");
+          return await http.delete(Uri.parse("$baseApiUrl$endpoint"),
+              headers: headers);
       }
     } on SocketException catch (_) {
       throw ApiClientException(

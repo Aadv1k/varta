@@ -1,5 +1,6 @@
 import 'package:app/models/user_model.dart';
 import 'package:collection/collection.dart';
+import 'package:intl/intl.dart';
 
 class SearchData {
   final List<UserModel>? postedBy;
@@ -47,5 +48,27 @@ class SearchData {
       dateTo,
       query,
     );
+  }
+
+  Map<String, dynamic> toQueryParameters() {
+    final Map<String, dynamic> params = {};
+
+    if (query != null && query!.isNotEmpty) {
+      params['query'] = query;
+    }
+
+    if (postedBy != null && postedBy!.isNotEmpty) {
+      params['posted_by'] = postedBy!.map((user) => user.publicId).toList();
+    }
+
+    if (dateFrom != null) {
+      params['date_from'] = DateFormat('yyyy-MM-dd').format(dateFrom!);
+    }
+
+    if (dateTo != null) {
+      params['date_to'] = DateFormat('yyyy-MM-dd').format(dateTo!);
+    }
+
+    return params;
   }
 }

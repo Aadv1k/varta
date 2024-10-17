@@ -16,7 +16,8 @@ class AuthService {
       "/me/verify",
       body: {
         // TODO: ideally there would be a proper implementation for selecting the country code on the front-end. Currently this has to do
-        "input_data": "+91${data.inputData}",
+        "input_data":
+            "${data.inputType == LoginType.email ? "" : "+91"}${data.inputData}",
         "school_id": data.schoolIDAndName!.$1,
         "otp": data.otp
       },
@@ -44,7 +45,8 @@ class AuthService {
       "/me/login",
       body: {
         // TODO: ideally there would be a proper implementation for selecting the country code on the front-end. Currently this has to do
-        "input_data": "+91${data.inputData}",
+        "input_data":
+            "${data.inputType == LoginType.email ? "" : "+91"}${data.inputData}",
         "input_format":
             data.inputType == LoginType.email ? "email" : "phone_number",
         "school_id": data.schoolIDAndName!.$1

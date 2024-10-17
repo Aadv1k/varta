@@ -68,7 +68,7 @@ class _EmailInputState extends State<EmailInput> {
                     : null,
                 border: InputBorder.none,
                 hintStyle: const TextStyle(
-                    color: AppColor.subtitle, fontSize: FontSizes.textBase),
+                    color: AppColor.subtitle, fontSize: FontSize.textBase),
               ),
             ),
           ),
@@ -80,7 +80,7 @@ class _EmailInputState extends State<EmailInput> {
                 child: Text(
                   widget.errorMessage!,
                   style: const TextStyle(
-                      color: TWColor.red600, fontSize: FontSizes.textSm),
+                      color: TWColor.red600, fontSize: FontSize.textBase),
                 ),
               )
             : const SizedBox.shrink(),

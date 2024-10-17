@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:js_interop';
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
@@ -55,7 +57,7 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
       final cachedAnnouncements =
           await cacheService.fetchOrNull("userAnnouncements");
 
-      if (cachedAnnouncements != null) {
+      if (cachedAnnouncements != null && cachedAnnouncements.data.isNotEmpty) {
         setState(() => _isLoading = false);
         return;
       }
@@ -63,7 +65,7 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
       try {
         PaginatedAnnouncementModelList data =
             await _announcementRepo.getAnnouncements(isUserAnnouncement: true);
-        state.addAnnouncements(data.data, isUserAnnouncement: true);
+        state.setAnnouncements(data.data, isUserAnnouncement: true);
         state.saveAnnouncementState(isUserAnnouncement: true);
       } catch (exc) {
         if (exc is ApiTokenExpiredException) {
@@ -102,15 +104,10 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
         clearAndNavigateBackToLogin(context);
         return;
       }
-
-      const ErrorSnackbar(
-              innerText:
-                  "Couldn't load more announcements. Please check your connection and try again")
-          .show(context);
     }
   }
 
-  void _handleDeleteAnnouncement(int index) {
+  void _handleDeleteAnnouncement(int index) async{
     var state = AppProvider.of(context).state;
     AnnouncementModel announcementToDelete = state.userAnnouncements[index];
 
@@ -121,7 +118,7 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
     state.setAnnouncements(newAnnouncements, isUserAnnouncement: true);
 
     try {
-      _announcementRepo.deleteAnnouncement(announcementToDelete);
+      await _announcementRepo.deleteAnnouncement(announcementToDelete);
       state.saveAnnouncementState(isUserAnnouncement: true);
     } catch (exc) {
       const ErrorSnackbar(
@@ -133,6 +130,37 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
           List.from(state.userAnnouncements);
       oldAnnouncements.insert(index, announcementToDelete);
       state.setAnnouncements(oldAnnouncements, isUserAnnouncement: true);
+    }
+  }
+
+  void _handleUpdateAnnouncement(
+      int index, AnnouncementCreationData creationData) async {
+    var state = AppProvider.of(context).state;
+    AnnouncementModel oldAnnouncement = state.userAnnouncements[index];
+
+    List<AnnouncementModel> newAnnouncements =
+        List.from(state.userAnnouncements);
+
+    newAnnouncements[index] = oldAnnouncement.copyWith(
+      title: creationData.title,
+      body: creationData.body,
+      scopes: creationData.scopes
+          .map((scope) => scope.toAnnouncementScope())
+          .toList(),
+    );
+
+    state.setAnnouncements(newAnnouncements, isUserAnnouncement: true);
+
+    try {
+      await _announcementRepo.updateAnnouncement(oldAnnouncement, creationData);
+      state.saveAnnouncementState(isUserAnnouncement: true);
+    } catch (exc) {
+      const ErrorSnackbar(
+              innerText:
+                  "Couldn't update announcement. Please try again later.")
+          .show(context);
+      newAnnouncements[index] = oldAnnouncement;
+      state.setAnnouncements(newAnnouncements, isUserAnnouncement: true);
     }
   }
 
@@ -177,64 +205,55 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
       listenable: state,
       builder: (context, _) => ((_hasError || state.userAnnouncements.isEmpty))
           ? _showErrorGraphic()
-          : RefreshIndicator(
-              color: AppColor.primaryColor,
-              backgroundColor: PaletteNeutral.shade000,
-              onRefresh: () async {
-                print("ayooo");
-              },
-              child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  controller: _scrollController,
-                  slivers: [
-                    Skeletonizer.sliver(
-                      enabled: _isLoading,
-                      effect: const ShimmerEffect(
-                        baseColor: PaletteNeutral.shade040,
-                        highlightColor: PaletteNeutral.shade020,
-                      ),
-                      child: _isLoading
-                          ? const PlaceholderAnnouncementListView()
-                          : SliverList.separated(
-                              itemCount: state.userAnnouncements.length,
-                              itemBuilder: (context, index) =>
-                                  UserAnnouncementListItem(
-                                      onDelete: () =>
-                                          _handleDeleteAnnouncement(index),
-                                      onPressed: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    CreateAnnouncementScreen(
-                                                        isUpdate: true,
-                                                        onSave: (data) {
-                                                          Navigator.pop(
-                                                              context);
-                                                          print(
-                                                              "UPDATE: ${state.userAnnouncements[index].id}");
-                                                        },
-                                                        onDelete: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                          print(
-                                                              "DELETE: ${state.userAnnouncements[index].id}");
-                                                        },
-                                                        onCreate: (data) {
-                                                          assert(false,
-                                                              "It should not be possible that when isUpdate is set to true the CreateANnouncemnetScreen can invoke this");
-                                                        },
-                                                        initialAnnouncement:
-                                                            state.userAnnouncements[
-                                                                index])));
-                                      },
-                                      announcement:
-                                          state.userAnnouncements[index]),
-                              separatorBuilder: (_, __) => const Divider(
-                                  color: PaletteNeutral.shade040, height: 1)),
+          : CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              controller: _scrollController,
+              slivers: [
+                  Skeletonizer.sliver(
+                    enabled: _isLoading,
+                    effect: const ShimmerEffect(
+                      baseColor: PaletteNeutral.shade040,
+                      highlightColor: PaletteNeutral.shade020,
                     ),
-                  ]),
-            ),
+                    child: _isLoading
+                        ? const PlaceholderAnnouncementListView()
+                        : SliverList.separated(
+                            itemCount: state.userAnnouncements.length,
+                            itemBuilder: (context, index) =>
+                                UserAnnouncementListItem(
+                                    onDelete: () =>
+                                        _handleDeleteAnnouncement(index),
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  CreateAnnouncementScreen(
+                                                      isUpdate: true,
+                                                      onSave: (data) {
+                                                        Navigator.pop(context);
+                                                        _handleUpdateAnnouncement(
+                                                            index, data);
+                                                      },
+                                                      onDelete: () {
+                                                        Navigator.pop(context);
+                                                        _handleDeleteAnnouncement(
+                                                            index);
+                                                      },
+                                                      onCreate: (data) {
+                                                        assert(false,
+                                                            "It should not be possible that when isUpdate is set to true the CreateANnouncemnetScreen can invoke this");
+                                                      },
+                                                      initialAnnouncement: state
+                                                              .userAnnouncements[
+                                                          index])));
+                                    },
+                                    announcement:
+                                        state.userAnnouncements[index]),
+                            separatorBuilder: (_, __) => const Divider(
+                                color: PaletteNeutral.shade040, height: 1)),
+                  ),
+                ]),
     );
   }
 }

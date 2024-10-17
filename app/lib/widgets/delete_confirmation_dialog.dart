@@ -17,6 +17,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
     return Dialog(
       child: Container(
         height: 320,
+        constraints: const BoxConstraints(maxWidth: 460, minWidth: 280),
         padding: const EdgeInsets.symmetric(
             horizontal: Spacing.lg, vertical: Spacing.lg),
         child: Column(

@@ -82,7 +82,7 @@ class AnnouncementsRepository {
     );
   }
 
-  Future<AnnouncementModel> createAnnouncement(
+  Future<String> createAnnouncement(
       AnnouncementCreationData creationData) async {
     try {
       http.Response response = await _apiService.makeRequest(
@@ -95,26 +95,72 @@ class AnnouncementsRepository {
                 .map((scope) => scope.toAnnouncementScope().toJson())
                 .toList(),
           });
-      if (response.statusCode != 201) {
-        ApiException.fromResponse(response);
-      }
 
+      if (response.statusCode != 201) {
+        throw ApiException.fromResponse(response);
+      }
       var data = jsonDecode(response.body)["data"];
-      return AnnouncementModel.fromJson(data);
+      return data["id"];
     } on ApiClientException catch (_) {
       rethrow;
     }
   }
 
-  Future<void> deleteAnnouncement(AnnouncementModel announcement) {
-    throw UnimplementedError();
+  Future<void> deleteAnnouncement(AnnouncementModel announcement) async {
+    try {
+      final http.Response response = await _apiService.makeRequest(
+          HTTPMethod.DELETE, "/announcements/${announcement.id}",
+          isAuthenticated: true);
+
+      if (response.statusCode != 204) {
+        throw ApiException.fromResponse(response);
+      }
+    } on ApiClientException catch (_) {
+      rethrow;
+    }
   }
 
-  Future<void> updateAnnouncement(AnnouncementModel announcement) {
-    throw UnimplementedError();
+  Future<void> updateAnnouncement(
+      AnnouncementModel oldAnnouncement, AnnouncementCreationData data) async {
+    try {
+      final http.Response response = await _apiService.makeRequest(
+          HTTPMethod.PUT, "/announcements/${oldAnnouncement.id}",
+          body: {
+            "title": oldAnnouncement.title == data.title ? null : data.title,
+            "body": oldAnnouncement.body == data.body ? null : data.body,
+            "scopes": data.scopes
+                .map((scope) => scope.toAnnouncementScope().toJson())
+                .toList(),
+          },
+          isAuthenticated: true);
+
+      if (response.statusCode != 200) {
+        throw ApiException.fromResponse(response);
+      }
+    } on ApiClientException catch (_) {
+      rethrow;
+    }
   }
 
-  Future<List<AnnouncementModel>> searchAnnouncement(SearchData data) {
-    throw UnimplementedError();
+  Future<List<AnnouncementModel>> searchAnnouncement(
+      SearchData searchData) async {
+    const String apiUrl = '${ApiService.baseApiUrl}/announcements/search';
+
+    final Map<String, dynamic> queryParams = searchData.toQueryParameters();
+    final Uri uri = Uri.parse(apiUrl).replace(queryParameters: queryParams);
+    var hackyFix = uri.toString().replaceAll(RegExp(ApiService.baseApiUrl), "");
+
+    try {
+      final http.Response response = await _apiService
+          .makeRequest(HTTPMethod.GET, hackyFix, isAuthenticated: true);
+
+      if (response.statusCode != 200) {
+        throw ApiException.fromResponse(response);
+      }
+      final List<dynamic> data = json.decode(response.body)["data"];
+      return data.map((json) => AnnouncementModel.fromJson(json)).toList();
+    } on ApiClientException catch (_) {
+      rethrow;
+    }
   }
 }

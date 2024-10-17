@@ -41,7 +41,7 @@ class StudentCard extends StatelessWidget {
             top: Spacing.xs,
             right: Spacing.xs,
             child: Container(
-              height: 240,
+              height: 260,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -125,6 +125,11 @@ class StudentCard extends StatelessWidget {
                               letterSpacing: 0.5,
                             ),
                       ),
+                  ],
+                ),
+                const SizedBox(height: Spacing.sm),
+                Row(
+                  children: [
                     const Spacer(),
                     Text(
                       "STUDENT ID",
@@ -135,7 +140,7 @@ class StudentCard extends StatelessWidget {
                           ),
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ),

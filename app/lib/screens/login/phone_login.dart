@@ -63,7 +63,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
   @override
   Widget build(BuildContext context) {
     final loginState = LoginProvider.of(context).state;
-    final shouldBeCompact = MediaQuery.of(context).size.width <= 480;
+    final shouldBeCompact = MediaQuery.of(context).size.height <= 380;
 
     final contentGap = shouldBeCompact ? Spacing.md : Spacing.xl;
     final headingStyle = shouldBeCompact
@@ -104,7 +104,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                     errorMessage: errorMessage,
                   ),
                 ),
-                SizedBox(height: contentGap),
+                const SizedBox(height: Spacing.sm),
                 TextButton(
                     onPressed: () {},
                     child: Text("Use Email Instead",

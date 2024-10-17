@@ -17,6 +17,9 @@ class SaveConfirmationDialog extends StatelessWidget {
     return Dialog(
       child: Container(
         height: 280,
+        constraints: const BoxConstraints(
+          maxWidth: 460,
+        ),
         padding: const EdgeInsets.symmetric(
             horizontal: Spacing.lg, vertical: Spacing.lg),
         child: Column(

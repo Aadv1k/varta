@@ -6,6 +6,7 @@ import 'package:app/repository/announcements_repo.dart';
 import 'package:app/repository/school_repository.dart';
 import 'package:app/repository/user_repo.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_list_item.dart';
+import 'package:app/screens/announcement_inbox/view_announcement_readonly_screen.dart';
 import 'package:app/widgets/connection_error.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,7 @@ String _formatDate(DateTime? date) {
 class _SearchScreenState extends State<SearchScreen> {
   final AnnouncementsRepository _announcementRepo = AnnouncementsRepository();
   SearchData _data = SearchData();
-  Future<List<AnnouncementModel>>? _searchResults;
+  Future<List<AnnouncementModel>>? _searchResultsFuture;
 
   void _handleSearchSubmit(_) {
     if (_data.query == null || _data.query!.isEmpty) return;
@@ -48,7 +49,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _doSearchRequest() async {
     setState(() {
-      _searchResults = _announcementRepo.searchAnnouncement(_data);
+      _searchResultsFuture = _announcementRepo.searchAnnouncement(_data);
     });
   }
 
@@ -98,8 +99,10 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           automaticallyImplyLeading: false,
+          backgroundColor: AppColor.primaryBg,
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(Spacing.xl),
             child: Align(
@@ -162,9 +165,9 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           titleSpacing: 0,
         ),
-        body: _searchResults != null
+        body: _searchResultsFuture != null
             ? FutureBuilder(
-                future: _searchResults,
+                future: _searchResultsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -175,11 +178,10 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: GenericError(size: ErrorSize.large));
                   }
 
-                  if (snapshot.data!.isNotEmpty) {
+                  if (snapshot.data!.isEmpty) {
                     return const Center(
                         heightFactor: 0.8,
                         child: GenericError(
-                          size: ErrorSize.medium,
                           svgPath: "falling.svg",
                           errorMessage:
                               "It looks like your search didn't yield any results!",
@@ -208,7 +210,17 @@ class _SearchScreenState extends State<SearchScreen> {
                               itemCount: snapshot.data!.length,
                               itemBuilder: (context, index) =>
                                   AnnouncementListItem(
-                                      announcement: snapshot.data![index])),
+                                    announcement: snapshot.data![index],
+                                    onPressed: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ViewAnnouncementReadonlyScreen(
+                                          announcement: snapshot.data![index],
+                                        ),
+                                      ),
+                                    ),
+                                  )),
                         ),
                       ],
                     ),
