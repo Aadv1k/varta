@@ -4,7 +4,8 @@ import 'package:app/common/exceptions.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/services/api_service.dart';
 import 'package:app/services/token_service.dart';
-import 'package:http/http.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 class AuthService {
   final ApiService _apiService = ApiService();
@@ -16,8 +17,7 @@ class AuthService {
       "/me/verify",
       body: {
         // TODO: ideally there would be a proper implementation for selecting the country code on the front-end. Currently this has to do
-        "input_data":
-            "${data.inputType == LoginType.email ? "" : "+91"}${data.inputData}",
+        "input_data": data.inputData,
         "school_id": data.schoolIDAndName!.$1,
         "otp": data.otp
       },
@@ -45,8 +45,7 @@ class AuthService {
       "/me/login",
       body: {
         // TODO: ideally there would be a proper implementation for selecting the country code on the front-end. Currently this has to do
-        "input_data":
-            "${data.inputType == LoginType.email ? "" : "+91"}${data.inputData}",
+        "input_data": data.inputData,
         "input_format":
             data.inputType == LoginType.email ? "email" : "phone_number",
         "school_id": data.schoolIDAndName!.$1
@@ -68,5 +67,26 @@ class AuthService {
 
   Future<void> renewToken() {
     throw UnimplementedError("AUTH SERVICE RENWEW TOKEN NOT IMPLEMENTED");
+  }
+
+  Future<void> registerDevice(String token, String contactData) async {
+    try {
+      final response = await _apiService.makeRequest(
+        HTTPMethod.POST,
+        "/me/device",
+        isAuthenticated: true,
+        body: {
+          "device_token": token,
+          "logged_in_through": contactData,
+          "device_type": kIsWeb ? "web" : "android"
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw ApiException.fromResponse(response);
+      }
+    } on ApiClientException catch (_) {
+      rethrow;
+    }
   }
 }

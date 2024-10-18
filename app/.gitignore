@@ -41,3 +41,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Since this is a private REPO we are going to commit this
+# /android/app/google-services.json
+# /lib/firebase_options.dart

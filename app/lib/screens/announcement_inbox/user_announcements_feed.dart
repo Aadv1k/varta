@@ -1,7 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:js_interop';
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
@@ -107,7 +103,7 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
     }
   }
 
-  void _handleDeleteAnnouncement(int index) async{
+  void _handleDeleteAnnouncement(int index) async {
     var state = AppProvider.of(context).state;
     AnnouncementModel announcementToDelete = state.userAnnouncements[index];
 

@@ -1,0 +1,1 @@
+console.log("FROM: firebase-messaging-sw.js");

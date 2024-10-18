@@ -15,6 +15,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: Spacing.md),
       child: Container(
         height: 320,
         constraints: const BoxConstraints(maxWidth: 460, minWidth: 280),

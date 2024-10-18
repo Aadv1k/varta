@@ -8,6 +8,7 @@ import 'package:app/models/login_data.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/repository/user_repo.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
+import 'package:app/services/notification_service.dart';
 import 'package:app/services/simple_cache_service.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
@@ -60,6 +61,12 @@ class _OTPVerificationState extends State<OTPVerification> {
       cacheService.store("user", jsonEncode(user.toJson()));
 
       final appState = await AppState.initialize(user: user);
+
+      final notificationService = NotificationService();
+
+      if (!await notificationService.didAllowNotifications()) {
+        await notificationService.initNotifications(loginData.inputData!);
+      }
 
       Navigator.pushAndRemoveUntil(
           context,
@@ -117,8 +124,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                       style: Theme.of(context).textTheme.bodyMedium,
                       children: [
                         TextSpan(
-                            text:
-                                "${loginData.inputType == LoginType.email ? '' : '+91 '}${loginData.inputData}",
+                            text: loginData.inputData,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium

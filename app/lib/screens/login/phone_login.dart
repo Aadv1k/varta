@@ -14,6 +14,24 @@ import 'package:app/widgets/phone_number_input.dart';
 import 'package:app/widgets/varta_button.dart';
 import 'package:flutter/material.dart';
 
+bool isPhoneNumberValid(String phoneNumber) {
+  if (!phoneNumber.startsWith('+')) {
+    return false;
+  }
+
+  String numericPart = phoneNumber.substring(1);
+
+  if (!RegExp(r'^\d+$').hasMatch(numericPart)) {
+    return false;
+  }
+
+  if (numericPart.length < 8 || numericPart.length > 15) {
+    return false;
+  }
+
+  return true;
+}
+
 class PhoneLogin extends StatefulWidget {
   const PhoneLogin({super.key});
 
@@ -124,7 +142,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                         handleVerificationClick(context, loginState),
                     isLoading: isLoading,
                     isDisabled: loginState.data.inputData == null ||
-                        loginState.data.inputData?.length != 10,
+                        isPhoneNumberValid(loginState.data.inputData!) == false,
                   ),
                 )
               ],

@@ -15,6 +15,7 @@ class SaveConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: Spacing.md),
       child: Container(
         height: 280,
         constraints: const BoxConstraints(

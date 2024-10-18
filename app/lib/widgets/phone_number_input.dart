@@ -34,7 +34,7 @@ class _PhoneNumberInputState extends State<PhoneNumberInput> {
   );
 
   void _handleInputChange() {
-    widget.onInput(maskFormatter.getUnmaskedText());
+    widget.onInput("+91${maskFormatter.getUnmaskedText()}");
     setState(() {
       phoneNumber = phoneNumberInputController.text;
     });

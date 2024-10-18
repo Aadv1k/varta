@@ -126,8 +126,8 @@ class AnnouncementsRepository {
       final http.Response response = await _apiService.makeRequest(
           HTTPMethod.PUT, "/announcements/${oldAnnouncement.id}",
           body: {
-            "title": oldAnnouncement.title == data.title ? null : data.title,
-            "body": oldAnnouncement.body == data.body ? null : data.body,
+            "title": data.title,
+            "body": data.body,
             "scopes": data.scopes
                 .map((scope) => scope.toAnnouncementScope().toJson())
                 .toList(),
@@ -157,7 +157,7 @@ class AnnouncementsRepository {
       if (response.statusCode != 200) {
         throw ApiException.fromResponse(response);
       }
-      final List<dynamic> data = json.decode(response.body)["data"];
+      final List<dynamic> data = json.decode(response.body)["data"]["results"];
       return data.map((json) => AnnouncementModel.fromJson(json)).toList();
     } on ApiClientException catch (_) {
       rethrow;
