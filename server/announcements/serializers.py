@@ -35,8 +35,7 @@ def validate_department(data: str):
 
 class AnnouncementScopeSerializer(serializers.ModelSerializer):
     filter = serializers.ChoiceField(required=True, choices=AnnouncementScope.FilterType.choices)
-    filter_data = serializers.CharField(required=False, max_length=255)
-
+    filter_data = serializers.CharField(required=False, max_length=255, allow_blank=True)
 
     def validate(self, data):
         filter_type = data.get('filter')

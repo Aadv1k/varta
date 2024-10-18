@@ -94,7 +94,7 @@ def user_verify(request):
     if not serializer.is_valid():
         return ErrorResponseBuilder() \
                 .set_code(400)        \
-                .set_message("We couldn't verify your number. Please check the number you entered and try again.") \
+                .set_message("We couldn't verify your details. Please check the details you entered and try again.") \
                 .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
                 .build()
 
@@ -110,7 +110,15 @@ def user_verify(request):
                     .set_message("Invalid or expired OTP. Please try again")   \
                     .build()
 
-    user = UserContact.objects.filter(contact_data=contact_data).first().user
+    user_query = UserContact.objects.filter(contact_data=contact_data)
+
+    if not user_query.exists():
+        return ErrorResponseBuilder() \
+                .set_code(400)        \
+                .set_message("User with the provided details wasn't found")   \
+                .build()
+
+    user = user_query.first().user
 
     token_issuer = "varta.app" if user_agent_is_from_mobile(request.META.get('HTTP_USER_AGENT', "")) else "varta.web"
 
@@ -167,8 +175,8 @@ def user_device(request):
     serializer.save()
 
     return SuccessResponseBuilder() \
-                .set_code(204) \
-                .set_message(None) \
+                .set_code(200) \
+                .set_message("Your device was successfully registered") \
                 .build()
 
 

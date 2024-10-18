@@ -116,9 +116,15 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
 
     def list(self, request):
-        return self._paginate_announcements(request, Announcement.objects.belong_to_user_school(request.user).exclude(author__id=request.user.id))
+        return self._paginate_announcements(request, Announcement.objects.filter(author__school__id=request.user.school.id).exclude(author__id=request.user.id))
 
     def create(self, request):
+        if not isinstance(request.data, dict):
+            return ErrorResponseBuilder() \
+                .set_code(400) \
+                .set_message("Invalid data format. Expected JSON.") \
+                .build()
+
         serializer = AnnouncementSerializer(data={
             "author": request.user.id,
             **request.data
@@ -147,7 +153,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=['get'])
     def list_mine(self, request):
-        return self._paginate_announcements(request,  Announcement.objects.get_by_user(request.user))
+        return self._paginate_announcements(request,  Announcement.objects.filter(author=request.user))
     
     @action(detail=True, methods=['get'])
     def updated_since(self, request):
@@ -164,15 +170,16 @@ class AnnouncementViewSet(viewsets.ViewSet):
         
         base_query = Announcement.objects.belong_to_user_school(request.user)
 
-        deleted_announcements = Announcement.objects.deleted_belong_to_user_school(request.user).filter(deleted_at__gte=timestamp)
+        deleted_announcements = Announcement.objects.deleted_belong_to_user_school(request.user).filter(deleted_at__gte=timestamp).exclude(author=request.user)
         deleted_serializer = AnnouncementOutputSerializer(data=deleted_announcements, many=True)
         deleted_serializer.is_valid()
 
+        # here we also omit the announcements by the user 
         created_announcements = base_query.filter(created_at__gte=timestamp).exclude(updated_at__isnull=False)
-        created_serializer = AnnouncementOutputSerializer(data=created_announcements, many=True)
+        created_serializer = AnnouncementOutputSerializer(data=[announcement for announcement in created_announcements if announcement.author != request.user], many=True)
         created_serializer.is_valid()
 
-        updated_announcements = base_query.filter(updated_at__gte=timestamp)
+        updated_announcements = base_query.filter(updated_at__gte=timestamp).exclude(author=request.user)
         updated_serializer = AnnouncementOutputSerializer(data=updated_announcements, many=True)
         updated_serializer.is_valid()
 
@@ -194,7 +201,6 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=['get'])
     def search(self, request: Request):
-        # posted_by_query_param = request.query_params.get("posted_by"),
         search_serializer = self.SearchSerializer(data={
             "query": request.query_params.get("query", ""),
             "posted_by": request.GET.getlist('posted_by'), #[puid for puid in posted_by_query_param if puid != None],
@@ -216,7 +222,6 @@ class AnnouncementViewSet(viewsets.ViewSet):
         else:
             base_query = Announcement.objects.filter(author__school__id=request.user.school.id, deleted_at__isnull=True)
 
-
         if validated_data.get("query"):
             base_query = base_query.filter(title__icontains=validated_data["query"])
 
@@ -226,14 +231,15 @@ class AnnouncementViewSet(viewsets.ViewSet):
         if validated_data.get("date_to"):
             base_query = base_query.filter(created_at__lte=validated_data["date_to"])
 
-        results = base_query
+        results = [announcement for announcement in base_query if announcement.for_user(request.user)]
 
-        output_serializer = AnnouncementOutputSerializer(data=results, many=True)
-        assert not output_serializer.is_valid(), search_serializer.errors
+        output_serializer = AnnouncementOutputSerializer(results, many=True)
 
         return SuccessResponseBuilder() \
             .set_message("Search query complete") \
-            .set_data(output_serializer.data) \
+            .set_data({
+                "results": output_serializer.data,
+            }) \
             .set_metadata({
                 "results": len(output_serializer.data),
             }) \

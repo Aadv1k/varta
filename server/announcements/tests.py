@@ -325,7 +325,7 @@ class SearchAnnouncementsTestCase(BaseAnnouncementTestCase):
         response = self.client.get(f"{reverse("announcement_search")}?query=hello")
 
         self.assertEqual(response.status_code, 200)
-        ids = [announcement["id"] for announcement in response.data["data"]]
+        ids = [announcement["id"] for announcement in response.data["data"]["results"]]
         self.assertIn(str(self.announcement_of_aug.id), ids)
         self.assertIn(str(self.announcement_of_sep.id), ids)
 
@@ -334,15 +334,15 @@ class SearchAnnouncementsTestCase(BaseAnnouncementTestCase):
         response = self.client.get(f"{reverse("announcement_search")}?posted_by={self.teacher_class_english_12th[0].public_id}")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["data"]), 1)
-        self.assertEqual(str(self.announcement_of_aug.id), response.data["data"][0]["id"])
+        self.assertEqual(len(response.data["data"]["results"]), 1)
+        self.assertEqual(str(self.announcement_of_aug.id), response.data["data"]["results"][0]["id"])
 
         response = self.client.get(f"{reverse("announcement_search")}?posted_by={self.teacher_mathematics_9th[0].public_id}")
 
         self.assertEqual(response.status_code, 200)
         
-        self.assertEqual(len(response.data["data"]), 1)
-        self.assertEqual(str(self.announcement_of_sep.id), response.data["data"][0]["id"])
+        self.assertEqual(len(response.data["data"]["results"]), 1)
+        self.assertEqual(str(self.announcement_of_sep.id), response.data["data"]["results"][0]["id"])
 
     def test_search_announcements_posted_by_multiple(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
@@ -350,9 +350,10 @@ class SearchAnnouncementsTestCase(BaseAnnouncementTestCase):
 
         self.assertEqual(response.status_code, 200)
         
-        self.assertEqual(len(response.data["data"]), 2)
 
-        ids = [announcement["id"] for announcement in response.data["data"]]
+        self.assertEqual(len(response.data["data"]["results"]), 2)
+
+        ids = [announcement["id"] for announcement in response.data["data"]["results"]]
         self.assertIn(str(self.announcement_of_aug.id), ids)
         self.assertIn(str(self.announcement_of_sep.id), ids)
 
