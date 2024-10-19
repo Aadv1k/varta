@@ -21,9 +21,9 @@ class UserAdmin(admin.ModelAdmin):
 admin.site.register(User, UserAdmin)
 
 class UserContactAdmin(admin.ModelAdmin):
-    list_display = ('user', 'contact_importance', 'contact_type', 'contact_data')
+    list_display = ('user', 'contact_type', 'contact_data')
     search_fields = ('user__first_name', 'user__last_name', 'contact_data')  
-    list_filter = ('contact_type', 'contact_importance')  
+    list_filter = ('contact_type', )
 
 admin.site.register(UserContact, UserContactAdmin)
 

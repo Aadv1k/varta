@@ -15,6 +15,8 @@ from schools.models import School
 from announcements.tests import BaseAnnouncementTestCase
 
 class UserActionTest(APITestCase):
+    fixtures = ["initial_classrooms"]
+
     def setUp(self):
         self.kv_store = KVStoreFactory()
         self.otp_service = OTPService()
@@ -41,21 +43,18 @@ class UserActionTest(APITestCase):
 
         self.primary_contact_email = UserContact.objects.create(
             user=self.student,
-            contact_importance=UserContact.ContactImportance.PRIMARY,
             contact_type=UserContact.ContactType.EMAIL,
             contact_data="aarav.sharma@example.com"
         )
 
         UserContact.objects.create(
             user=self.student,
-            contact_importance=UserContact.ContactImportance.SECONDARY,
             contact_type=UserContact.ContactType.PHONE_NUMBER,
             contact_data="+919876543210"
         )
 
         UserContact.objects.create(
             user=self.student,
-            contact_importance=UserContact.ContactImportance.PRIMARY,
             contact_type=UserContact.ContactType.PHONE_NUMBER,
             contact_data="+919123456789"
         )

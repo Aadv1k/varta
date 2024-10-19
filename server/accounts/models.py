@@ -103,7 +103,7 @@ class User(models.Model):
 
 class StudentDetail(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_details")
-    classroom = models.OneToOneField(Classroom, on_delete=models.SET_NULL, null=True)
+    classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "Student Detail"
@@ -126,16 +126,11 @@ class TeacherDetail(models.Model):
         return f"{self.user}'s Teacher Details"
 
 class UserContact(models.Model):
-    class ContactImportance(models.TextChoices):
-        PRIMARY = "primary", "Primary"
-        SECONDARY = "secondary", "Secondary"
-
     class ContactType(models.TextChoices):
         EMAIL = "email", "Email"
         PHONE_NUMBER = "phone_number", "Phone Number"
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="contacts")
-    contact_importance = models.CharField(max_length=10, choices=ContactImportance.choices)
     contact_type = models.CharField(max_length=14, choices=ContactType.choices)
     contact_data = models.CharField(max_length=255)
 
@@ -145,12 +140,11 @@ class UserContact(models.Model):
         unique_together = ('user', 'contact_type', 'contact_data')
 
         indexes = [
-            models.Index(fields=["contact_importance", "contact_type", "contact_data"])
+            models.Index(fields=["contact_type", "contact_data"])
         ]
 
-
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}'s - {self.contact_importance} {self.contact_type}"
+        return f"{self.user}'s {self.contact_type} - {self.contact_data}"
 
 
 class UserDevice(models.Model):
