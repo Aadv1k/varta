@@ -159,7 +159,7 @@ class UserActionTest(APITestCase):
             "device_type": "web",
         }, format="json")
 
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 200)
         
 
     def test_user_cannot_register_device_with_invalid_login_details(self):

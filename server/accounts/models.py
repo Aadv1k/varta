@@ -40,6 +40,11 @@ class Classroom(models.Model):
         unique_together = ('standard', 'division')
         ordering = ['standard', 'division']
 
+        indexes = [
+            models.Index(fields=["standard"]),
+            models.Index(fields=["standard", "division"]),
+        ]
+
 
 # NOTE: this is a reference table data at ./fixtures/initial_departments.json
 class Department(models.Model):
@@ -58,6 +63,10 @@ class Department(models.Model):
             return Department.objects.get(department_name=dept_name)
         except Department.DoesNotExist:
             return None
+
+    indexes = [
+        models.Index(fields=["department_code"]),
+    ]
 
 class User(models.Model):
     class UserType(models.TextChoices):
@@ -84,7 +93,13 @@ class User(models.Model):
         return f"{self.first_name} {"" if not self.middle_name else self.middle_name + "."} {self.last_name or ""}"
     
     class Meta:
-        ordering = ['last_name', 'first_name']
+        ordering = ['first_name', 'last_name']
+
+    indexes = [
+        models.Index(fields=["user_type"]),
+        models.Index(fields=["user_type", "school"]),
+    ]
+
 
 class StudentDetail(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_details")
@@ -129,6 +144,11 @@ class UserContact(models.Model):
         verbose_name_plural = "User Contacts"
         unique_together = ('user', 'contact_type', 'contact_data')
 
+        indexes = [
+            models.Index(fields=["contact_importance", "contact_type", "contact_data"])
+        ]
+
+
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}'s - {self.contact_importance} {self.contact_type}"
 
@@ -145,7 +165,6 @@ class UserDevice(models.Model):
     device_type = models.CharField(max_length=10, choices=DeviceType.choices, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     last_used_at = models.DateTimeField(auto_now=True)
-
 
     class Meta:
         unique_together = ('user', 'device_token') 
