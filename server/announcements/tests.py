@@ -30,13 +30,6 @@ class BaseAnnouncementTestCase(APITestCase):
         token, _ = TokenService.generate_token_pair(TokenPayload(sub=str(user.public_id), iss="varta.test", role=user.user_type))
 
         return user, token
-    @staticmethod
-    def create_test_file(name="test.pdf", content=b"test content"):
-        return SimpleUploadedFile(
-            name=name,
-            content=content,
-            content_type="application/pdf"
-        )
 
     @staticmethod
     def create_teacher_and_token(school, departments: List[str], subject_teacher_of: Optional[List[str]] = None, class_teacher_of: Optional[str] = None):
@@ -779,9 +772,3 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertIn("resource_url", response.data["data"])
-
-    def test_user_cannot_add_more_than_N_attachments_to_announcement(self):
-        pass
-
-    def test_user_can_add_attachments_to_announcement(self):
-        pass
