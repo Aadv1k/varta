@@ -105,3 +105,20 @@ class AnnouncementScope(models.Model):
         if self.filter_data:
             filter_info += f" ({self.filter_data})"
         return f"Scope for {self.announcement.title}: {filter_info}"
+
+class AnnouncementAttachment(models.Model):
+    class AttachmentType(models.TextChoices):
+        JPEG = "image/jpeg", "JPEG"
+        PNG = "image/PNG", "PNG"
+        PDF = "application/pdf", "pdf",
+        DOC = "application/msword", "DOC",
+        DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "DOCX"
+        XLS = "application/vnd.ms-excel", "XLS",
+        XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "XLSX"
+
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="attachments")
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    attachment_name = models.CharField(max_length=512)
+    attachment_type = models.CharField(max_length=128, choices=AttachmentType.choices)
+    attachment_path = models.URLField(max_length=2048)

@@ -7,5 +7,13 @@
             "end_date": "2025-03-31",
             "current": true
         }
+    },
+    {
+        "model": "schools.AcademicYear",
+        "pk": 1,
+        "fields": {
+            "start_date": "2025-04-01",
+            "end_date": "2026-03-31"
+        }
     }
 ]

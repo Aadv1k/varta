@@ -13,7 +13,7 @@ class TeacherDetailInline(admin.TabularInline):
 
 class UserAdmin(admin.ModelAdmin):
     inlines = [TeacherDetailInline]
-    list_display = ('public_id', 'first_name', 'middle_name', 'last_name', 'user_type', 'school')
+    list_display = ('public_id', 'first_name', 'middle_name', 'last_name', 'user_type')
     search_fields = ('first_name', 'last_name', 'school__name') 
     list_filter = ('user_type', 'school') 
     ordering = ('last_name', 'first_name')

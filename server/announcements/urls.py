@@ -20,7 +20,11 @@ urlpatterns = [
         "get": "search",
     }), name="announcement_search"),
 
-    path("announcements/mine/", AnnouncementViewSet.as_view({
+    path("announcements/mine", AnnouncementViewSet.as_view({
         "get": "list_mine",
-    }), name="my_announcement_list")
+    }), name="my_announcement_list"),
+
+    path("announcements/upload", AnnouncementViewSet.as_view({
+        "post": "create_attachment",
+    }), name="announcement_attachment_upload")
 ]

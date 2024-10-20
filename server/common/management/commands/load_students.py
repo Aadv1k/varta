@@ -13,8 +13,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         filepath = options['filepath']
 
-        User.objects.filter(user_type=User.UserType.STUDENT).delete()
-
         try:
             school = School.objects.get(id=options["school_id"])
         except School.DoesNotExist:
@@ -29,15 +27,23 @@ class Command(BaseCommand):
             raise CommandError("Error decoding JSON data.")
 
         for data in students_data:
+            first_name = data.get("first_name", "")
+            middle_name = data.get("middle_name")
+            last_name = data.get("last_name") or ""
+
             self.stdout.write(f"Processing {data["first_name"]} {data.get("last_name") or data.get("middle_name")}")
 
-            user = User.objects.create(
+            user, created = User.objects.get_or_create(
                 school=school,
-                first_name=data.get("first_name", ""),
-                middle_name=data.get("middle_name"),
-                last_name=data.get("last_name") or "", 
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
                 user_type=User.UserType.STUDENT
             )
+
+            if not created:
+                self.stdout.write(self.style.WARNING(f"User {first_name} {last_name if last_name else middle_name} already exists, skipping."))
+                continue
 
             classroom = None
             if data.get("classroom"):
@@ -52,8 +58,7 @@ class Command(BaseCommand):
                 for contact in contacts:
                     UserContact.objects.create(
                         user=user,
-                        contact_importance=UserContact.ContactImportance.PRIMARY,
-                        contact_type=UserContact.ContactType.EMAIL if contact["input_type"] == "email" else UserContact.ContactType.PHONE_NUMBER,
+                        contact_type=UserContact.ContactType.EMAIL if contact["contact_type"] == "email" else UserContact.ContactType.PHONE_NUMBER,
                         contact_data=contact["contact_data"]
                     )
 

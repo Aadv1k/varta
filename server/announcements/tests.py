@@ -8,6 +8,12 @@ from .models import Announcement, AnnouncementScope
 import math
 import datetime
 
+from django.conf import settings
+
+import tempfile
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 class BaseAnnouncementTestCase(APITestCase):
     @staticmethod
     def create_student_and_token(school, std_div) -> Tuple[User, str]:
@@ -24,6 +30,13 @@ class BaseAnnouncementTestCase(APITestCase):
         token, _ = TokenService.generate_token_pair(TokenPayload(sub=str(user.public_id), iss="varta.test", role=user.user_type))
 
         return user, token
+    @staticmethod
+    def create_test_file(name="test.pdf", content=b"test content"):
+        return SimpleUploadedFile(
+            name=name,
+            content=content,
+            content_type="application/pdf"
+        )
 
     @staticmethod
     def create_teacher_and_token(school, departments: List[str], subject_teacher_of: Optional[List[str]] = None, class_teacher_of: Optional[str] = None):
@@ -686,3 +699,89 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
         self.assertEqual(len(response.data["data"]["deleted"]), 0)
         self.assertEqual(len(response.data["data"]["updated"]), 0)
         self.assertEqual(response.data["data"]["new"][0]["id"], announcement_id)
+
+class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
+    fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
+
+    def setUp(self):
+        settings.MEDIA_ROOT=tempfile.gettempdir()
+
+        self.school = School.objects.create(
+            name="Delhi Public School",
+            address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
+            phone_number="+911123456789",
+            email="info@dpsrohini.com",
+            website="https://www.dpsrohini.com"
+        )
+
+        self.teacher, self.teacher_token = self.create_teacher_and_token(self.school, ["lang/english"], subject_teacher_of=["12A", "12B", "12C", "12D"], class_teacher_of="12D")
+
+    def test_user_cannot_upload_attachment_that_is_too_large(self):
+        file = SimpleUploadedFile(
+                name="testing_large_file.pdf", 
+                content_type="application/pdf", 
+                content=b"0" * 15 * 1024 * 1024, 
+        )
+
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.teacher_token)
+        response = self.client.post(
+                reverse("announcement_attachment_upload"),
+                data={
+                    "file_content": file,
+                    "file_name": "testing_large_file.pdf",
+                }, 
+                format="multipart"
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(len(response.data.get("errors") or []), 1)
+        self.assertEqual(response.data["errors"][0]["field"], "file_content")
+
+
+    def test_user_cannot_upload_attachments_of_invalid_filetype(self):
+        file = SimpleUploadedFile(
+                name="testing.mp4", 
+                content_type="video/mp4", 
+                content=b"0" * 5 * 1024 * 1024, 
+        )
+
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.teacher_token)
+        response = self.client.post(
+                reverse("announcement_attachment_upload"),
+                data={
+                    "file_content": file,
+                    "file_name": "testing.mp4",
+                }, 
+                format="multipart"
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(len(response.data.get("errors") or []), 1)
+        self.assertEqual(response.data["errors"][0]["field"], "file_content")
+
+
+    def test_user_can_upload_valid_attachment(self):
+        file = SimpleUploadedFile(
+                name="docx file", 
+                content_type="application/msword", 
+                content=b"0" * 5 * 1024 * 1024, 
+        )
+
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.teacher_token)
+        response = self.client.post(
+                reverse("announcement_attachment_upload"),
+                data={
+                    "file_content": file,
+                    "file_name": "docx file",
+                }, 
+                format="multipart"
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("resource_url", response.data["data"])
+
+    def test_user_cannot_add_more_than_N_attachments_to_announcement(self):
+        pass
+
+    def test_user_can_add_attachments_to_announcement(self):
+        pass

@@ -1,5 +1,11 @@
 from pathlib import Path
 
+import os
+import sys
+
+from dotenv import load_dotenv
+load_dotenv() 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-%erff=vl*7gn6gw9n)wgbs6b7m*un!)35687)kr9n&@*nsjd75'
 
@@ -11,8 +17,6 @@ ALLOWED_HOSTS = [
     "192.168.1.6"
 ]
 
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -64,16 +68,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
 # Password validation
@@ -122,18 +118,42 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # == Custom Configuration == #
 # ========================== #
 
-import os
-import sys
-
-from dotenv import load_dotenv
-load_dotenv() 
 
 CORS_ALLOW_ALL_ORIGINS = True
 
 FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS=30
 
+MAX_UPLOAD_SIZE_IN_BYTES = 10 * 1024 * 1024 # 10MB
+MAX_ATTACHMENTS_PER_ANNOUNCEMENT = 4
+
 # https://stackoverflow.com/questions/6957016/detect-django-testing-mode
 TESTING = sys.argv[1:2] == ['test']
+
+
+AWS_RDS_VARTA_DB_CONNECTION_URL = os.getenv("AWS_RDS_VARTA_DB_CONNECTION_URL")
+AWS_RDS_VARTA_DB_PASSWORD = os.getenv("AWS_RDS_VARTA_DB_PASSWORD")
+
+if not AWS_RDS_VARTA_DB_PASSWORD or not AWS_RDS_VARTA_DB_CONNECTION_URL:
+    raise Exception("BAD CONFIG AWS_RDS_VARTA_DB_CONNECTION_URL and AWS_RDS_VARTA_DB_PASSWORD are required to setup the database")
+
+if TESTING:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "vartadb",
+            "USER": "aadv1k",
+            "PASSWORD": AWS_RDS_VARTA_DB_PASSWORD,
+            "HOST": AWS_RDS_VARTA_DB_CONNECTION_URL,
+            "PORT": "5432",
+        }
+    }
 
 
 # 5 minutes
@@ -145,12 +165,6 @@ MASTER_OTP = "000000"
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 REDIS_PASSWORD = ""
-
-# MJ_APIKEY_PUBLIC = os.getenv("MJ_APIKEY_PUBLIC")
-# MJ_APIKEY_PRIVATE = os.getenv("MJ_APIKEY_PRIVATE")
-
-# if not MJ_APIKEY_PUBLIC or not MJ_APIKEY_PRIVATE:
-#     raise Exception("BAD CONFIG mailjet MJ_APIKEY_PUBLIC and MJ_APIKEY_PRIVATE configuration for email required")
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (       

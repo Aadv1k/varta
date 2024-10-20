@@ -7,11 +7,13 @@ from datetime import datetime
 import pytz
 
 from accounts.models import User
-from .models import Announcement, AnnouncementScope
+from .models import Announcement, AnnouncementScope, AnnouncementAttachment
 
 from common.fields.AcademicYearField import AcademicYearField
 from common.services.notification_queue import NotificationQueueFactory
 from common.services.notification_service import send_notification
+
+from django.conf import settings
 
 from accounts.models import Department, Classroom
 
@@ -32,6 +34,17 @@ def validate_department(data: str):
         Department.objects.get(department_code=data)
     except Department.DoesNotExist:
         raise ValidationError(f"Couldn't find a department of code \"{data}\".")
+
+
+class AnnouncementAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnnouncementAttachment
+        exclude = ["id", "created_at"]
+
+class AnnouncementAttachmentOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnnouncementAttachment
+        exclude = ["announcement"]
 
 class AnnouncementScopeSerializer(serializers.ModelSerializer):
     filter = serializers.ChoiceField(required=True, choices=AnnouncementScope.FilterType.choices)
@@ -73,10 +86,15 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=255)
     body = serializers.CharField()
     scopes = AnnouncementScopeSerializer(many=True)
+    attachments = AnnouncementAttachmentSerializer(many=True)
 
     class Meta:
         model = Announcement 
         fields = ["id", "title", "body", "scopes", "author"]
+
+    def validate_scopes(self, attachments):
+        if len(attachments) > settings.MAX_ATTACHMENTS_PER_ANNOUNCEMENT:
+            raise ValidationError(f"Can't have more than {settings.MAX_ATTACHMENTS_PER_ANNOUNCEMENT} attachments per announcement")
 
     def validate_scopes(self, scopes_data):
         if len(scopes_data) == 0:
@@ -124,6 +142,7 @@ class SimpleAnnouncementAuthorSerializer(serializers.ModelSerializer):
 class AnnouncementOutputSerializer(serializers.ModelSerializer):
     author = SimpleAnnouncementAuthorSerializer()
     scopes = AnnouncementScopeSerializer(many=True)
+    attachments = AnnouncementAttachmentOutputSerializer(many=True)
     academic_year = AcademicYearField() 
 
     class Meta:
