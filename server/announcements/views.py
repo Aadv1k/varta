@@ -27,6 +27,9 @@ from schools.models import AcademicYear
 from common.response_builder import ErrorResponseBuilder, SuccessResponseBuilder
 from common.fields.AcademicYearField import AcademicYearField
 
+from common.services.notification_queue import NotificationQueueFactory
+from common.services.notification_service import send_notification
+
 from common.services.bucket_store import BucketStoreFactory
 
 import re
@@ -34,6 +37,9 @@ import re
 from accounts.permissions import IsTeacher
 
 from rest_framework.permissions import BasePermission
+
+notification_queue = NotificationQueueFactory(send_notification)
+
 
 class IsOwner(BasePermission):
     def has_permission(self, request, view):
@@ -145,6 +151,8 @@ class AnnouncementViewSet(viewsets.ViewSet):
                 .build()
 
         serializer.save()
+
+        notification_queue.enqueue(serializer.data["id"])
 
         return SuccessResponseBuilder() \
             .set_code(201) \
@@ -334,7 +342,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
         serializer.save()
 
-        # TOOD: handle re-notification here 
+        notification_queue.enqueue(old_announcement.id)
 
         return SuccessResponseBuilder() \
             .set_code(200) \
