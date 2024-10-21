@@ -136,6 +136,13 @@ AWS_RDS_VARTA_DB_PASSWORD = os.getenv("AWS_RDS_VARTA_DB_PASSWORD")
 if not AWS_RDS_VARTA_DB_PASSWORD or not AWS_RDS_VARTA_DB_CONNECTION_URL:
     raise Exception("BAD CONFIG AWS_RDS_VARTA_DB_CONNECTION_URL and AWS_RDS_VARTA_DB_PASSWORD are required to setup the database")
 
+
+ZEPTOMAIL_TOKEN = os.getenv("ZEPTOMAIL_TOKEN")
+ZEPTOMAIL_FROM_ADDRESS = os.getenv("ZEPTOMAIL_FROM_ADDRESS")
+
+if not ZEPTOMAIL_TOKEN or not ZEPTOMAIL_FROM_ADDRESS:
+    raise Exception("BAD CONFIG ZEPTOMAIL_TOKEN and ZEPTOMAIL_FROM_ADDRESS are required to setup the email service")
+
 if TESTING:
     DATABASES = {
         "default": {

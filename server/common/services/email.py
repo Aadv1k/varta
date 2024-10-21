@@ -1,37 +1,44 @@
-def send_verification_email(to_address: str, subject: str, html_message: str):
-    pass
+from django.template.loader import render_to_string
 
-    # try:
-    #     mailjet = Client(auth=(settings.MJ_APIKEY_PUBLIC, settings.MJ_APIKEY_PRIVATE), version='v3.1')
-    #     receiver_name = to_address.split("@")[0]
-    #     data = {
-    #         'Messages': [
-    #             {
-    #                 "From": {
-    #                     "Email": "killerrazerblade@gmail.com",
-    #                     "Name": "Dancing Lazer"
-    #                 },
-    #                 "To": [
-    #                     {
-    #                         "Email": to_address,
-    #                         "Name": receiver_name,
-    #                     }
-    #                 ],
-    #                 "Subject": subject,
-    #                 "HTMLPart": html_message
-    #             }
-    #         ]
-    #     }
-        
-    #     result = mailjet.send.create(data=data)
-    #     response = result.json()
-    #     response_status_code = response.get("StatusCode")
-    #     error_message = response.get("ErrorMessage")
+from django.conf import settings
 
-    #     if response_status_code == 200:
-    #         return True, None
-    #     else:
-    #         return False, f"API request failed with status code {response_status_code}; \"{error_message}\""
-    
-    # except Exception as e:
-    #     return False, f"An error occurred: {str(e)}"
+import requests
+
+url = "https://api.zeptomail.in/v1.1/email"
+
+def send_verification_email(otp: str, to_address: str, user) -> str:
+    subject = "Varta OTP Verification"
+    email_html_body = render_to_string("emails/email_otp_verification.html", {
+        "otp": otp,
+    })
+    payload = {
+        "from": {
+            "address": settings.ZEPTOMAIL_FROM_ADDRESS,
+            "name": "Aadvik at Varta"
+        },
+        "to": [
+            {
+                "email_address": {
+                    "address": to_address,
+                    "name": str(user)
+                }
+            }
+        ],
+        "subject": subject,
+        "textbody": f"Here is your varta verification code: {otp}",
+        "htmlbody": email_html_body
+    }
+
+    headers = {
+        'accept': "application/json",
+        'content-type': "application/json",
+        'authorization': settings.ZEPTOMAIL_TOKEN,
+    }
+
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    if response.status_code // 100 != 2:
+        raise Exception(f"Error sending email: {response.status_code} - {response.text}")
+
+    return response.json()["request_id"]

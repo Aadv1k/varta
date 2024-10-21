@@ -58,28 +58,29 @@ def user_login(request):
             .set_details({ "error_detail": str(e) }) \
             .build()
 
-    if user_contact.contact_type == UserContact.ContactType.EMAIL:
-        try:
-            send_verification_email(
-                user_contact.contact_data, 
-                "Your Varta verification code", 
-                f"Your one time login code for varta is <h2>{otp}</h2>"
-            )
-        except Exception as e:
-            return ErrorResponseBuilder() \
-                        .set_code(500)     \
-                        .set_message("Failed to send verification email at the moment. Please try again later.") \
-                        .set_details({ "error_detail": str(e) }) \
-                        .build()
-    elif user_contact.contact_type == UserContact.ContactType.PHONE_NUMBER:
-        try:
-            send_verification_sms(user_contact.contact_data)
-        except Exception as e:
-            return ErrorResponseBuilder() \
-                        .set_code(500)     \
-                        .set_message("Failed to send verification SMS at the moment. Please try again later.") \
-                        .set_details({ "error_detail": str(e) }) \
-                        .build()
+    if not settings.TESTING:
+        if user_contact.contact_type == UserContact.ContactType.EMAIL:
+            try:
+                send_verification_email(
+                    otp,
+                    user_contact.contact_data, 
+                    user_contact.user,
+                )
+            except Exception as e:
+                return ErrorResponseBuilder() \
+                            .set_code(500)     \
+                            .set_message("Failed to send verification email at the moment. Please try again later.") \
+                            .set_details({ "error_detail": str(e) }) \
+                            .build()
+        elif user_contact.contact_type == UserContact.ContactType.PHONE_NUMBER:
+            try:
+                send_verification_sms(user_contact.contact_data)
+            except Exception as e:
+                return ErrorResponseBuilder() \
+                            .set_code(500)     \
+                            .set_message("Failed to send verification SMS at the moment. Please try again later.") \
+                            .set_details({ "error_detail": str(e) }) \
+                            .build()
 
     return SuccessResponseBuilder() \
                 .set_message(f"Sent an OTP to {user_contact.contact_data}") \
