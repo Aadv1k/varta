@@ -72,7 +72,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
         per_page = serializers.IntegerField(max_value=100, min_value=10, required=False)
         academic_year = AcademicYearField(required=False, allow_null=True)
 
-    def _paginate_announcements(self, request, base_query):
+    def _paginate_announcements(self, request, base_query, is_user_own = False):
         try:
             serializer = self.PaginationSerializer(
                 data=dict(
@@ -102,8 +102,12 @@ class AnnouncementViewSet(viewsets.ViewSet):
         else:
             current_academic_year_query = base_query.filter(academic_year__current=True)
 
+
         sorted_announcement_query = current_academic_year_query.order_by("-created_at")
-        sorted_announcements_for_user = [ann for ann in sorted_announcement_query if ann.for_user(request.user)]
+        if not is_user_own:
+            sorted_announcements_for_user = [ann for ann in sorted_announcement_query if ann.for_user(request.user)]
+        else:
+            sorted_announcements_for_user = sorted_announcement_query
 
         serializer = AnnouncementOutputSerializer(data=sorted_announcements_for_user, many=True)
         serializer.is_valid()
@@ -128,7 +132,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
 
     def list(self, request):
-        return self._paginate_announcements(request, Announcement.objects.filter(author__school__id=request.user.school.id).exclude(author__id=request.user.id))
+        return self._paginate_announcements(request, Announcement.objects.filter(author__school__id=request.user.school.id, deleted_at__isnull=True).exclude(author__id=request.user.id))
 
     def create(self, request):
         if not isinstance(request.data, dict):
@@ -167,7 +171,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=['get'])
     def list_mine(self, request):
-        return self._paginate_announcements(request,  Announcement.objects.filter(author=request.user))
+        return self._paginate_announcements(request, Announcement.objects.filter(author__id=request.user.id, deleted_at__isnull=True), is_user_own=True)
     
     @action(detail=True, methods=['get'])
     def updated_since(self, request):

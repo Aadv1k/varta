@@ -5,7 +5,7 @@ import uuid
 import re
 
 from django.conf import settings
-from datetime import timezone, timedelta
+from datetime import timezone, timedelta, datetime
 
 class Classroom(models.Model):
     STANDARD_CHOICES = [(str(i), str(i)) for i in range(1, 13)]
@@ -158,23 +158,16 @@ class UserDevice(models.Model):
     device_token = models.CharField(max_length=255, blank=False, null=False, unique=True)
     device_type = models.CharField(max_length=10, choices=DeviceType.choices, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    last_used_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('user', 'device_token') 
         verbose_name = "User Device"
         verbose_name_plural = "User Devices"
-        ordering = ['-last_used_at']
-
 
     @property
     def is_expired(self):
         expiry_days = getattr(settings, 'FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS', 30)
-        return self.last_used_at <= timezone.now() - timedelta(days=expiry_days)
-
-    def update_last_used(self):
-        self.last_used_at = timezone.now()
-        self.save(update_fields=['last_used_at'])
+        return self.created_at <= datetime.now(timezzone.utc) - timedelta(days=expiry_days)
 
     def __str__(self):
         return f"{self.user}'s {self.device_type} device"

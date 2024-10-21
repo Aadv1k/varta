@@ -60,9 +60,8 @@ admin.site.register(Department, DepartmentAdmin)
 
 
 class UserDeviceAdmin(admin.ModelAdmin):
-    list_display = ('user', 'device_type', 'device_token', 'last_used_at')
+    list_display = ('user', 'device_type', 'device_token')
     search_fields = ('user__first_name', 'user__last_name', 'device_token')
     list_filter = ('device_type',)
-    ordering = ('-last_used_at',)  
 
 admin.site.register(UserDevice, UserDeviceAdmin)
