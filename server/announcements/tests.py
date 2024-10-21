@@ -60,13 +60,13 @@ class BaseAnnouncementTestCase(APITestCase):
     def _assertVisibleTo(self, users: List[Tuple[User, str]], ann_id: str, mine:bool=False):
         for (user, token) in users:
             self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
-            response = self.client.get(reverse("announcement_list")) if not mine else self.client.get(reverse("my_announcement_list"))
+            response = self.client.get(reverse('announcement_list')) if not mine else self.client.get(reverse("my_announcement_list"))
             self.assertIn(str(ann_id), [x["id"] for x in response.data["data"]])
 
     def _assertNotVisibleTo(self, users: List[Tuple[User, str]], ann_id: str, mine:bool=False):
         for (user, token) in users:
             self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
-            response = self.client.get(reverse("announcement_list")) if not mine else self.client.get(reverse("my_announcement_list"))
+            response = self.client.get(reverse('announcement_list')) if not mine else self.client.get(reverse('my_announcement_list'))
             self.assertNotIn(str(ann_id), [x["id"] for x in response.data["data"]])
 
 class StudentAnnouncementTestCase(BaseAnnouncementTestCase):
@@ -231,7 +231,7 @@ class MyAnnouncementsTestCase(BaseAnnouncementTestCase):
         
     def test_student_cannot_access_my_announcements_endpoint(self):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.student_12D[1]}")
-        response = self.client.get(reverse("my_announcement_list"))
+        response = self.client.get(reverse('my_announcement_list'))
 
         self.assertEqual(response.status_code, 403)
 
@@ -279,7 +279,7 @@ class PaginatedAnnouncementsTestCase(BaseAnnouncementTestCase):
 
     def test_announcements_are_paginated_correctly(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
-        response = self.client.get(reverse("announcement_list"))
+        response = self.client.get(reverse('announcement_list'))
 
         self.assertEqual(response.data["metadata"].get("page_number"), 1)
         self.assertEqual(response.data["metadata"].get("page_length"), 20)
@@ -328,7 +328,7 @@ class SearchAnnouncementsTestCase(BaseAnnouncementTestCase):
 
     def test_search_announcement_by_query(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
-        response = self.client.get(f"{reverse("announcement_search")}?query=hello")
+        response = self.client.get(f"{reverse('announcement_search')}?query=hello")
 
         self.assertEqual(response.status_code, 200)
         ids = [announcement["id"] for announcement in response.data["data"]["results"]]
@@ -337,13 +337,13 @@ class SearchAnnouncementsTestCase(BaseAnnouncementTestCase):
 
     def test_search_announcement_posted_by_single(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
-        response = self.client.get(f"{reverse("announcement_search")}?posted_by={self.teacher_class_english_12th[0].public_id}")
+        response = self.client.get(f"{reverse('announcement_search')}?posted_by={self.teacher_class_english_12th[0].public_id}")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data["data"]["results"]), 1)
         self.assertEqual(str(self.announcement_of_aug.id), response.data["data"]["results"][0]["id"])
 
-        response = self.client.get(f"{reverse("announcement_search")}?posted_by={self.teacher_mathematics_9th[0].public_id}")
+        response = self.client.get(f"{reverse('announcement_search')}?posted_by={self.teacher_mathematics_9th[0].public_id}")
 
         self.assertEqual(response.status_code, 200)
         
@@ -352,7 +352,7 @@ class SearchAnnouncementsTestCase(BaseAnnouncementTestCase):
 
     def test_search_announcements_posted_by_multiple(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_12D[1])
-        response = self.client.get(f"{reverse("announcement_search")}?posted_by={self.teacher_mathematics_9th[0].public_id}&posted_by={self.teacher_class_english_12th[0].public_id}")
+        response = self.client.get(f"{reverse('announcement_search')}?posted_by={self.teacher_mathematics_9th[0].public_id}&posted_by={self.teacher_class_english_12th[0].public_id}")
 
         self.assertEqual(response.status_code, 200)
         
@@ -382,7 +382,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_teacher_can_create_announcement_for_everyone(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-        response = self.client.post(reverse("announcement_list"), {
+        response = self.client.post(reverse('announcement_list'), {
             "title": "Test Announcement",
             "body": "This is a test announcement",
             "scopes": [
@@ -395,7 +395,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_cannot_create_announcement_with_no_scope(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-        response = self.client.post(reverse("announcement_list"), {
+        response = self.client.post(reverse('announcement_list'), {
             "title": "Test Announcement",
             "body": "This is a test announcement",
             "scopes": []
@@ -407,7 +407,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_cannot_create_announcement_with_invalid_scope_combination(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-        url = reverse("announcement_list")
+        url = reverse('announcement_list')
         response = self.client.post(url, {
             "title": "Test Announcement",
             "body": "This is a test announcement",
@@ -422,7 +422,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_cannot_create_announcement_with_illegal_departments(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-        url = reverse("announcement_list")
+        url = reverse('announcement_list')
         response = self.client.post(url, {
             "title": "Test Announcement",
             "body": "This is a test announcement",
@@ -436,7 +436,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_create_announcement_invalid_filter_content(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-        url = reverse("announcement_list")
+        url = reverse('announcement_list')
         response = self.client.post(url, {
             "title": "Test Announcement",
             "body": "This is a test announcement",
@@ -450,7 +450,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_create_announcement_for_specific_standard(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-        url = reverse("announcement_list")
+        url = reverse('announcement_list')
         response = self.client.post(url, {
             "title": "Announcement for 9th Standard",
             "body": "This is an announcement for 9th standard students",
@@ -465,7 +465,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_create_announcement_for_all_teachers(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
-        url = reverse("announcement_list")
+        url = reverse('announcement_list')
         response = self.client.post(url, {
             "title": "Announcement for All Teachers",
             "body": "This is an announcement for all teachers",
@@ -480,7 +480,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_create_announcement_for_specific_department(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
-        url = reverse("announcement_list")
+        url = reverse('announcement_list')
         response = self.client.post(url, {
             "title": "Announcement for Mathematics Department",
             "body": "This is an announcement for the mathematics department",
@@ -495,7 +495,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_create_announcement_with_multiple_scopes(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.admin[1])
-        url = reverse("announcement_list")
+        url = reverse('announcement_list')
         response = self.client.post(url, {
             "title": "Announcement for Multiple Scopes",
             "body": "This is an announcement for multiple scopes",
@@ -512,7 +512,7 @@ class CreateAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_student_cannot_create_announcement(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
-        url = reverse("announcement_list")
+        url = reverse('announcement_list')
         response = self.client.post(url, {
             "title": "Unauthorized Announcement",
             "body": "This announcement should not be created",
@@ -553,24 +553,24 @@ class ModifyAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_announcement_cannot_be_deleted_by_anyone_not_the_author(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
-        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}))
+        response = self.client.delete(reverse('announcement_detail', kwargs={"pk": self.announcement_by_teacher_9B.id}))
 
         self.assertEqual(response.status_code, 403)
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_12D[1])
-        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}))
+        response = self.client.delete(reverse('announcement_detail', kwargs={"pk": self.announcement_by_teacher_9B.id}))
 
         self.assertEqual(response.status_code, 403)
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_9B[1])
-        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}))
+        response = self.client.delete(reverse('announcement_detail', kwargs={"pk": self.announcement_by_teacher_9B.id}))
 
         self.assertEqual(response.status_code, 204)
         self.assertEqual(response.data["data"]["id"], self.announcement_by_teacher_9B.id)
     
     def test_announcements_are_soft_deleted(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_9B[1])
-        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}))
+        response = self.client.delete(reverse('announcement_detail', kwargs={"pk": self.announcement_by_teacher_9B.id}))
 
         self.assertEqual(response.status_code, 204)
         self.assertEqual(response.data["data"]["id"], self.announcement_by_teacher_9B.id)
@@ -581,7 +581,7 @@ class ModifyAnnouncementTestCase(BaseAnnouncementTestCase):
     def test_announcements_can_be_updated_by_author(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_9B[1])
         response = self.client.put(
-            reverse("announcement_detail", kwargs={"pk": self.announcement_by_teacher_9B.id}), 
+            reverse('announcement_detail', kwargs={"pk": self.announcement_by_teacher_9B.id}), 
             data={
                 "title": "This announcement is now only for teachers",
                 "body": "This announcement was initialyl for everyone but now is only for teachers",
@@ -595,7 +595,7 @@ class ModifyAnnouncementTestCase(BaseAnnouncementTestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
         response = self.client.get(
-            reverse("announcement_list"),
+            reverse('announcement_list'),
         )
 
         self.assertEqual(len(response.data["data"]), 0)
@@ -622,7 +622,7 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_updated_since_timestamp_returns_deleted_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-        response = self.client.post(reverse("announcement_list"), {
+        response = self.client.post(reverse('announcement_list'), {
             "title": "Test Announcement",
             "body": "This is a test announcement",
             "scopes": [
@@ -633,11 +633,12 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
         created_announcement_id = response.data["data"]["id"]
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-        response = self.client.delete(reverse("announcement_detail", kwargs={"pk": created_announcement_id}))
+        response = self.client.delete(reverse('announcement_detail', kwargs={"pk": created_announcement_id}))
+
         self.assertEqual(response.status_code, 204)
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
-        response = self.client.get(reverse("announcement_updated_since") + f"?timestamp={int(datetime.datetime.now().timestamp()) - 1000}")  
+        response = self.client.get(reverse('announcement_updated_since') + f"?timestamp={int(datetime.datetime.now().timestamp()) - 1000}")  
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data["data"]["new"]), 0)
@@ -648,7 +649,7 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
     def test_updated_since_timestamp_returns_updated_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
         
-        response = self.client.post(reverse("announcement_list"), {
+        response = self.client.post(reverse('announcement_list'), {
             "title": "Test Announcement",
             "body": "This is a test announcement",
             "scopes": [
@@ -660,12 +661,12 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
 
         announcement_id = response.data["data"]["id"]
 
-        self.client.put(reverse("announcement_detail", kwargs={"pk": announcement_id}), {
+        self.client.put(reverse('announcement_detail', kwargs={"pk": announcement_id}), {
             "title": "Updated test announcement",
         }, format="json")
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
-        response = self.client.get(reverse("announcement_updated_since") + f"?timestamp={int(datetime.datetime.now().timestamp()) - 10_000}")  
+        response = self.client.get(reverse('announcement_updated_since') + f"?timestamp={int(datetime.datetime.now().timestamp()) - 10_000}")  
 
         self.assertEqual(len(response.data["data"]["new"]), 0)
         self.assertEqual(len(response.data["data"]["deleted"]), 0)
@@ -675,7 +676,7 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
     def test_updated_since_timestamp_returns_new_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
         
-        response = self.client.post(reverse("announcement_list"), {
+        response = self.client.post(reverse('announcement_list'), {
             "title": "Test Announcement",
             "body": "This is a test announcement",
             "scopes": [
@@ -686,7 +687,7 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
         announcement_id = response.data["data"]["id"]
 
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student[1])
-        response = self.client.get(reverse("announcement_updated_since") + f"?timestamp={int(datetime.datetime.now().timestamp()) - 1000}")  
+        response = self.client.get(reverse('announcement_updated_since') + f"?timestamp={int(datetime.datetime.now().timestamp()) - 1000}")  
 
         self.assertEqual(len(response.data["data"]["new"]), 1)
         self.assertEqual(len(response.data["data"]["deleted"]), 0)
@@ -718,7 +719,7 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.teacher_token)
         response = self.client.post(
-                reverse("announcement_attachment_upload"),
+                reverse('announcement_attachment_upload'),
                 data={
                     "file_content": file,
                     "file_name": "testing_large_file.pdf",
@@ -740,7 +741,7 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.teacher_token)
         response = self.client.post(
-                reverse("announcement_attachment_upload"),
+                reverse('announcement_attachment_upload'),
                 data={
                     "file_content": file,
                     "file_name": "testing.mp4",
@@ -762,7 +763,7 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.teacher_token)
         response = self.client.post(
-                reverse("announcement_attachment_upload"),
+                reverse('announcement_attachment_upload'),
                 data={
                     "file_content": file,
                     "file_name": "docx file",

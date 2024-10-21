@@ -1,5 +1,5 @@
 from django.urls import path 
-from .views import AnnouncementViewSet
+from .views import AnnouncementViewSet, create_attachment
 
 urlpatterns = [
     path("announcements/", AnnouncementViewSet.as_view({
@@ -24,7 +24,5 @@ urlpatterns = [
         "get": "list_mine",
     }), name="my_announcement_list"),
 
-    path("announcements/upload", AnnouncementViewSet.as_view({
-        "post": "create_attachment",
-    }), name="announcement_attachment_upload")
+    path("announcements/upload", create_attachment, name="announcement_attachment_upload")
 ]

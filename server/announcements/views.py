@@ -3,10 +3,10 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 
 from rest_framework.parsers import MultiPartParser
-from django.core.paginator import Paginator, EmptyPage
-from datetime import datetime
+from rest_framework.decorators import parser_classes, api_view, permission_classes
 
-import pytz
+from django.core.paginator import Paginator, EmptyPage
+from datetime import datetime, timezone
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -54,12 +54,11 @@ class IsOwner(BasePermission):
 
 class AnnouncementViewSet(viewsets.ViewSet):
     permission_classes = [ IsJWTAuthenticated, ]
-    parser_classes = [ MultiPartParser ]
 
     def get_permissions(self):
         perms = []
 
-        if self.action in { "list_mine" , "create", "create_attachment" }:
+        if self.action in { "list_mine" , "create" }:
             perms = [ IsJWTAuthenticated, IsTeacher ]
         elif self.action in { "destroy" , "update" }:
             perms = [ IsJWTAuthenticated, IsTeacher, IsOwner ]
@@ -174,7 +173,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
     def updated_since(self, request):
         t_param = request.query_params.get("timestamp")
         try:
-            timestamp = datetime.fromtimestamp(int(t_param) / 1000, tz=pytz.utc)
+            timestamp = datetime.fromtimestamp(int(t_param) / 1000, tz=timezone.utc)
         except Exception as e:
             return ErrorResponseBuilder() \
                     .set_message("Invalid or Insufficient query parameters.") \
@@ -274,61 +273,6 @@ class AnnouncementViewSet(viewsets.ViewSet):
             .build()
 
 
-    class AttachmentRequestDataSerializer(serializers.Serializer):
-        file_name = serializers.CharField(max_length=512, min_length=8, required=True)
-        file_content = serializers.FileField()
-
-        def validate_file_name(self, value: str):
-            invalid_chars = '<>:"|?*\0/'
-            if any(char in value for char in invalid_chars):
-                raise ValidationError("Illegal characters found in the filename")
-
-            return value
-            
-        def validate_file_content(self, value):
-            if value.size > settings.MAX_UPLOAD_SIZE_IN_BYTES:
-                raise ValidationError("File size too large")
-            
-            if not value.content_type:
-                raise ValidationError("Unable to detect the filetype of the file. It is likely invalid")
-            
-            if value.content_type not in AnnouncementAttachment.AttachmentType.values:
-                raise ValidationError("File type not supported")
-
-            return value
-
-    @action(detail=False, methods=['POST'])
-    def create_attachment(self, request):
-        serializer = self.AttachmentRequestDataSerializer(data={
-            "file_content": request.FILES.get("file_content"),
-            "file_name": request.data.get("file_name")
-        })
-
-        if not serializer.is_valid():
-            return ErrorResponseBuilder() \
-                    .set_code(400) \
-                    .set_message("Unable to upload your file as it is invalid") \
-                    .set_details([{"field": key, "error": str(value[0])} for key, value in serializer.errors.items()]) \
-                    .build()
-        
-        bucket_store = BucketStoreFactory()
-        
-        try:
-            resource_url = bucket_store.upload(serializer.validated_data["file_name"], request.FILES.get("file_content").read())
-            return SuccessResponseBuilder() \
-                    .set_message("File uploaded successfully.") \
-                    .set_code(201) \
-                    .set_data({
-                        "resource_url": resource_url,
-                    }) \
-                    .build()
-        except Exception as exc: 
-            return ErrorResponseBuilder() \
-                    .set_code(500) \
-                    .set_message("Something went wrong while trying to upload your file. Please try again later") \
-                    .set_details([{"field": "file_content", "error": str(exc)}]) \
-                    .build()
-
     def update(self, request, pk=None):
         old_announcement = Announcement.objects.get(id=pk)
         serializer = AnnouncementSerializer(old_announcement, data=request.data, partial=True)
@@ -355,3 +299,63 @@ class AnnouncementViewSet(viewsets.ViewSet):
             }) \
             .build()
     
+
+
+class AttachmentRequestDataSerializer(serializers.Serializer):
+    file_name = serializers.CharField(max_length=512, min_length=8, required=True)
+    file_content = serializers.FileField()
+
+    def validate_file_name(self, value: str):
+        invalid_chars = '<>:"|?*\0/'
+        if any(char in value for char in invalid_chars):
+            raise ValidationError("Illegal characters found in the filename")
+
+        return value
+        
+    def validate_file_content(self, value):
+        if value.size > settings.MAX_UPLOAD_SIZE_IN_BYTES:
+            raise ValidationError("File size too large")
+        
+        if not value.content_type:
+            raise ValidationError("Unable to detect the filetype of the file. It is likely invalid")
+        
+        if value.content_type not in AnnouncementAttachment.AttachmentType.values:
+            raise ValidationError("File type not supported")
+
+        return value
+
+
+@api_view(["POST"])
+@permission_classes([IsJWTAuthenticated, IsTeacher])
+@parser_classes([MultiPartParser])
+def create_attachment(request):
+    serializer = AttachmentRequestDataSerializer(data={
+        "file_content": request.FILES.get("file_content"),
+        "file_name": request.data.get("file_name")
+    })
+
+    if not serializer.is_valid():
+        return ErrorResponseBuilder() \
+                .set_code(400) \
+                .set_message("Unable to upload your file as it is invalid") \
+                .set_details([{"field": key, "error": str(value[0])} for key, value in serializer.errors.items()]) \
+                .build()
+    
+    bucket_store = BucketStoreFactory()
+    
+    try:
+        resource_url = bucket_store.upload(serializer.validated_data["file_name"], request.FILES.get("file_content").read())
+        return SuccessResponseBuilder() \
+                .set_message("File uploaded successfully.") \
+                .set_code(201) \
+                .set_data({
+                    "resource_url": resource_url,
+                }) \
+                .build()
+    except Exception as exc: 
+        return ErrorResponseBuilder() \
+                .set_code(500) \
+                .set_message("Something went wrong while trying to upload your file. Please try again later") \
+                .set_details([{"field": "file_content", "error": str(exc)}]) \
+                .build()
+

@@ -2,9 +2,7 @@ from rest_framework import serializers
 
 from rest_framework.exceptions import ValidationError
 
-from datetime import datetime
-
-import pytz
+from datetime import datetime, timezone
 
 from accounts.models import User
 from .models import Announcement, AnnouncementScope, AnnouncementAttachment
@@ -86,11 +84,11 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=255)
     body = serializers.CharField()
     scopes = AnnouncementScopeSerializer(many=True)
-    attachments = AnnouncementAttachmentSerializer(many=True)
+    attachments = AnnouncementAttachmentSerializer(many=True, required=False)
 
     class Meta:
         model = Announcement 
-        fields = ["id", "title", "body", "scopes", "author"]
+        fields = ["id", "title", "body", "scopes", "author", "attachments"]
 
     def validate_scopes(self, attachments):
         if len(attachments) > settings.MAX_ATTACHMENTS_PER_ANNOUNCEMENT:
@@ -129,7 +127,7 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             for scope in new_scopes:
                 AnnouncementScope.objects.create(announcement=instance, **scope)
 
-        instance.updated_at = datetime.now(tz=pytz.utc)
+        instance.updated_at = datetime.now(timezone.utc)
         instance.save()
 
         return instance

@@ -90,7 +90,7 @@ class User(models.Model):
         return True
     
     def __str__(self):
-        return f"{self.first_name} {"" if not self.middle_name else self.middle_name + "."} {self.last_name or ""}"
+        return f"{self.first_name} {'' if not self.middle_name else self.middle_name + '.'} {self.last_name or ''}"
     
     class Meta:
         ordering = ['first_name', 'last_name']

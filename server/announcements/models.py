@@ -5,9 +5,7 @@ import uuid
 from accounts.models import User, Classroom
 from schools.models import AcademicYear
 
-from datetime import datetime
-
-import pytz
+from datetime import datetime, timezone
 
 class AnnouncementManager(models.Manager):
     def belong_to_user_school(self, user):
@@ -33,7 +31,7 @@ class Announcement(models.Model):
     body = models.TextField()
 
     def soft_delete(self):
-        self.deleted_at = datetime.now(tz=pytz.utc)
+        self.deleted_at = datetime.now(timezone.utc)
         self.save()
 
     def with_scope(self, filter_type, filter_data = None):
