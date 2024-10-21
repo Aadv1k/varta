@@ -6,8 +6,6 @@ from rest_framework.parsers import MultiPartParser
 from django.core.paginator import Paginator, EmptyPage
 from datetime import datetime
 
-import pytz
-
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from django.conf import settings
@@ -174,7 +172,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
     def updated_since(self, request):
         t_param = request.query_params.get("timestamp")
         try:
-            timestamp = datetime.fromtimestamp(int(t_param) / 1000, tz=pytz.utc)
+            timestamp = datetime.fromtimestamp(int(t_param) / 1000, tzinfo=timezone.utc)
         except Exception as e:
             return ErrorResponseBuilder() \
                     .set_message("Invalid or Insufficient query parameters.") \

@@ -158,19 +158,17 @@ class UserDevice(models.Model):
     device_token = models.CharField(max_length=255, blank=False, null=False, unique=True)
     device_type = models.CharField(max_length=10, choices=DeviceType.choices, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    last_used_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('user', 'device_token') 
         verbose_name = "User Device"
         verbose_name_plural = "User Devices"
-        ordering = ['-last_used_at']
 
 
     @property
     def is_expired(self):
         expiry_days = getattr(settings, 'FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS', 30)
-        return self.last_used_at <= timezone.now() - timedelta(days=expiry_days)
+        return self.last_used_at <= datetime.now(timezone.utc) - timedelta(days=expiry_days)
 
     def update_last_used(self):
         self.last_used_at = timezone.now()
