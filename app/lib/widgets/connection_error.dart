@@ -45,7 +45,7 @@ class GenericError extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SvgPicture.asset(
-          svgPath ?? "crashed-error.svg",
+          "assets/images/${svgPath ?? "crashed-error.svg"}",
           width: imageSize,
           height: imageSize,
         ),

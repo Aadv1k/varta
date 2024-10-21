@@ -93,6 +93,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
     bool isTeacher = appState.user?.userType == UserType.teacher;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       floatingActionButton: isTeacher
           ? LayoutBuilder(
               builder: (context, constraints) => constraints.maxWidth <= 600

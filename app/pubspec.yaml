@@ -35,53 +35,37 @@ dev_dependencies:
 
 flutter_native_splash:
   color: "#191919"
-  image: assets/varta-logo-small.png
+  image: assets/images/varta-logo-small.png
 
 flutter:
-  uses-material-design: true
-
   assets:
-    - assets/
+    - assets/images/abstract-1.svg
+    - assets/images/crashed-error.svg
+    - assets/images/falling.svg
+    - assets/images/relax.svg
 
   fonts:
     - family: Geist
       fonts:
-        - asset: assets/fonts/Geist/Geist-Black.ttf
-          weight: 900
-        - asset: assets/fonts/Geist/Geist-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Geist/Geist-Light.ttf
-          weight: 300
-        - asset: assets/fonts/Geist/Geist-Medium.ttf
-          weight: 500
+        # - asset: assets/fonts/Geist/Geist-Black.ttf
+        #   weight: 900
         - asset: assets/fonts/Geist/Geist-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Geist/Geist-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Geist/Geist-Thin.ttf
-          weight: 100
+        - asset: assets/fonts/Geist/Geist-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Geist/Geist-Bold.ttf
+          weight: 700
         - asset: assets/fonts/Geist/Geist-UltraBlack.ttf
           weight: 900
-        - asset: assets/fonts/Geist/Geist-UltraLight.ttf
-          weight: 200
 
     - family: GeistMono
       fonts:
-        - asset: assets/fonts/GeistMono/GeistMono-Black.ttf
-          weight: 900
         - asset: assets/fonts/GeistMono/GeistMono-Bold.ttf
           weight: 700
-        - asset: assets/fonts/GeistMono/GeistMono-Light.ttf
-          weight: 300
-        - asset: assets/fonts/GeistMono/GeistMono-Medium.ttf
-          weight: 500
         - asset: assets/fonts/GeistMono/GeistMono-Regular.ttf
           weight: 400
-        - asset: assets/fonts/GeistMono/GeistMono-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/GeistMono/GeistMono-Thin.ttf
-          weight: 100
-        - asset: assets/fonts/GeistMono/GeistMono-UltraBlack.ttf
-          weight: 900
-        - asset: assets/fonts/GeistMono/GeistMono-UltraLight.ttf
-          weight: 200
+        - asset: assets/fonts/GeistMono/GeistMono-Medium.ttf
+          weight: 500
+
+  uses-material-design: true
+

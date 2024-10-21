@@ -40,7 +40,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   void initState() {
     _fetchInitial();
     _pollingTimer =
-        Timer.periodic(const Duration(seconds: 30), (_) => _handlePoll());
+        Timer.periodic(const Duration(seconds: 15), (_) => _handlePoll());
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
@@ -57,7 +57,8 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     var appState = AppProvider.of(context).state;
 
     List<AnnouncementModel> newAnnouncements = [
-      ...appState.announcements,
+      ...appState.announcements
+          .where((announcement) => !changes.deleted.contains(announcement)),
       ...changes.created,
     ];
     for (final announcement in appState.announcements) {
@@ -185,7 +186,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   Widget _showErrorGraphic() {
     if (_hasError) {
       return Center(
-        heightFactor: 0.75,
+        heightFactor: 0.80,
         child: GenericError(
             onTryAgain: () {
               setState(() {
@@ -201,7 +202,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     }
 
     return const Center(
-      heightFactor: 0.75,
+      heightFactor: 0.80,
       child: GenericError(
           size: ErrorSize.medium,
           svgPath: "relax.svg",

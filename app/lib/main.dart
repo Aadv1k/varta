@@ -76,8 +76,7 @@ class _VartaAppState extends State<VartaApp> {
             future: _initializedApp,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                FlutterNativeSplash.preserve(
-                    widgetsBinding: WidgetsBinding.instance);
+                return const SizedBox.shrink();
               }
 
               FlutterNativeSplash.remove();
@@ -97,9 +96,7 @@ class _VartaAppState extends State<VartaApp> {
               }
 
               return AppProvider(
-                state: appState,
-                child: const AnnouncementInboxScreen(),
-              );
+                  state: appState, child: const AnnouncementInboxScreen());
             }));
   }
 }

@@ -70,7 +70,7 @@ class _EmailLoginState extends State<EmailLogin> {
   @override
   Widget build(BuildContext context) {
     final loginState = LoginProvider.of(context).state;
-    final shouldBeCompact = MediaQuery.of(context).size.height <= 380;
+    final shouldBeCompact = MediaQuery.of(context).size.height <= 1024;
 
     final contentGap = shouldBeCompact ? Spacing.md : Spacing.xl;
     final headingStyle = shouldBeCompact

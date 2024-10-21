@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
@@ -5,7 +7,6 @@ import 'package:app/repository/announcements_repo.dart';
 import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/placeholder_announcement_list_view.dart';
 import 'package:app/screens/announcement_inbox/mobile/user_announcement_list_item.dart';
-import 'package:app/screens/announcement_inbox/view_announcement_readonly_screen.dart';
 import 'package:app/services/simple_cache_service.dart';
 import 'package:app/widgets/connection_error.dart';
 import 'package:app/widgets/error_snackbar.dart';
@@ -13,7 +14,6 @@ import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/state/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
-import 'package:app/screens/announcement_inbox/mobile/announcement_list_item.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class UserAnnouncementFeed extends StatefulWidget {
@@ -53,7 +53,9 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
       final cachedAnnouncements =
           await cacheService.fetchOrNull("userAnnouncements");
 
-      if (cachedAnnouncements != null && cachedAnnouncements.data.isNotEmpty) {
+      if (cachedAnnouncements != null &&
+          jsonDecode(cachedAnnouncements.data).isNotEmpty) {
+        print(cachedAnnouncements.data);
         setState(() => _isLoading = false);
         return;
       }

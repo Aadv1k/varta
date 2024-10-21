@@ -99,7 +99,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: AppColor.primaryBg,
@@ -175,7 +175,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
                   if (snapshot.hasError) {
                     return const Center(
-                        child: GenericError(size: ErrorSize.large));
+                        child: GenericError(size: ErrorSize.medium));
                   }
 
                   if (snapshot.data!.isEmpty) {
