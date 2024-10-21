@@ -168,11 +168,7 @@ class UserDevice(models.Model):
     @property
     def is_expired(self):
         expiry_days = getattr(settings, 'FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS', 30)
-        return self.last_used_at <= datetime.now(timezone.utc) - timedelta(days=expiry_days)
-
-    def update_last_used(self):
-        self.last_used_at = timezone.now()
-        self.save(update_fields=['last_used_at'])
+        return self.created_at <= datetime.now(timezone.utc) - timedelta(days=expiry_days)
 
     def __str__(self):
         return f"{self.user}'s {self.device_type} device"
