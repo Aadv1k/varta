@@ -33,8 +33,8 @@ class TeacherCard extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 260, maxWidth: 420),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
             PaletteNeutral.shade030,
             PaletteNeutral.shade050,

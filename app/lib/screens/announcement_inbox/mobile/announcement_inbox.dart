@@ -139,8 +139,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => AppProvider(
-                              state: appState,
-                              child: const UserProfileScreen())));
+                              state: appState, child: UserProfileScreen())));
                 },
                 icon: const Center(child: Icon(Icons.person)),
               ),

@@ -20,6 +20,7 @@ import 'package:app/widgets/button.dart';
 import 'package:app/widgets/error_text.dart';
 import 'package:app/widgets/state/app_state.dart';
 import 'package:app/widgets/varta_button.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
@@ -63,8 +64,10 @@ class _OTPVerificationState extends State<OTPVerification> {
       final appState = await AppState.initialize(user: user);
 
       final notificationService = NotificationService();
+      bool hasAllowedNotifications =
+          await notificationService.didAllowNotifications();
 
-      if (!await notificationService.didAllowNotifications()) {
+      if (!hasAllowedNotifications) {
         await notificationService.initNotifications(loginData.inputData!);
       }
 
@@ -80,7 +83,7 @@ class _OTPVerificationState extends State<OTPVerification> {
         hasError = true;
         errorMessage = exc is ApiException
             ? exc.message
-            : "Looks like something went wrong, if this persists contact support.";
+            : "Looks like something went wrong. Check your details or try again later.";
       });
     } finally {
       setState(() => isLoading = false);

@@ -72,7 +72,7 @@ class _EmailLoginState extends State<EmailLogin> {
     final loginState = LoginProvider.of(context).state;
     final shouldBeCompact = MediaQuery.of(context).size.height <= 1024;
 
-    final contentGap = shouldBeCompact ? Spacing.md : Spacing.xl;
+    final contentGap = shouldBeCompact ? Spacing.sm : Spacing.sm;
     final headingStyle = shouldBeCompact
         ? Theme.of(context).textTheme.headlineMedium
         : Theme.of(context).textTheme.headlineLarge;
@@ -95,7 +95,7 @@ class _EmailLoginState extends State<EmailLogin> {
                 SizedBox(
                   width: 320,
                   child: Text(
-                      "If you are registered with the school we’ll send you an OTP to verify",
+                      "We'll send you an OTP for verification. Please check your junk or spam folder if it's not in your inbox",
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                 ),

@@ -186,7 +186,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   Widget _showErrorGraphic() {
     if (_hasError) {
       return Center(
-        heightFactor: 0.80,
+        heightFactor: 0.75,
         child: GenericError(
             onTryAgain: () {
               setState(() {
@@ -202,7 +202,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     }
 
     return const Center(
-      heightFactor: 0.80,
+      heightFactor: 0.75,
       child: GenericError(
           size: ErrorSize.medium,
           svgPath: "relax.svg",

@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationService {
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   final AuthService _authService = AuthService();
   SharedPreferencesAsync prefs = SharedPreferencesAsync();
 
@@ -15,19 +15,14 @@ class NotificationService {
 
   Future initNotifications(String contactData) async {
     try {
-      final permission = await _firebaseMessaging.requestPermission();
+      final permission = await firebaseMessaging.requestPermission(alert: true);
 
       if (permission.authorizationStatus != AuthorizationStatus.authorized) {
         await prefs.setBool("hasAllowedNotifications", false);
         return;
       }
 
-      String? fcmToken;
-      if (kIsWeb) {
-        fcmToken = await _firebaseMessaging.getToken();
-      } else {
-        fcmToken = await _firebaseMessaging.getToken();
-      }
+      String? fcmToken = await firebaseMessaging.getToken();
 
       if (fcmToken == null) {
         throw ApiClientException("FCM token retrieval failed");
@@ -35,6 +30,12 @@ class NotificationService {
 
       await _authService.registerDevice(fcmToken, contactData);
       await prefs.setBool("hasAllowedNotifications", true);
+
+      await firebaseMessaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
     } catch (e) {
       throw ApiClientException(
           "Failed to initialize notifications: ${e.toString()}");
