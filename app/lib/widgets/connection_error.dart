@@ -7,6 +7,7 @@ enum ErrorSize { small, medium, large }
 
 class GenericError extends StatelessWidget {
   final VoidCallback? onTryAgain;
+	final String? onTryAgainLabel;
   final ErrorSize size;
   final String? svgPath;
   final String errorMessage;
@@ -14,6 +15,7 @@ class GenericError extends StatelessWidget {
   const GenericError({
     super.key,
     this.onTryAgain,
+		this.onTryAgainLabel,
     this.size = ErrorSize.medium,
     this.svgPath,
     this.errorMessage = "Something went wrong. Please try again later.",
@@ -66,7 +68,7 @@ class GenericError extends StatelessWidget {
           TextButton(
             onPressed: onTryAgain,
             child: Text(
-              "Try Again",
+              onTryAgainLabel ?? "Try Again",
               style: Theme.of(context)
                   .textTheme
                   .labelLarge!

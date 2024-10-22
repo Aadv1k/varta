@@ -72,7 +72,7 @@ class _EmailLoginState extends State<EmailLogin> {
     final loginState = LoginProvider.of(context).state;
     final shouldBeCompact = MediaQuery.of(context).size.height <= 1024;
 
-    final contentGap = shouldBeCompact ? Spacing.sm : Spacing.sm;
+    final contentGap = shouldBeCompact ? Spacing.md : Spacing.xl;
     final headingStyle = shouldBeCompact
         ? Theme.of(context).textTheme.headlineMedium
         : Theme.of(context).textTheme.headlineLarge;
@@ -93,7 +93,7 @@ class _EmailLoginState extends State<EmailLogin> {
                 Text("Your Email", style: headingStyle),
                 SizedBox(height: contentGap),
                 SizedBox(
-                  width: 320,
+                  width: 420,
                   child: Text(
                       "We'll send you an OTP for verification. Please check your junk or spam folder if it's not in your inbox",
                       textAlign: TextAlign.center,
@@ -112,6 +112,7 @@ class _EmailLoginState extends State<EmailLogin> {
                   ),
                 ),
                 const SizedBox(height: Spacing.sm),
+								/*
                 TextButton(
                     onPressed: () {
                       Navigator.pushReplacement(
@@ -126,7 +127,7 @@ class _EmailLoginState extends State<EmailLogin> {
                         style: Theme.of(context)
                             .textTheme
                             .labelLarge
-                            ?.copyWith(color: TWColor.blue600))),
+                            ?.copyWith(color: TWColor.blue600))),*/
                 const Spacer(),
                 ListenableBuilder(
                   listenable: loginState,

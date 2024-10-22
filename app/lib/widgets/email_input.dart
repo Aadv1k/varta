@@ -76,14 +76,11 @@ class _EmailInputState extends State<EmailInput> {
         const SizedBox(height: Spacing.sm),
         widget.hasError
             ? SizedBox(
-                width: 320,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+									width: 360,
                   child: Text(
                     widget.errorMessage!,
                     style: const TextStyle(
                         color: TWColor.red600, fontSize: FontSize.textBase),
-                  ),
                 ),
               )
             : const SizedBox.shrink(),

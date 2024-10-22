@@ -37,6 +37,11 @@ class NotificationService {
         sound: true,
       );
 
+
+			FirebaseMessaging.onMessageOpenedApp.listen((_) async {
+				// await prefs.setBool("openedAppFromNotification", true);
+			});
+
       firebaseMessaging.onTokenRefresh.listen((token) async {
         await _authService.registerDevice(token, contactData);
       });

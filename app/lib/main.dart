@@ -11,7 +11,6 @@ import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/widgets/state/app_state.dart';
 import 'package:app/widgets/state/login_state.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -74,6 +73,7 @@ class _VartaAppState extends State<VartaApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Varta',
+        debugShowCheckedModeBanner: false,
         theme: VartaTheme().data,
         home: FutureBuilder(
             future: _initializedApp,

@@ -16,7 +16,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_list_item.dart';
-import 'package:flutter/widgets.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ForYouAnnouncementFeed extends StatefulWidget {
@@ -40,7 +39,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   void initState() {
     _fetchInitial();
     _pollingTimer =
-        Timer.periodic(const Duration(seconds: 15), (_) => _handlePoll());
+        Timer.periodic(const Duration(seconds: 6), (_) => _handlePoll());
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
@@ -56,23 +55,17 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     if (!context.mounted) return [];
     var appState = AppProvider.of(context).state;
 
-    List<AnnouncementModel> newAnnouncements = [
-      ...appState.announcements
-          .where((announcement) => !changes.deleted.contains(announcement)),
-      ...changes.created,
-    ];
-    for (final announcement in appState.announcements) {
-      if (changes.deleted.contains(announcement)) continue;
+		List<AnnouncementModel> initialAnnouncements = [...appState.announcements];
+		initialAnnouncements = initialAnnouncements.where((announcement) => !changes.deleted.contains(announcement)).toList();
+		initialAnnouncements = initialAnnouncements.map((announcement)  {
+			var updated = changes.updated.firstWhereOrNull((updatedAnn) => updatedAnn == announcement);
+			if (updated != null) return updated;
+			return announcement;
+		}).toList();
 
-      final updatedAnnouncement = changes.updated.firstWhereOrNull(
-          (updatedAnnouncement) => updatedAnnouncement.id == announcement.id);
+		final List<AnnouncementModel> finalAnnouncements = [...changes.created, ...initialAnnouncements];
 
-      if (updatedAnnouncement == null) continue;
-
-      newAnnouncements.add(updatedAnnouncement);
-    }
-
-    return newAnnouncements;
+    return finalAnnouncements;
   }
 
   void _fetchInitial() async {
@@ -123,13 +116,12 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
       var changes = await _announcementRepo.fetchLatestChanges(cache.cachedAt);
       var newAnnouncements = _getUpdatedAnnouncements(changes);
 
-      if (newAnnouncements.isNotEmpty) {
-        state.setAnnouncements(newAnnouncements);
-        cacheService.store(
-            "announcements",
-            jsonEncode(
-                state.announcements.map((elem) => elem.toJson()).toList()));
-      }
+			state.setAnnouncements(newAnnouncements);
+			cacheService.store(
+					"announcements",
+					jsonEncode(
+							state.announcements.map((elem) => elem.toJson()).toList()));
+
     } catch (exc) {
       if (exc is ApiTokenExpiredException) {
         clearAndNavigateBackToLogin(context);
@@ -201,13 +193,15 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
       );
     }
 
-    return const Center(
+    return Center(
       heightFactor: 0.75,
       child: GenericError(
           size: ErrorSize.medium,
           svgPath: "relax.svg",
-          errorMessage:
-              "Nothing here yet. Announcements for you will show up here."),
+					onTryAgain: _handlePoll,
+					onTryAgainLabel: "Refresh",
+          errorMessage: "Nothing here yet. Announcements for you will show up here."),
+					
     );
   }
 
