@@ -1,0 +1,19 @@
+# flutter pub run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/images/varta-logo.png"
+
+  android: "ic_launcher"
+  image_path_android: "assets/images/varta-logo.png"
+  min_sdk_android: 21
+
+  adaptive_icon_background: "#191919" 
+  adaptive_icon_foreground: "assets/images/varta-logo.png"
+
+  ios: true
+  remove_alpha_channel_ios: true
+
+  web:
+    generate: true
+    image_path: "assets/images/varta-logo-medium.png"
+    background_color: "#191919"
+    theme_color: "#191919"

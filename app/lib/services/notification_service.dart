@@ -36,6 +36,10 @@ class NotificationService {
         badge: true,
         sound: true,
       );
+
+      firebaseMessaging.onTokenRefresh.listen((token) async {
+        await _authService.registerDevice(token, contactData);
+      });
     } catch (e) {
       throw ApiClientException(
           "Failed to initialize notifications: ${e.toString()}");

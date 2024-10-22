@@ -1,6 +1,8 @@
 name: app
-description: "A new Flutter project."
+description: A one-way multi-channel school communications app
+
 publish_to: 'none'
+
 version: 1.0.0+1
 
 environment:
@@ -34,10 +36,16 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: "^0.14.1"
 
 flutter_native_splash:
   color: "#191919"
-  image: assets/images/varta-logo-small.png
+  image: assets/images/varta-logo-medium.png
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/images/varta-logo-medium.png"
+  ios: true
 
 flutter:
   assets:
@@ -49,8 +57,6 @@ flutter:
   fonts:
     - family: Geist
       fonts:
-        # - asset: assets/fonts/Geist/Geist-Black.ttf
-        #   weight: 900
         - asset: assets/fonts/Geist/Geist-Regular.ttf
           weight: 400
         - asset: assets/fonts/Geist/Geist-Medium.ttf
@@ -70,4 +76,3 @@ flutter:
           weight: 500
 
   uses-material-design: true
-
