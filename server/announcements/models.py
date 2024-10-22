@@ -31,6 +31,10 @@ class Announcement(models.Model):
     body = models.TextField()
 
     def soft_delete(self):
+        print("SOFT DELETED")
+        print("SOFT DELETED")
+        print("SOFT DELETED")
+        print("SOFT DELETED")
         self.deleted_at = datetime.now(timezone.utc)
         self.save()
 
