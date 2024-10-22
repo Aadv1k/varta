@@ -9,13 +9,9 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-%erff=vl*7gn6gw9n)wgbs6b7m*un!)35687)kr9n&@*nsjd75'
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", False)
 
-ALLOWED_HOSTS = [
-    "10.0.2.2",
-    "192.168.1.4",
-    "localhost"
-]
+ALLOWED_HOSTS = [ "*" ]
 
 
 INSTALLED_APPS = [
