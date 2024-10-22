@@ -32,7 +32,6 @@ def user_login(request):
                 .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
                 .build()
 
-
     user_contact_query = UserContact.objects.filter(
         user__school=serializer.validated_data.get("school_id"),
         contact_type=serializer.validated_data.get("input_format"),

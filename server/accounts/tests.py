@@ -149,7 +149,6 @@ class UserActionTest(APITestCase):
 
     def test_user_can_register_device(self):
         at, _ = TokenService.generate_token_pair(TokenPayload(sub=str(self.student.public_id), role=self.student.user_type, iss="varta.app"))
-            
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {at}")
         response = self.client.post(reverse("user_device"), {
@@ -199,7 +198,6 @@ class UserSelfActionTestCase(BaseAnnouncementTestCase):
         response = self.client.get(reverse("user_details"))
 
         self.assertEqual(response.status_code, 200)
-
 
         self.assertIn("first_name", response.data["data"])
         self.assertIn("last_name", response.data["data"])
