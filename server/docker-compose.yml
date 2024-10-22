@@ -1,0 +1,21 @@
+name: varta-server
+services:
+  redis-cache:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+  server: 
+    build:
+      context: .
+    command: sh -c "python manage.py start_rq_worker & python manage.py runserver 0.0.0.0:8000"
+    depends_on: 
+      - redis-cache
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_HOST: redis-cache
+      REDIS_PORT: "6379"
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON}
+    volumes:
+      - ${FIREBASE_SERVICE_ACCOUNT_JSON}:/varta-server/.firebase/service-account.json
+
