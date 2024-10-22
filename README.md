@@ -1,5 +1,50 @@
 # Varta
 
+multi-channel one-way school communications app 
+
+- Push notifications
+- Scoped announcements
+- Live updates via polling
+- Extensive search
+
+
+## Setup
+
+### Server 
+
+The server provides a [`docker-compose.yml`](./server/docker-compose.yml) which builds `redis` and the primary server. To get started you need the following files:
+
+> `.env.example`
+
+```env
+DB_HOST=""
+DB_PORT="5432"
+DB_PASSWORD=""
+DB_NAME=""
+DB_USER=""
+
+# https://www.zoho.com/zeptomail/help/api/email-sending.html
+ZEPTOMAIL_TOKEN="<ZeptoMail Token>"
+ZEPTOMAIL_FROM_ADDRESS="<ZeptoMail Domain>"
+
+# These can be left as-is as you will provide this through docker compose
+
+REDIS_HOST="localhost"
+REDIS_PORT="6379"
+
+GOOGLE_APPLICATION_CREDENTIALS=".firebase/service-account.json"
+```
+
+> to accquire `service-account.json` you would need to [create a firebase app](https://firebase.google.com/docs/projects/learn-more) and then follow the steps to retrive these details
+
+When you have all of these you can run the following command to get everything setup
+
+```shell
+FIREBASE_SERVICE_ACCOUNT_JSON=/path/to/your/service-account.json
+docker compose -f ./server/docker-compose.yml --env-file /path/to/env up
+```
+This will start the django server, locally on `8000`
+
 ## Marketing
 
 - Create a second repo, something along the lines of VartaApp which is going to serve as the
@@ -30,7 +75,6 @@
     - r/flutterdev app design and development process
 - Showwwcase
 - LinkedIn
-
 
 ---
 

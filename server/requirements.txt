@@ -11,3 +11,4 @@ redis==5.1.1
 rq==1.16.2
 sqlparse==0.5.1
 tzdata==2024.1
+firebase-admin==6.5.0
