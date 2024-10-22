@@ -68,13 +68,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -129,19 +122,31 @@ MAX_ATTACHMENTS_PER_ANNOUNCEMENT = 4
 # https://stackoverflow.com/questions/6957016/detect-django-testing-mode
 TESTING = sys.argv[1:2] == ['test']
 
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("DB_NAME")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT", "5432") 
+DB_USER = os.getenv("DB_USER") 
 
-AWS_RDS_VARTA_DB_CONNECTION_URL = os.getenv("AWS_RDS_VARTA_DB_CONNECTION_URL")
-AWS_RDS_VARTA_DB_PASSWORD = os.getenv("AWS_RDS_VARTA_DB_PASSWORD")
-
-if not AWS_RDS_VARTA_DB_PASSWORD or not AWS_RDS_VARTA_DB_CONNECTION_URL:
-    raise Exception("BAD CONFIG AWS_RDS_VARTA_DB_CONNECTION_URL and AWS_RDS_VARTA_DB_PASSWORD are required to setup the database")
-
+if not DB_PASSWORD or not DB_USER or not DB_NAME or not DB_HOST:
+    raise Exception("BAD CONFIG: DB_USER, DB_PASSWORD, DB_NAME, and DB_HOST are required to setup the database")
 
 ZEPTOMAIL_TOKEN = os.getenv("ZEPTOMAIL_TOKEN")
 ZEPTOMAIL_FROM_ADDRESS = os.getenv("ZEPTOMAIL_FROM_ADDRESS")
 
 if not ZEPTOMAIL_TOKEN or not ZEPTOMAIL_FROM_ADDRESS:
     raise Exception("BAD CONFIG ZEPTOMAIL_TOKEN and ZEPTOMAIL_FROM_ADDRESS are required to setup the email service")
+
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+
+if not REDIS_HOST or not REDIS_PORT:
+    raise Exception("BAD CONFIG: REDIS_HOST and REDIS_PORT are required to setup Redis connection")
+
+if not (GOOGLE_APPLICATION_CREDENTIALS := os.getenv("GOOGLE_APPLICATION_CREDENTIALS")):
+    raise Exception("BAD CONFIG: GOOGLE_APPLICATION_CREDENTIALS needs to be provided for notifications to work")
+
 
 if TESTING:
     DATABASES = {
@@ -154,24 +159,19 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "vartadb",
-            "USER": "aadv1k",
-            "PASSWORD": AWS_RDS_VARTA_DB_PASSWORD,
-            "HOST": AWS_RDS_VARTA_DB_CONNECTION_URL,
-            "PORT": "5432",
+            "NAME": DB_NAME,
+            "USER": DB_USER,
+            "PASSWORD": DB_PASSWORD,
+            "HOST": DB_HOST,
+            "PORT": DB_PORT,
         }
     }
-
 
 # 5 minutes
 OTP_EXPIRY_IN_SECONDS = 300
 OTP_LENGTH = 6 
 MASTER_OTP = "000000"
 
-# Redis configuration
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-REDIS_PASSWORD = ""
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (       

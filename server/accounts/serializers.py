@@ -3,6 +3,8 @@ from rest_framework.exceptions import ValidationError
 
 from schools.serializers import SchoolSerializer
 
+from django.conf import settings
+
 from schools.models import School
 from .models import UserContact, UserDevice, User, StudentDetail, TeacherDetail, Classroom, Department
 import re

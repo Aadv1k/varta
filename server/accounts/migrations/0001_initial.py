@@ -99,14 +99,12 @@ class Migration(migrations.Migration):
                 ('device_token', models.CharField(max_length=255, unique=True)),
                 ('device_type', models.CharField(choices=[('android', 'Android'), ('ios', 'iOS'), ('web', 'Web')], max_length=10)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('last_used_at', models.DateTimeField(auto_now=True)),
                 ('logged_in_through', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='registered_on', to='accounts.usercontact')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='devices', to='accounts.user')),
             ],
             options={
                 'verbose_name': 'User Device',
                 'verbose_name_plural': 'User Devices',
-                'ordering': ['-last_used_at'],
             },
         ),
         migrations.AddIndex(
