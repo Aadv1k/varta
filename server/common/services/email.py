@@ -7,6 +7,9 @@ import requests
 url = "https://api.zeptomail.in/v1.1/email"
 
 def send_verification_email(otp: str, to_address: str, user) -> str:
+    if settings.DEBUG:
+        return "okay-1234"
+
     subject = "Varta OTP Verification"
     email_html_body = render_to_string("emails/email_otp_verification.html", {
         "otp": otp,

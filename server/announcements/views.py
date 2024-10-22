@@ -186,14 +186,14 @@ class AnnouncementViewSet(viewsets.ViewSet):
                     .build()
 
         
-        base_query = Announcement.objects.belong_to_user_school(request.user)
-
-        deleted_announcements = Announcement.objects.deleted_belong_to_user_school(request.user).filter(deleted_at__gte=timestamp).exclude(author=request.user)
-        deleted_serializer = AnnouncementOutputSerializer(data=deleted_announcements, many=True)
+        deleted_announcements = Announcement.objects.filter(author__school=request.user.school, deleted_at__gte=timestamp)
+        deleted_serializer = AnnouncementOutputSerializer(data=[announcement for announcement in deleted_announcements if announcement.author != request.user], many=True)
         deleted_serializer.is_valid()
 
+        base_query = Announcement.objects.belong_to_user_school(request.user)
+
         # here we also omit the announcements by the user 
-        created_announcements = base_query.filter(created_at__gte=timestamp).exclude(updated_at__isnull=False)
+        created_announcements = base_query.filter(created_at__gte=timestamp, updated_at__isnull=True)
         created_serializer = AnnouncementOutputSerializer(data=[announcement for announcement in created_announcements if announcement.author != request.user], many=True)
         created_serializer.is_valid()
 
