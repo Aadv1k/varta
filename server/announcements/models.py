@@ -81,24 +81,26 @@ class AnnouncementScope(models.Model):
     def matches_for_user(self, user: User) -> bool:
         if self.filter == self.FilterType.EVERYONE:
             return True
-        elif self.filter == self.FilterType.ALL_STUDENTS and user.user_type == User.UserType.STUDENT:
-            return True 
-        elif self.filter == self.FilterType.ALL_TEACHERS and user.user_type == User.UserType.TEACHER:
-            return True 
-        elif self.filter == self.FilterType.STU_STANDARD and user.user_type == User.UserType.STUDENT:
-            if user.student_details.classroom.standard == self.filter_data:
+        
+        if user.user_type == User.UserType.STUDENT:
+            if self.filter == self.FilterType.ALL_STUDENTS:
                 return True
-        elif self.filter == self.FilterType.STU_STANDARD_DIVISION and user.user_type == User.UserType.STUDENT:
-            if user.student_details.classroom.equals_std_div_str(self.filter_data):
+            if self.filter == self.FilterType.STU_STANDARD and user.student_details.classroom.standard == self.filter_data:
                 return True
-        elif self.filter == self.FilterType.T_SUBJECT_TEACHER_OF_STANDARD_DIVISION and user.user_type == User.UserType.TEACHER:
-            t_classroom = Classroom.get_by_std_div_or_none(self.filter_data) 
-            for classroom in user.teacher_details.subject_teacher_of.all():
-                if (t_classroom.division == classroom.division and t_classroom.standard == classroom.standard):
-                    return True
-        elif self.filter == self.FilterType.T_DEPARTMENT and user.user_type == User.UserType.TEACHER:
-            if user.teacher_details.departments.filter(department_code=self.filter_data).exists():
+            if self.filter == self.FilterType.STU_STANDARD_DIVISION and user.student_details.classroom.equals_std_div_str(self.filter_data):
                 return True
+            return False
+
+        if user.user_type == User.UserType.TEACHER:
+            if self.filter == self.FilterType.ALL_TEACHERS:
+                return True
+            if self.filter == self.FilterType.T_SUBJECT_TEACHER_OF_STANDARD_DIVISION:
+                t_classroom = Classroom.get_by_std_div_or_none(self.filter_data)
+                return any((t_classroom.division == classroom.division and t_classroom.standard == classroom.standard)
+                           for classroom in user.teacher_details.subject_teacher_of.all())
+            if self.filter == self.FilterType.T_DEPARTMENT:
+                return user.teacher_details.departments.filter(department_code=self.filter_data).exists()
+            return False
 
         return False
 
