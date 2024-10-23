@@ -190,17 +190,17 @@ class AnnouncementViewSet(viewsets.ViewSet):
         announcements_from_user_school = Announcement.objects.filter(~Q(author__id=request.user.id), author__school=request.user.school)
 
         deleted_announcements = announcements_from_user_school.filter(author__school=request.user.school, deleted_at__gte=timestamp)
-        deleted_serializer = AnnouncementOutputSerializer(data=deleted_announcements, many=True)
+        deleted_serializer = AnnouncementOutputSerializer(data=[ann for ann in deleted_announcements if ann.for_user(request.user)], many=True)
         deleted_serializer.is_valid()
 
         announcements_from_user_school_not_deleted = announcements_from_user_school.filter(deleted_at__isnull=True)
 
         created_announcements = announcements_from_user_school_not_deleted.filter(created_at__gte=timestamp, updated_at__isnull=True)
-        created_serializer = AnnouncementOutputSerializer(data=created_announcements, many=True)
+        created_serializer = AnnouncementOutputSerializer(data=[ann for ann in created_announcements if ann.for_user(request.user)], many=True)
         created_serializer.is_valid()
 
         updated_announcements = announcements_from_user_school_not_deleted.filter(updated_at__gte=timestamp)
-        updated_serializer = AnnouncementOutputSerializer(data=updated_announcements, many=True)
+        updated_serializer = AnnouncementOutputSerializer(data=[ann for ann in updated_announcements if ann.for_user(request.user)], many=True)
         updated_serializer.is_valid()
 
 
