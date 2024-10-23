@@ -2,6 +2,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 
+from django.db.models import Q
+
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import parser_classes, api_view, permission_classes
 
@@ -185,19 +187,19 @@ class AnnouncementViewSet(viewsets.ViewSet):
                     .set_details([{"field": "timestamp", "error": str(e)}]) \
                     .build()
 
-        
-        deleted_announcements = Announcement.objects.filter(author__school=request.user.school, deleted_at__gte=timestamp)
-        deleted_serializer = AnnouncementOutputSerializer(data=[announcement for announcement in deleted_announcements if announcement.author != request.user], many=True)
+        announcements_from_user_school = Announcement.objects.filter(~Q(author__id=request.user.id), author__school=request.user.school)
+
+        deleted_announcements = announcements_from_user_school.filter(author__school=request.user.school, deleted_at__gte=timestamp)
+        deleted_serializer = AnnouncementOutputSerializer(data=deleted_announcements, many=True)
         deleted_serializer.is_valid()
 
-        base_query = Announcement.objects.belong_to_user_school(request.user)
+        announcements_from_user_school_not_deleted = announcements_from_user_school.filter(deleted_at__isnull=True)
 
-        # here we also omit the announcements by the user 
-        created_announcements = base_query.filter(created_at__gte=timestamp, updated_at__isnull=True)
-        created_serializer = AnnouncementOutputSerializer(data=[announcement for announcement in created_announcements if announcement.author != request.user], many=True)
+        created_announcements = announcements_from_user_school_not_deleted.filter(created_at__gte=timestamp, updated_at__isnull=True)
+        created_serializer = AnnouncementOutputSerializer(data=created_announcements, many=True)
         created_serializer.is_valid()
 
-        updated_announcements = base_query.filter(updated_at__gte=timestamp).exclude(author=request.user)
+        updated_announcements = announcements_from_user_school_not_deleted.filter(updated_at__gte=timestamp)
         updated_serializer = AnnouncementOutputSerializer(data=updated_announcements, many=True)
         updated_serializer.is_valid()
 
