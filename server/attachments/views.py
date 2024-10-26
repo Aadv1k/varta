@@ -24,7 +24,6 @@ class AttachmentViewSet(ViewSet):
         
         return [perm() for perm in perms]
 
-
     def create(self, reqeust):
         pass
 
@@ -49,6 +48,7 @@ def upload_attachment(request):
                 .build()
 
     try:
+
         attachment = upload_serializer.save(request.user)
 
         return SuccessResponseBuilder() \

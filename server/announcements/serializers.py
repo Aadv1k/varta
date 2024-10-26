@@ -11,9 +11,14 @@ from common.fields.AcademicYearField import AcademicYearField
 from common.services.notification_queue import NotificationQueueFactory
 from common.services.notification_service import send_notification
 
+from attachments.models import Attachment, AnnouncementAttachment
+
 from django.conf import settings
 
 from accounts.models import Department, Classroom
+
+        
+notification_queue = NotificationQueueFactory(send_notification)
 
 def validate_standard(data: str):
     try:
@@ -73,17 +78,30 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=255)
     body = serializers.CharField()
     scopes = AnnouncementScopeSerializer(many=True)
-    # attachments = serializers.ListField(
-    #      child=serializers.UUIDField(),
-    #      max_length=settings.MAX_ATTACHMENTS_PER_ANNOUNCEMENT
-    # )
+    attachments = serializers.ListSerializer(
+        required=False,
+        child=serializers.UUIDField(),
+        max_length=settings.MAX_ATTACHMENTS_PER_ANNOUNCEMENT,
+        allow_empty=True
+    )
+
+    def validate_attachments(self, attachments):
+        attachments_set = set()
+        
+        for attachment_id in attachments:
+            if str(attachment_id) in attachments_set:
+                raise ValidationError("Duplicate attachment detected. Each attachment must be unique.")
+            try:
+                Attachment.objects.get(id=attachment_id)
+                attachments_set.add(str(attachment_id))
+            except Attachment.DoesNotExist:
+                raise ValidationError("Duplicate attachment detected. Each attachment must be unique.")
+
+        return attachments
 
     class Meta:
         model = Announcement 
-        fields = ["id", "title", "body", "scopes", "author" ]
-
-    def validate_attachments(self, attachments):
-        return []
+        fields = ["id", "title", "body", "scopes", "author", "attachments"]
 
     def validate_scopes(self, scopes_data):
         if len(scopes_data) == 0:
@@ -94,16 +112,25 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         
         return scopes_data
     
-    def create(self, validated_data):
-        scopes_data = validated_data.pop('scopes')
-        announcement = Announcement.objects.create(**validated_data)
-        for scope_data in scopes_data:
-            AnnouncementScope.objects.create(announcement=announcement, **scope_data)
-        
-        # TODO: push to the notification queue right here
+    def save(self):
+        announcement = Announcement.objects.create(
+            author=self.validated_data["author"],
+            title=self.validated_data["title"],
+            body=self.validated_data["body"],
+        )
 
-        nq = NotificationQueueFactory(send_notification)
-        nq.enqueue(str(announcement.id))
+        for scope in self.validated_data["scopes"]:
+            AnnouncementScope.objects.create(announcement=announcement, **scope)
+
+        for attachment_id in self.validated_data["attachments"]:
+            announcement.attachments.add(
+                AnnouncementAttachment.objects.create(
+                    announcement=announcement,
+                    attachment=Attachment.objects.get(id=attachment_id)
+                )
+            )
+
+        notification_queue.enqueue(str(announcement.id))
         
         return announcement
     
@@ -128,10 +155,24 @@ class SimpleAnnouncementAuthorSerializer(serializers.ModelSerializer):
         model = User
         fields = ["first_name", "last_name", "public_id"]
 
+class AttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attachment
+        fields = "__all__"
+
+class AnnouncementAttachmentToAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnnouncementAttachment
+        fields = ["announcement"]
+
+    def to_representation(self, instance):
+        return AttachmentSerializer(instance.attachment).data
+
 class AnnouncementOutputSerializer(serializers.ModelSerializer):
     author = SimpleAnnouncementAuthorSerializer()
     scopes = AnnouncementScopeSerializer(many=True)
     academic_year = AcademicYearField() 
+    attachments = AnnouncementAttachmentToAttachmentSerializer(many=True)
 
     class Meta:
         model = Announcement

@@ -648,7 +648,6 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
 
     def test_updated_since_timestamp_returns_updated_announcements(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher[1])
-        
         response = self.client.post(reverse('announcement_list'), {
             "title": "Test Announcement",
             "body": "This is a test announcement",

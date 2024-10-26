@@ -50,8 +50,9 @@ class ErrorResponseBuilder:
         self.error["errors"] = errors
         return self
 
+    # what in the name of god is this? and yes I wrote this shit 
     def set_details_from_serializer(self, serializer):
-        self.error["errors"] = [{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]
+        self.error["errors"] = [{"field": key, "error": str(value.pop()) if isinstance(value, list) else str(value.pop("non_field_errors").pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]
         return self
 
     def build(self):

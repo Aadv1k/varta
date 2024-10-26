@@ -24,12 +24,14 @@ class AttachmentUploadSerializer(Serializer):
 
     def validate_file(self, file: File):
         self.validate_filename(file.name)
-        if file.size <= 2048 and file.size >= settings.MAX_UPLOAD_FILE_SIZE_IN_BYTES:
+        if file.size < 2048 or file.size >= settings.MAX_UPLOAD_FILE_SIZE_IN_BYTES:
             raise ValidationError(
                 "Invalid file size, it's either too large or too small."
             )
 
         mimetype = magic.from_buffer(file.read(2048), mime=True)
+        file.seek(0)
+
         if mimetype not in Attachment.attachment_type_set:
             raise ValidationError("Unknown Filetype")
 
@@ -68,6 +70,7 @@ class AttachmentUploadSerializer(Serializer):
     def save(self, user) -> Attachment:
         file: File = self.validated_data["file"]
         file_hash = hashlib.md5(file.read(2048)).hexdigest()
+        file.seek(0)
 
         try:
             attachment: Attachment = AttachmentHash.objects.get(
@@ -81,6 +84,8 @@ class AttachmentUploadSerializer(Serializer):
             )
         except AttachmentHash.DoesNotExist:
             url = bucket_store.upload( file.name, file.read(),)
+            file.seek(0)
+
             mimetype = magic.from_buffer(file.read(2048), mime=True)
             new_attachment = Attachment.objects.create(
                 user=user,

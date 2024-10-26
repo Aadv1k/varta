@@ -2,8 +2,13 @@ from django.db import models
 from accounts.models import User
 
 from announcements.models import Announcement
+from django.db import Q
+
+from common.services.bucket_store import BucketStoreFactory
 
 import uuid
+
+bucket_store = BucketStoreFactory()
 
 class Attachment(models.Model):
     class AttachmentType(models.TextChoices):
@@ -30,6 +35,14 @@ class Attachment(models.Model):
     type = models.CharField(max_length=76, choices=AttachmentType.choices)
 
     def delete(self):
+        other_attachments = AttachmentHash.objects.filter(~Q(attachment=self), hash=self.attachment_hash.hash)
+
+        if other_attachments.exists():
+            pass
+        else:
+            pass
+        
+
         assert False, "HANDLE ATTACHMENT DELETION HERE"
         # TODO: 
         #  - check if the current hash is shared by anything else

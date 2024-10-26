@@ -10,6 +10,9 @@ class GenericBucketStore(ABC):
     def upload(self, file_name: str, file_content: bytes) -> Optional[str]:
         pass
 
+    def delete(self, id: str):
+        pass
+
 class S3BucketStore(GenericBucketStore):
     def upload(self, file_name: str, file_content: bytes):
         pass

@@ -147,22 +147,16 @@ class AnnouncementViewSet(viewsets.ViewSet):
             return ErrorResponseBuilder() \
                 .set_code(400) \
                 .set_message("Could not create announcement due to error") \
-                .set_details([{"field": key, "error": str(value[0])} for key, value in serializer.errors.items()]) \
+                .set_details_from_serializer(serializer) \
                 .build()
 
-        serializer.save()
-
-        notification_queue.enqueue(serializer.data["id"])
-
+        announcement = serializer.save()
+        output_serializer = AnnouncementOutputSerializer(announcement)
+       
         return SuccessResponseBuilder() \
             .set_code(201) \
             .set_message("Created announcement successfully") \
-            .set_data({
-                "id": serializer.data["id"],
-                "title": serializer.data["title"],
-                "scopes": serializer.data["scopes"],
-                "body": serializer.data["body"]
-            }) \
+            .set_data(output_serializer.data) \
             .build()
         
 
@@ -296,31 +290,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
                 "id": serializer.data["id"],
                 "title": serializer.data["title"],
                 "scopes": serializer.data["scopes"],
-                "body": serializer.data["body"]
+                "body": serializer.data["body"],
+                "attachments": serializer.data["attachments"]
             }) \
             .build()
-    
-
-
-class AttachmentRequestDataSerializer(serializers.Serializer):
-    file_name = serializers.CharField(max_length=512, min_length=8, required=True)
-    file_content = serializers.FileField()
-
-    def validate_file_name(self, value: str):
-        invalid_chars = '<>:"|?*\0/'
-        if any(char in value for char in invalid_chars):
-            raise ValidationError("Illegal characters found in the filename")
-
-        return value
-        
-    def validate_file_content(self, value):
-        if value.size > settings.MAX_UPLOAD_SIZE_IN_BYTES:
-            raise ValidationError("File size too large")
-        
-        if not value.content_type:
-            raise ValidationError("Unable to detect the filetype of the file. It is likely invalid")
-        
-        if value.content_type not in AnnouncementAttachment.AttachmentType.values:
-            raise ValidationError("File type not supported")
-
-        return value
