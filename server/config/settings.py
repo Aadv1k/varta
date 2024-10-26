@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "schools",
     "accounts",
     "announcements",
+    "attachments",
 
     "common"
 ]
