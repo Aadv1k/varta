@@ -1,5 +1,5 @@
 from django.urls import reverse
-from attachments.models import AttachmentHash, Attachment
+from attachments.models import Attachment
 from announcements.tests import BaseAnnouncementTestCase 
 from announcements.models import AnnouncementScope
 from django.conf import settings
@@ -116,20 +116,20 @@ class AttachmentTestCase(BaseAnnouncementTestCase):
         self.assertIn("url", response.data["data"])
 
     
-    def test_duplicate_announcements_arent_reuploaded(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
-        with open("./attachments/tests/test-image-v3.jpg", "rb") as test_file:
-            valid_file = SimpleUploadedFile( "test-file.jpg", test_file.read(), content_type="image/jpeg")
-            test_file.seek(0)
-            valid_file_2 = SimpleUploadedFile( "test-file.jpg", test_file.read(), content_type="image/jpeg")
+    # def test_duplicate_announcements_arent_reuploaded(self):
+    #     self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
+    #     with open("./attachments/tests/test-image-v3.jpg", "rb") as test_file:
+    #         valid_file = SimpleUploadedFile( "test-file.jpg", test_file.read(), content_type="image/jpeg")
+    #         test_file.seek(0)
+    #         valid_file_2 = SimpleUploadedFile( "test-file.jpg", test_file.read(), content_type="image/jpeg")
 
-        response = self.client.post(reverse("attachment_upload"), data={ "file": valid_file })
-        response_2 = self.client.post(reverse("attachment_upload"), data={ "file": valid_file_2 })
+    #     response = self.client.post(reverse("attachment_upload"), data={ "file": valid_file })
+    #     response_2 = self.client.post(reverse("attachment_upload"), data={ "file": valid_file_2 })
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response_2.status_code, 201)
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(response_2.status_code, 201)
 
-        self.assertEqual(response.data["data"]["url"], response_2.data["data"]["url"])
+    #     self.assertEqual(response.data["data"]["url"], response_2.data["data"]["url"])
 
 class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
     fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
@@ -196,7 +196,6 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
                 attachment_ids.append(response.data["data"]["id"])
                 test_file.seek(0)
 
-        self.assertEqual(AttachmentHash.objects.all().count(), 1)
         self.assertEqual(Attachment.objects.all().count(), 5)
 
         response = self.client.post(reverse("announcement_list"), data={

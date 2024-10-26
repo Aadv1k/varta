@@ -4,7 +4,7 @@ from django.core.files import File
 
 from common.services.bucket_store import BucketStoreFactory
 
-from .models import Attachment, AttachmentHash
+from .models import Attachment
 
 from pathlib import Path
 import hashlib
@@ -72,27 +72,15 @@ class AttachmentUploadSerializer(Serializer):
         file_hash = hashlib.md5(file.read(2048)).hexdigest()
         file.seek(0)
 
-        try:
-            attachment: Attachment = AttachmentHash.objects.get(
-                hash=file_hash
-            ).attachment
-            new_attachment = Attachment.objects.create(
-                user=user,
-                url=attachment.url,
-                type=attachment.type,
-                name=file.name,
-            )
-        except AttachmentHash.DoesNotExist:
-            url = bucket_store.upload( file.name, file.read(),)
-            file.seek(0)
+        url = bucket_store.upload( file.name, file.read(),)
+        file.seek(0)
 
-            mimetype = magic.from_buffer(file.read(2048), mime=True)
-            new_attachment = Attachment.objects.create(
-                user=user,
-                url=url,
-                type=mimetype,
-                name=file.name,
-            )
-            AttachmentHash.objects.create( attachment=new_attachment, hash=file_hash,)
+        mimetype = magic.from_buffer(file.read(2048), mime=True)
+        attachment = Attachment.objects.create(
+            user=user,
+            path=url,
+            type=mimetype,
+            name=file.name,
+        )
 
-        return new_attachment
+        return attachment 
