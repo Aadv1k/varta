@@ -19,13 +19,10 @@ class LocalBucketStore(GenericBucketStore):
         self.temp_dir = tempfile.TemporaryDirectory()
 
     def upload(self, file_name: str, file_content: bytes) -> str:
-        print(file_name)
         file_path = os.path.join(self.temp_dir.name, file_name)
         with open(file_path, 'wb') as f:
             f.write(file_content)
         return file_path
-
-
 
 def BucketStoreFactory() -> GenericBucketStore:
     if settings.TESTING:

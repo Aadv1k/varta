@@ -50,5 +50,9 @@ class ErrorResponseBuilder:
         self.error["errors"] = errors
         return self
 
+    def set_details_from_serializer(self, serializer):
+        self.error["errors"] = [{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]
+        return self
+
     def build(self):
         return Response(data=self.error, status=self.error["code"])

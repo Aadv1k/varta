@@ -4,17 +4,12 @@ from rest_framework.request import Request
 
 from django.db.models import Q
 
-from rest_framework.parsers import MultiPartParser
-from rest_framework.decorators import parser_classes, api_view, permission_classes
-
 from django.core.paginator import Paginator, EmptyPage
 from datetime import datetime, timezone
 
-from django.core.exceptions import ValidationError as DjangoValidationError
-
 from django.conf import settings
 
-from .models import Announcement, AnnouncementAttachment
+from .models import Announcement
 from accounts.permissions import IsJWTAuthenticated
 from accounts.models import User
 
@@ -329,39 +324,3 @@ class AttachmentRequestDataSerializer(serializers.Serializer):
             raise ValidationError("File type not supported")
 
         return value
-
-
-@api_view(["POST"])
-@permission_classes([IsJWTAuthenticated, IsTeacher])
-@parser_classes([MultiPartParser])
-def create_attachment(request):
-    serializer = AttachmentRequestDataSerializer(data={
-        "file_content": request.FILES.get("file_content"),
-        "file_name": request.data.get("file_name")
-    })
-
-    if not serializer.is_valid():
-        return ErrorResponseBuilder() \
-                .set_code(400) \
-                .set_message("Unable to upload your file as it is invalid") \
-                .set_details([{"field": key, "error": str(value[0])} for key, value in serializer.errors.items()]) \
-                .build()
-    
-    bucket_store = BucketStoreFactory()
-    
-    try:
-        resource_url = bucket_store.upload(serializer.validated_data["file_name"], request.FILES.get("file_content").read())
-        return SuccessResponseBuilder() \
-                .set_message("File uploaded successfully.") \
-                .set_code(201) \
-                .set_data({
-                    "resource_url": resource_url,
-                }) \
-                .build()
-    except Exception as exc: 
-        return ErrorResponseBuilder() \
-                .set_code(500) \
-                .set_message("Something went wrong while trying to upload your file. Please try again later") \
-                .set_details([{"field": "file_content", "error": str(exc)}]) \
-                .build()
-

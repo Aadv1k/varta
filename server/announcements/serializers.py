@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 from datetime import datetime, timezone
 
 from accounts.models import User
-from .models import Announcement, AnnouncementScope, AnnouncementAttachment
+from .models import Announcement, AnnouncementScope
 
 from common.fields.AcademicYearField import AcademicYearField
 from common.services.notification_queue import NotificationQueueFactory
@@ -32,17 +32,6 @@ def validate_department(data: str):
         Department.objects.get(department_code=data)
     except Department.DoesNotExist:
         raise ValidationError(f"Couldn't find a department of code \"{data}\".")
-
-
-class AnnouncementAttachmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AnnouncementAttachment
-        exclude = ["id", "created_at"]
-
-class AnnouncementAttachmentOutputSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AnnouncementAttachment
-        exclude = ["announcement"]
 
 class AnnouncementScopeSerializer(serializers.ModelSerializer):
     filter = serializers.ChoiceField(required=True, choices=AnnouncementScope.FilterType.choices)
@@ -84,15 +73,17 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=255)
     body = serializers.CharField()
     scopes = AnnouncementScopeSerializer(many=True)
-    attachments = AnnouncementAttachmentSerializer(many=True, required=False)
+    # attachments = serializers.ListField(
+    #      child=serializers.UUIDField(),
+    #      max_length=settings.MAX_ATTACHMENTS_PER_ANNOUNCEMENT
+    # )
 
     class Meta:
         model = Announcement 
-        fields = ["id", "title", "body", "scopes", "author", "attachments"]
+        fields = ["id", "title", "body", "scopes", "author" ]
 
-    def validate_scopes(self, attachments):
-        if len(attachments) > settings.MAX_ATTACHMENTS_PER_ANNOUNCEMENT:
-            raise ValidationError(f"Can't have more than {settings.MAX_ATTACHMENTS_PER_ANNOUNCEMENT} attachments per announcement")
+    def validate_attachments(self, attachments):
+        return []
 
     def validate_scopes(self, scopes_data):
         if len(scopes_data) == 0:
@@ -140,7 +131,6 @@ class SimpleAnnouncementAuthorSerializer(serializers.ModelSerializer):
 class AnnouncementOutputSerializer(serializers.ModelSerializer):
     author = SimpleAnnouncementAuthorSerializer()
     scopes = AnnouncementScopeSerializer(many=True)
-    attachments = AnnouncementAttachmentOutputSerializer(many=True)
     academic_year = AcademicYearField() 
 
     class Meta:
