@@ -1,5 +1,5 @@
 from django.conf import settings
-from rest_framework.serializers import Serializer, FileField, ValidationError, CharField
+from rest_framework.serializers import Serializer, FileField, ValidationError, CharField, ModelSerializer
 from django.core.files import File
 
 from common.services.bucket_store import BucketStoreFactory
@@ -7,8 +7,9 @@ from common.services.bucket_store import BucketStoreFactory
 from .models import Attachment
 
 from pathlib import Path
-import hashlib
 import re
+
+import uuid
 
 import magic
 
@@ -16,6 +17,10 @@ SAFE_FILENAME_PATTERN = re.compile(r"^[\w][\w\-. ]{0,252}[\w]$")
 
 bucket_store = BucketStoreFactory()
 
+class AttachmentSerializer(ModelSerializer):
+    class Meta:
+        model = Attachment
+        fields = "__all__"
 
 class AttachmentUploadSerializer(Serializer):
     file = FileField(
@@ -69,18 +74,21 @@ class AttachmentUploadSerializer(Serializer):
 
     def save(self, user) -> Attachment:
         file: File = self.validated_data["file"]
-        file_hash = hashlib.md5(file.read(2048)).hexdigest()
-        file.seek(0)
 
-        url = bucket_store.upload( file.name, file.read(),)
+        attachment_id = uuid.uuid4()
+        object_key = Attachment.get_object_key(user.public_id, attachment_id, file.name)
+
+        url = bucket_store.upload(file.read(), object_key)
         file.seek(0)
 
         mimetype = magic.from_buffer(file.read(2048), mime=True)
         attachment = Attachment.objects.create(
+            id=attachment_id,
             user=user,
-            path=url,
-            type=mimetype,
-            name=file.name,
+            url=url,
+            key=object_key,
+            file_type=mimetype,
+            file_name=file.name,
         )
 
         return attachment 

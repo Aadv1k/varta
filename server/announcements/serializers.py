@@ -113,25 +113,31 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         return scopes_data
     
     def save(self):
+        if self.partial:
+            # Hmm i think I am doing something VERY wrong here
+            self.update(self.instance, self.validated_data)
+            return
+
+        data = {**self.validated_data}
+
+        scopes = data.pop("scopes")
+        attachments = [] if "attachments" not in data else data.pop("attachments") 
+
         announcement = Announcement.objects.create(
-            author=self.validated_data["author"],
-            title=self.validated_data["title"],
-            body=self.validated_data["body"],
+            **data
         )
 
-        for scope in self.validated_data["scopes"]:
+        for scope in scopes:
             AnnouncementScope.objects.create(announcement=announcement, **scope)
 
-        for attachment_id in self.validated_data["attachments"]:
-            announcement.attachments.add(
-                AnnouncementAttachment.objects.create(
-                    announcement=announcement,
-                    attachment=Attachment.objects.get(id=attachment_id)
-                )
+        for attachment_id in attachments:
+            AnnouncementAttachment.objects.create(
+                announcement=announcement,
+                attachment=Attachment.objects.get(id=attachment_id)
             )
 
         notification_queue.enqueue(str(announcement.id))
-        
+
         return announcement
     
     def update(self, instance, validated_data):
@@ -147,6 +153,8 @@ class AnnouncementSerializer(serializers.ModelSerializer):
 
         instance.updated_at = datetime.now(timezone.utc)
         instance.save()
+
+        notification_queue.enqueue(instance.id)
 
         return instance
 

@@ -1,4 +1,4 @@
-from .serializers import AttachmentUploadSerializer
+from .serializers import AttachmentUploadSerializer, AttachmentSerializer
 
 from announcements.views import IsOwner
 from accounts.permissions import IsJWTAuthenticated , IsTeacher
@@ -48,22 +48,19 @@ def upload_attachment(request):
                 .build()
 
     try:
-
         attachment = upload_serializer.save(request.user)
-
+        
         return SuccessResponseBuilder() \
                 .set_message("Your attachment was uploaded successfully")\
-                .set_data({
-                    "id": str(attachment.id),
-                    "url": attachment.url,
-                })\
+                .set_data(AttachmentSerializer(attachment).data)\
                 .set_code(201)\
                 .build()
     except Exception as exc :
         return ErrorResponseBuilder() \
                 .set_message("Couldn't upload your attachment at the moment")\
                 .set_code(500)\
-                .set_details({
-                    "file": str(exc)
-                })\
+                .set_details([{
+                    "field": "file",
+                    "error": str(exc),
+                }])\
                 .build()

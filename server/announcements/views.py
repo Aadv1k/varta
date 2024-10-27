@@ -281,8 +281,6 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
         serializer.save()
 
-        notification_queue.enqueue(old_announcement.id)
-
         return SuccessResponseBuilder() \
             .set_code(200) \
             .set_message("Successfully updated announcement") \

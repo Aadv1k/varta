@@ -32,6 +32,10 @@ class Announcement(models.Model):
 
     def soft_delete(self):
         self.deleted_at = datetime.now(timezone.utc)
+
+        for attachment in self.attachments.all():
+            attachment.attachment.delete()
+
         self.save()
 
     def with_scope(self, filter_type, filter_data = None):

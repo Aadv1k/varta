@@ -28,7 +28,7 @@ class LocalBucketStore(GenericBucketStore):
         self.temp_dir = tempfile.TemporaryDirectory()
 
     def upload(self, file_content: bytes, object_key: str) -> str:
-        file_path = os.path.join(self.temp_dir.name, object_key)
+        file_path = os.path.join(self.temp_dir.name, object_key.replace("/", "_"))
         with open(file_path, 'wb') as f:
             f.write(file_content)
         return file_path
