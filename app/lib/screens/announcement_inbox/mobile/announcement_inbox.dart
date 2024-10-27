@@ -55,7 +55,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
       title: data.title,
       body: data.body,
       createdAt: DateTime.now(),
-      attachments: [], // TODO: implement the attachments here as well, assume everything is implemented correctly. YOU WOULD ALSO need to handle logic if the user clicks on the attachment when it isn't fully loaded (in this case maybe have the chip ignore)
+      attachments: [], // TODO: implement the attachments here as well, assume everything is implemented correctly. YOU WOULD ALSO need to handle logic if the user clicks on the attachment when it isn't fully loaded (in this case maybe have the chip ignore )
       id: "OPTMISTIC-${const Uuid().v1()}",
       scopes: data.scopes
           .map((rawScope) => rawScope.toAnnouncementScope())

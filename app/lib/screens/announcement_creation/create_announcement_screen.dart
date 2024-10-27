@@ -189,99 +189,113 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            TextField(
-              minLines: 1,
-              maxLines: null,
-              controller: _titleController,
-              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                  color: AppColor.heading, overflow: TextOverflow.ellipsis),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: "Announcement Title",
-                hintStyle: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                    color: AppColor.subtitle, fontWeight: FontWeight.normal),
-              ),
-            ),
-            const SizedBox(height: Spacing.sm),
-            const Divider(height: 1, color: AppColor.subtitleLighter),
-            const SizedBox(height: Spacing.md),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Wrap(
-                  runSpacing: Spacing.sm,
-                  spacing: Spacing.sm,
-                  children:
-                      _announcementData.scopes.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    var scopeData = entry.value;
-                    return VartaChip(
-                      variant: VartaChipVariant.secondary,
-                      text: scopeData.getUserFriendlyLabel(),
-                      onDeleted: () => _handleDeleteScope(index),
-                      size: VartaChipSize.small,
-                    );
-                  }).toList(),
-                ),
-                if (_announcementData.scopes.isNotEmpty)
-                  const SizedBox(height: Spacing.sm),
-                VartaChip(
-                  variant: VartaChipVariant.outlined,
-                  isDisabled: shouldDisableAdd,
-                  onPressed: shouldDisableAdd
-                      ? null
-                      : () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            isDismissible: false,
-                            backgroundColor: AppColor.primaryBg,
-                            enableDrag: false,
-                            builder: (context) => ScopeSelectionBottomSheet(
-                              onCreated: (scope) => _handleCreateScope(scope),
-                            ),
-                          );
-                        },
-                  text: "Add Scope",
-                  size: VartaChipSize.small,
-                ),
-              ],
-            ),
-            const SizedBox(height: Spacing.md),
-            const Divider(height: 1, color: AppColor.subtitleLighter),
-            const SizedBox(height: Spacing.sm),
-            Expanded(
-              child: TextField(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              TextField(
+                minLines: 1,
                 maxLines: null,
-                controller: _bodyController,
+                controller: _titleController,
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                    color: AppColor.heading, overflow: TextOverflow.ellipsis),
                 decoration: InputDecoration(
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
                   border: InputBorder.none,
-                  hintText: 'eg "This is an announcement regarding..."',
-                  hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: AppColor.subtitle,
-                      ),
+                  hintText: "Announcement Title",
+                  hintStyle: Theme.of(context)
+                      .textTheme
+                      .headlineLarge!
+                      .copyWith(
+                          color: AppColor.subtitle,
+                          fontWeight: FontWeight.normal),
                 ),
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: AppColor.heading,
-                    ),
               ),
-            ),
-            const Spacer(),
-            const Wrap(runSpacing: Spacing.sm, spacing: Spacing.sm, children: [
-              AttachmentPreviewBoxWidget(),
-              AttachmentPreviewBoxWidget(),
-              AttachmentPreviewBoxWidget(),
-              AttachmentPreviewBoxWidget(),
-            ])
-          ],
+              const SizedBox(height: Spacing.sm),
+              const Divider(height: 1, color: AppColor.subtitleLighter),
+              const SizedBox(height: Spacing.md),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Wrap(
+                    runSpacing: Spacing.sm,
+                    spacing: Spacing.sm,
+                    children:
+                        _announcementData.scopes.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      var scopeData = entry.value;
+                      return VartaChip(
+                        variant: VartaChipVariant.secondary,
+                        text: scopeData.getUserFriendlyLabel(),
+                        onDeleted: () => _handleDeleteScope(index),
+                        size: VartaChipSize.small,
+                      );
+                    }).toList(),
+                  ),
+                  if (_announcementData.scopes.isNotEmpty)
+                    const SizedBox(height: Spacing.sm),
+                  VartaChip(
+                    variant: VartaChipVariant.outlined,
+                    isDisabled: shouldDisableAdd,
+                    onPressed: shouldDisableAdd
+                        ? null
+                        : () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              isDismissible: false,
+                              backgroundColor: AppColor.primaryBg,
+                              enableDrag: false,
+                              builder: (context) => ScopeSelectionBottomSheet(
+                                onCreated: (scope) => _handleCreateScope(scope),
+                              ),
+                            );
+                          },
+                    text: "Add Scope",
+                    size: VartaChipSize.small,
+                  ),
+                ],
+              ),
+              const SizedBox(height: Spacing.md),
+              const Divider(height: 1, color: AppColor.subtitleLighter),
+              const SizedBox(height: Spacing.sm),
+              Column(
+                children: [
+                  TextField(
+                    maxLines: null,
+                    controller: _bodyController,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                      border: InputBorder.none,
+                      hintText: 'eg "This is an announcement regarding..."',
+                      hintStyle:
+                          Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                color: AppColor.subtitle,
+                              ),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: AppColor.heading,
+                        ),
+                  ),
+                  const SizedBox(height: Spacing.lg),
+                  const Wrap(
+                      clipBehavior: Clip.none,
+                      runSpacing: Spacing.sm,
+                      spacing: Spacing.sm,
+                      children: [
+                        AttachmentPreviewBoxWidget(),
+                        AttachmentPreviewBoxWidget(),
+                        AttachmentPreviewBoxWidget(),
+                        AttachmentPreviewBoxWidget(),
+                      ]),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -297,16 +311,15 @@ class AttachmentPreviewBoxWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(clipBehavior: Clip.none, children: [
       Container(
-        height: 90,
+        height: 94,
         width: 120,
-        padding: const EdgeInsets.only(
-            left: Spacing.xs, bottom: Spacing.xs, right: Spacing.xs),
+        padding: const EdgeInsets.all(Spacing.xs),
         decoration: BoxDecoration(
             color: PaletteNeutral.shade030,
             border: Border.all(color: PaletteNeutral.shade040),
             borderRadius: const BorderRadius.all(Radius.circular(8))),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Icon(Icons.image, size: IconSizes.iconLg),
