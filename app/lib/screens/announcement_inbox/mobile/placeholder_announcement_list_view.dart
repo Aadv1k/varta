@@ -20,15 +20,15 @@ class PlaceholderAnnouncementListView extends StatelessWidget {
 }
 
 var placeholderAnnouncementModel = AnnouncementModel(
-  title: 'This is an example title, to act as a proxy for',
-  body:
-      'So I guess we are generating some random data! pretty cool if you ask me ngl, anyway. Cool package, cool Language',
-  id: '',
-  createdAt: DateTime(2024, 3, 6),
-  author: AnnouncementAuthorModel(
-    firstName: 'Foo',
-    lastName: 'Bar',
-    publicId: '1234',
-  ),
-  scopes: [],
-);
+    title: 'This is an example title, to act as a proxy for',
+    body:
+        'So I guess we are generating some random data! pretty cool if you ask me ngl, anyway. Cool package, cool Language',
+    id: '',
+    createdAt: DateTime(2024, 3, 6),
+    author: AnnouncementAuthorModel(
+      firstName: 'Foo',
+      lastName: 'Bar',
+      publicId: '1234',
+    ),
+    scopes: [],
+    attachments: []);

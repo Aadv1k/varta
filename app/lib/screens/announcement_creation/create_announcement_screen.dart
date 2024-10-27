@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app/common/sizes.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/models/announcement_model.dart';
@@ -5,6 +7,7 @@ import 'package:app/widgets/delete_confirmation_dialog.dart';
 import 'package:app/widgets/save_confirmation_dialog.dart';
 import 'package:app/widgets/varta_button.dart';
 import 'package:app/widgets/varta_chip.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:app/screens/announcement_creation/scope_selection_bottom_sheet.dart';
 
@@ -29,45 +32,6 @@ class CreateAnnouncementScreen extends StatefulWidget {
       _CreateAnnouncementScreenState();
 }
 
-class AnnouncementCreationData {
-  final String title;
-  final String body;
-  final List<ScopeSelectionData> scopes;
-
-  AnnouncementCreationData copyWith({
-    String? title,
-    String? body,
-    List<ScopeSelectionData>? scopes,
-  }) {
-    return AnnouncementCreationData(
-      title: title ?? this.title,
-      body: body ?? this.body,
-      scopes: scopes ?? this.scopes,
-    );
-  }
-
-  bool isValid() {
-    return (title.trim().isNotEmpty && body.trim().isNotEmpty) &&
-        scopes.isNotEmpty;
-  }
-
-  AnnouncementCreationData({
-    required this.scopes,
-    required this.title,
-    required this.body,
-  });
-
-  factory AnnouncementCreationData.fromModel(AnnouncementModel model) {
-    return AnnouncementCreationData(
-      title: model.title,
-      body: model.body,
-      scopes: model.scopes
-          .map((e) => ScopeSelectionData.fromAnnouncementScope(e))
-          .toList(),
-    );
-  }
-}
-
 class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
   late AnnouncementCreationData _announcementData;
   bool shouldDisableAdd = false;
@@ -86,8 +50,8 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
       _titleController.text = _announcementData.title;
       _bodyController.text = _announcementData.body;
     } else {
-      _announcementData =
-          AnnouncementCreationData(scopes: [], title: "", body: "");
+      _announcementData = AnnouncementCreationData(
+          scopes: [], title: "", body: "", attachments: []);
     }
 
     _titleController.addListener(() {
@@ -163,6 +127,16 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
             ));
   }
 
+  void _handleAddAttachment(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+    } else {
+      // User canceled the picker
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -172,23 +146,36 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
         backgroundColor: AppColor.primaryBg,
         toolbarHeight: 54,
         titleSpacing: 0,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.chevron_left,
-              color: AppColor.body, size: IconSizes.iconLg),
+        leading: Padding(
+          padding: EdgeInsets.zero,
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.chevron_left,
+                color: AppColor.subtitle, size: IconSizes.iconMd),
+          ),
         ),
         actions: [
-          if (widget.isUpdate) ...[
+          SizedBox(
+            child: IconButton(
+                style: const ButtonStyle(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                onPressed: () => _handleAddAttachment(context),
+                icon: const Icon(Icons.attachment,
+                    color: AppColor.subtitle, size: IconSizes.iconMd)),
+          ),
+          if (widget.isUpdate == false) ...[
             IconButton(
+                style: const ButtonStyle(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: _handleDeleteAnnouncement,
                 icon: const Icon(Icons.delete,
-                    color: PaletteNeutral.shade600, size: IconSizes.iconMd)),
-            const SizedBox(width: Spacing.sm),
+                    color: AppColor.subtitle, size: IconSizes.iconMd)),
+            const SizedBox(width: Spacing.xs),
           ],
           Padding(
-            padding: const EdgeInsets.only(right: Spacing.sm),
+            padding: const EdgeInsets.only(right: Spacing.md),
             child: VartaButton(
               onPressed: _announcementData.isValid()
                   ? (widget.isUpdate
@@ -202,25 +189,17 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
           ),
         ],
       ),
-      body: Container(
-        padding: const EdgeInsets.only(
-          left: Spacing.md,
-          right: Spacing.md,
-          top: Spacing.sm,
-          bottom: Spacing.md,
-        ),
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             TextField(
               minLines: 1,
-              maxLines: 6,
+              maxLines: null,
               controller: _titleController,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineLarge!
-                  .copyWith(color: AppColor.heading),
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                  color: AppColor.heading, overflow: TextOverflow.ellipsis),
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "Announcement Title",
@@ -228,7 +207,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                     color: AppColor.subtitle, fontWeight: FontWeight.normal),
               ),
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: Spacing.sm),
             const Divider(height: 1, color: AppColor.subtitleLighter),
             const SizedBox(height: Spacing.md),
             Column(
@@ -279,7 +258,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
             const SizedBox(height: Spacing.sm),
             Expanded(
               child: TextField(
-                maxLines: 999,
+                maxLines: null,
                 controller: _bodyController,
                 decoration: InputDecoration(
                   isDense: true,
@@ -295,9 +274,139 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                     ),
               ),
             ),
+            const Spacer(),
+            const Wrap(runSpacing: Spacing.sm, spacing: Spacing.sm, children: [
+              AttachmentPreviewBoxWidget(),
+              AttachmentPreviewBoxWidget(),
+              AttachmentPreviewBoxWidget(),
+              AttachmentPreviewBoxWidget(),
+            ])
           ],
         ),
       ),
     );
   }
 }
+
+class AttachmentPreviewBoxWidget extends StatelessWidget {
+  const AttachmentPreviewBoxWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(clipBehavior: Clip.none, children: [
+      Container(
+        height: 90,
+        width: 120,
+        padding: const EdgeInsets.only(
+            left: Spacing.xs, bottom: Spacing.xs, right: Spacing.xs),
+        decoration: BoxDecoration(
+            color: PaletteNeutral.shade030,
+            border: Border.all(color: PaletteNeutral.shade040),
+            borderRadius: const BorderRadius.all(Radius.circular(8))),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.image, size: IconSizes.iconLg),
+            const SizedBox(height: Spacing.xs),
+            Text("My example...file name.jpeg",
+                maxLines: 2, style: Theme.of(context).textTheme.bodySmall)
+          ],
+        ),
+      ),
+      Positioned(
+        right: -16,
+        top: -16,
+        child: IconButton.filled(
+            style: const ButtonStyle(
+                backgroundColor:
+                    WidgetStatePropertyAll(PaletteNeutral.shade200)),
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            onPressed: () {},
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.close,
+                color: AppColor.activeChipFg, size: IconSizes.iconSm)),
+      ),
+    ]);
+  }
+}
+
+// showModalBottomSheet(
+//     isDismissible: true,
+//     backgroundColor: AppColor.primaryBg,
+//     context: context,
+//     builder: (context) {
+//       return Container(
+//           padding: const EdgeInsets.all(Spacing.lg),
+//           height: MediaQuery.sizeOf(context).height * 0.25,
+//           child: Row(
+//             children: [
+//               Expanded(
+//                 child: AspectRatio(
+//                     aspectRatio: 1,
+//                     child: Container(
+//                       padding: const EdgeInsets.all(Spacing.md),
+//                       decoration: BoxDecoration(
+//                           color: AppColor.inactiveChipBg,
+//                           borderRadius:
+//                               const BorderRadius.all(Radius.circular(16)),
+//                           border: Border.all(
+//                               color: PaletteNeutral.shade060, width: 1)),
+//                       child: Column(
+//                         crossAxisAlignment: CrossAxisAlignment.center,
+//                         mainAxisAlignment: MainAxisAlignment.center,
+//                         children: [
+//                           const Icon(Icons.camera_alt,
+//                               color: PaletteNeutral.shade200,
+//                               size: IconSizes.iconXxl),
+//                           const SizedBox(height: Spacing.sm),
+//                           Text("Select a photo or video.",
+//                               textAlign: TextAlign.center,
+//                               style: Theme.of(context)
+//                                   .textTheme
+//                                   .bodySmall!
+//                                   .copyWith(color: AppColor.body))
+//                         ],
+//                       ),
+//                     )),
+//               ),
+//               const SizedBox(width: Spacing.md),
+//               GestureDetector(
+//                 onTap: () async {
+//                   await FilePicker.platform.pickFiles();
+//                 },
+//                 child: Expanded(
+//                   child: AspectRatio(
+//                       aspectRatio: 1,
+//                       child: Container(
+//                         padding: const EdgeInsets.all(Spacing.md),
+//                         decoration: BoxDecoration(
+//                             color: AppColor.inactiveChipBg,
+//                             borderRadius:
+//                                 const BorderRadius.all(Radius.circular(16)),
+//                             border: Border.all(
+//                                 color: PaletteNeutral.shade060, width: 1)),
+//                         child: Column(
+//                           crossAxisAlignment: CrossAxisAlignment.center,
+//                           mainAxisAlignment: MainAxisAlignment.center,
+//                           children: [
+//                             const Icon(Icons.description,
+//                                 color: PaletteNeutral.shade200,
+//                                 size: IconSizes.iconXxl),
+//                             const SizedBox(height: Spacing.sm),
+//                             Text("Choose a file to attach.",
+//                                 textAlign: TextAlign.center,
+//                                 style: Theme.of(context)
+//                                     .textTheme
+//                                     .bodySmall!
+//                                     .copyWith(color: AppColor.body))
+//                           ],
+//                         ),
+//                       )),
+//                 ),
+//               ),
+//             ],
+//           ));
+//     });

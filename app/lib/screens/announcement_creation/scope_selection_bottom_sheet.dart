@@ -3,14 +3,11 @@ import 'package:app/common/sizes.dart';
 import 'package:app/data/dropdown_classroom_standard.dart';
 import 'package:app/data/dropdown_classroom_standard_division.dart';
 import 'package:app/data/dropdown_departments.dart';
-import 'package:app/models/search_data.dart';
 import 'package:app/widgets/varta_button.dart';
 import 'package:app/widgets/varta_checkbox.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
-import 'package:app/widgets/button.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 class ScopeSelectionBottomSheet extends StatefulWidget {
@@ -21,162 +18,6 @@ class ScopeSelectionBottomSheet extends StatefulWidget {
   @override
   _ScopeSelectionBottomSheetState createState() =>
       _ScopeSelectionBottomSheetState();
-}
-
-enum ScopeContext { student, teacher, everyone }
-
-enum GenericFilterType {
-  standard("Standard", "standard"),
-  standardDivision("Standard Division", "standard_division"),
-  department("Department", "department"),
-  all("All", "all");
-
-  const GenericFilterType(this.label, this.value);
-  final String label;
-  final String value;
-}
-
-class ScopeSelectionData {
-  final ScopeContext scopeType;
-  final GenericFilterType scopeFilterType;
-  final String scopeFilterData;
-  final bool? isClassTeacher;
-  final bool? isSubjectTeacher;
-
-  ScopeSelectionData({
-    required this.scopeType,
-    required this.scopeFilterType,
-    required this.scopeFilterData,
-    this.isClassTeacher,
-    this.isSubjectTeacher,
-  });
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ScopeSelectionData &&
-          runtimeType == other.runtimeType &&
-          scopeType == other.scopeType &&
-          scopeFilterType == other.scopeFilterType &&
-          scopeFilterData == other.scopeFilterData &&
-          isClassTeacher == other.isClassTeacher &&
-          isSubjectTeacher == other.isSubjectTeacher;
-
-  @override
-  int get hashCode =>
-      scopeType.hashCode ^
-      scopeFilterType.hashCode ^
-      scopeFilterData.hashCode ^
-      isClassTeacher.hashCode ^
-      isSubjectTeacher.hashCode;
-
-  ScopeSelectionData copyWith({
-    ScopeContext? scopeContext,
-    GenericFilterType? scopeFilterType,
-    String? scopeFilterData,
-    bool? isClassTeacher,
-    bool? isSubjectTeacher,
-  }) {
-    return ScopeSelectionData(
-      scopeType: scopeContext ?? scopeType,
-      scopeFilterType: scopeFilterType ?? this.scopeFilterType,
-      scopeFilterData: scopeFilterData ?? this.scopeFilterData,
-      isClassTeacher: isClassTeacher ?? this.isClassTeacher,
-      isSubjectTeacher: isSubjectTeacher ?? this.isSubjectTeacher,
-    );
-  }
-
-  String getUserFriendlyLabel() {
-    switch (scopeType) {
-      case ScopeContext.student:
-        return switch (scopeFilterType) {
-          GenericFilterType.standard => "${scopeFilterData}th Grade",
-          GenericFilterType.standardDivision => "Class ${scopeFilterData}",
-          GenericFilterType.all => "All Students",
-          _ => throw AssertionError("Invalid filter type for students"),
-        };
-      case ScopeContext.teacher:
-        return switch (scopeFilterType) {
-          GenericFilterType.standard when isSubjectTeacher == true =>
-            "${scopeFilterData}th Grade Teachers",
-          GenericFilterType.standardDivision when isClassTeacher == true =>
-            "Class ${scopeFilterData} Teacher",
-          GenericFilterType.standardDivision =>
-            "Class ${scopeFilterData} Teachers",
-          GenericFilterType.department => "${scopeFilterData} Dept",
-          GenericFilterType.all => "All Teachers",
-          _ => throw AssertionError("Invalid filter type for teachers"),
-        };
-      case ScopeContext.everyone:
-        return "Everyone";
-    }
-  }
-
-  AnnouncementScope toAnnouncementScope() {
-    var filterType = "";
-
-    if (scopeType == ScopeContext.student) {
-      filterType = switch (scopeFilterType) {
-        GenericFilterType.standard => "stu_standard",
-        GenericFilterType.standardDivision => "stu_standard_division",
-        GenericFilterType.all => "stu_all",
-        GenericFilterType.department => throw AssertionError(
-            "A selection of GenericFilterType.department should not be possible when scopeType is ScopeContext.student, this is likely a bug in bottom-sheet selection logic")
-      };
-    } else if (scopeType == ScopeContext.teacher) {
-      switch (scopeFilterType) {
-        case GenericFilterType.standard:
-          assert(isSubjectTeacher == true,
-              "isSubjectTeacher must be true for standard");
-          filterType = "t_subject_teacher_of_standard";
-        case GenericFilterType.standardDivision:
-          if (isClassTeacher == true) {
-            filterType = "t_class_teacher_of";
-            break;
-          }
-          filterType = "t_subject_teacher_of_standard_division";
-        case GenericFilterType.department:
-          filterType = "t_department";
-        case GenericFilterType.all:
-          filterType = "t_all";
-      }
-    } else {
-      filterType = "everyone";
-    }
-    return AnnouncementScope(filter: filterType, filterData: scopeFilterData);
-  }
-
-  static ScopeSelectionData fromAnnouncementScope(AnnouncementScope scope) {
-    return ScopeSelectionData(
-        isClassTeacher: scope.filter == "t_class_teacher_of",
-        isSubjectTeacher: scope.filter == "t_subject_teacher_of_standard",
-        scopeType: switch (scope.filter) {
-          "everyone" => ScopeContext.everyone,
-          "stu_all" => ScopeContext.student,
-          "stu_standard" => ScopeContext.student,
-          "stu_standard_division" => ScopeContext.student,
-          "t_all" => ScopeContext.teacher,
-          "t_department" => ScopeContext.teacher,
-          "t_class_teacher_of" => ScopeContext.teacher,
-          "t_subject_teacher_of_standard_division" => ScopeContext.teacher,
-          "t_subject_teacher_of_standard" => ScopeContext.teacher,
-          _ => throw AssertionError("Invalid filter type"),
-        },
-        scopeFilterType: switch (scope.filter) {
-          "everyone" => GenericFilterType.all,
-          "stu_all" => GenericFilterType.all,
-          "stu_standard" => GenericFilterType.standard,
-          "stu_standard_division" => GenericFilterType.standard,
-          "t_all" => GenericFilterType.all,
-          "t_department" => GenericFilterType.department,
-          "t_class_teacher_of" => GenericFilterType.standardDivision,
-          "t_class_teacher_of" => GenericFilterType.standardDivision,
-          "t_subject_teacher_of_standard_division" =>
-            GenericFilterType.standardDivision,
-          "t_subject_teacher_of_standard" => GenericFilterType.standard,
-          _ => throw AssertionError("Invalid filter type"),
-        },
-        scopeFilterData: scope.filterData ?? "");
-  }
 }
 
 class ScopeSelectionDropdownOption {

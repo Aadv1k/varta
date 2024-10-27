@@ -55,6 +55,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
       title: data.title,
       body: data.body,
       createdAt: DateTime.now(),
+      attachments: [], // TODO: implement the attachments here as well, assume everything is implemented correctly. YOU WOULD ALSO need to handle logic if the user clicks on the attachment when it isn't fully loaded (in this case maybe have the chip ignore)
       id: "OPTMISTIC-${const Uuid().v1()}",
       scopes: data.scopes
           .map((rawScope) => rawScope.toAnnouncementScope())
@@ -127,7 +128,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
         leading: const SizedBox.shrink(),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: Spacing.lg),
+            padding: const EdgeInsets.only(right: Spacing.md),
             child: CircleAvatar(
               backgroundColor: AppColor.inactiveChipBg,
               child: IconButton(
@@ -149,7 +150,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(isTeacher ? 84 : 48),
           child: Container(
-            padding: const EdgeInsets.only(left: Spacing.md, right: Spacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
             child: Column(
               children: [
                 const CustomSearchBar(navigational: true),

@@ -8,8 +8,7 @@ import "package:http/http.dart" as http;
 enum HTTPMethod { GET, POST, DELETE, PUT }
 
 class ApiService {
-	
-  static const String baseApiUrl = "http://65.0.183.148/api/v1";
+  static const String baseApiUrl = "http://10.0.2.2:8000/api/v1";
   final TokenService _tokenService = TokenService();
 
   Future<http.Response> makeRequest(HTTPMethod method, String endpoint,

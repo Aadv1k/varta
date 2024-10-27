@@ -41,7 +41,7 @@ class VartaChip extends StatelessWidget {
         border = BorderSide.none;
         break;
       case VartaChipVariant.outlined:
-        bg = Colors.transparent;
+        bg = Colors.white;
         fg = AppColor.primaryColor;
         border = BorderSide(
             color: isDisabled

@@ -39,14 +39,15 @@ class _EmailInputState extends State<EmailInput> {
 
   @override
   Widget build(BuildContext context) {
-    Color borderAccent = widget.hasError ? TWColor.red400 : TWColor.zinc200;
+    Color borderAccent =
+        widget.hasError ? AppColor.dangerBody : AppColor.appBarBottomBorder;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 360,
-          height: 56,
+          width: double.infinity,
+          height: 48,
           padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
           decoration: BoxDecoration(
             border: Border(
@@ -60,28 +61,33 @@ class _EmailInputState extends State<EmailInput> {
             child: TextField(
               keyboardType: TextInputType.emailAddress,
               controller: emailInputController,
-              style: const TextStyle(color: Colors.black),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge!
+                  .copyWith(color: AppColor.heading),
               decoration: InputDecoration(
                 hintText: "Email Address",
                 suffixIcon: widget.hasError
-                    ? const Icon(Icons.error_outline, color: TWColor.red400)
+                    ? const Icon(Icons.error_outline,
+                        color: AppColor.dangerBody, size: IconSizes.iconMd)
                     : null,
                 border: InputBorder.none,
-                hintStyle: const TextStyle(
-                    color: AppColor.subtitle, fontSize: FontSize.textBase),
+                hintStyle: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(color: AppColor.subtitle),
               ),
             ),
           ),
         ),
         const SizedBox(height: Spacing.sm),
         widget.hasError
-            ? SizedBox(
-									width: 360,
-                  child: Text(
-                    widget.errorMessage!,
-                    style: const TextStyle(
-                        color: TWColor.red600, fontSize: FontSize.textBase),
-                ),
+            ? Text(
+                widget.errorMessage!,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall!
+                    .copyWith(color: AppColor.dangerBody),
               )
             : const SizedBox.shrink(),
       ],

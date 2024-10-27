@@ -23,7 +23,7 @@ class UserAnnouncementListItem extends StatelessWidget {
 
     int scopeLength = announcement.scopes.length;
     String scopeSummary =
-        "To ${announcement.scopes.sublist(0, scopeLength > 3 ? 3 : scopeLength).map((scope) => scope.toUserFriendlyLabel()).join(", ")}${scopeLength > 3 ? " and ${scopeLength - 3} more" : ""}";
+        "To ${announcement.scopes.sublist(0, scopeLength > 1 ? 1 : scopeLength).map((scope) => scope.toUserFriendlyLabel()).join(", ")}${scopeLength > 1 ? " +${scopeLength - 1}" : ""}";
 
     return Dismissible(
       direction: DismissDirection.endToStart,
@@ -53,47 +53,45 @@ class UserAnnouncementListItem extends StatelessWidget {
         onTap: onPressed,
         splashColor: Colors.transparent,
         hoverColor: PaletteNeutral.shade020,
-        highlightColor: PaletteNeutral.shade040,
+        highlightColor: PaletteNeutral.shade020,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-              vertical: Spacing.md, horizontal: Spacing.lg),
+              vertical: Spacing.md, horizontal: Spacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Text(
-                    scopeSummary,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold, color: AppColor.subtitle),
+                  Expanded(
+                    child: Text(
+                      softWrap: true,
+                      scopeSummary,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColor.subtitle,
+                          fontWeight: FontWeight.w500),
+                    ),
                   ),
-                  const Spacer(),
                   Text(
                     formatDate(announcement.createdAt),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold, color: AppColor.subtitle),
+                        color: AppColor.subtitle, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
               const SizedBox(height: Spacing.md),
               Text(announcement.title,
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: AppColor.subheading,
-                      fontWeight: FontWeight.bold,
-                      fontSize: FontSize.textBase)),
-              Padding(
-                padding: const EdgeInsets.only(right: Spacing.lg),
-                child: Text(
-                  announcementBody,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: AppColor.body),
-                ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColor.heading, fontWeight: FontWeight.bold)),
+              Text(
+                announcementBody,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: AppColor.body),
               ),
             ],
           ),

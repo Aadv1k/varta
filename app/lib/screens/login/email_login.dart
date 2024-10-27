@@ -8,7 +8,6 @@ import 'package:app/screens/login/otp_verification/otp_verification.dart';
 import 'package:app/screens/login/phone_login.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/widgets/basic_app_bar.dart';
-import 'package:app/widgets/button.dart';
 import 'package:app/widgets/email_input.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/widgets/state/login_state.dart';
@@ -70,79 +69,78 @@ class _EmailLoginState extends State<EmailLogin> {
   @override
   Widget build(BuildContext context) {
     final loginState = LoginProvider.of(context).state;
-    final shouldBeCompact = MediaQuery.of(context).size.height <= 1024;
 
-    final contentGap = shouldBeCompact ? Spacing.md : Spacing.xl;
-    final headingStyle = shouldBeCompact
-        ? Theme.of(context).textTheme.headlineMedium
-        : Theme.of(context).textTheme.headlineLarge;
+    final headingStyle = Theme.of(context).textTheme.headlineMedium;
 
     return Scaffold(
         backgroundColor: AppColor.primaryBg,
         appBar: BasicAppBar(title: loginState.data.schoolIDAndName!.$2),
-        body: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.only(
-                top: Spacing.md,
-                bottom: Spacing.md,
-                left: Spacing.xl,
-                right: Spacing.xl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text("Your Email", style: headingStyle),
-                SizedBox(height: contentGap),
-                SizedBox(
-                  width: 420,
-                  child: Text(
-                      "We'll send you an OTP for verification. Please check your junk or spam folder if it's not in your inbox",
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium),
-                ),
-                SizedBox(height: contentGap),
-                ListenableBuilder(
-                  listenable: loginState,
-                  builder: (context, child) => EmailInput(
-                    onInput: (e) {
-                      loginState.setLoginData(loginState.data
-                          .copyWith(inputType: LoginType.email, inputData: e));
-                    },
-                    hasError: hasError,
-                    errorMessage: errorMessage,
-                  ),
-                ),
-                const SizedBox(height: Spacing.sm),
-								/*
-                TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LoginProvider(
-                              state: loginState, child: const PhoneLogin()),
+        body: SafeArea(
+          child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(
+                  vertical: Spacing.md, horizontal: Spacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 340,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text("Your Email", style: headingStyle),
+                        const SizedBox(height: Spacing.sm),
+                        Text(
+                            "We'll send you an OTP. Check your spam folder if it’s not in your inbox.",
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium),
+                        const SizedBox(height: Spacing.lg),
+                        ListenableBuilder(
+                          listenable: loginState,
+                          builder: (context, child) => EmailInput(
+                            onInput: (e) {
+                              loginState.setLoginData(loginState.data.copyWith(
+                                  inputType: LoginType.email, inputData: e));
+                            },
+                            hasError: hasError,
+                            errorMessage: errorMessage,
+                          ),
                         ),
-                      );
-                    },
-                    child: Text("Use Phone Number Instead",
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(color: TWColor.blue600))),*/
-                const Spacer(),
-                ListenableBuilder(
-                  listenable: loginState,
-                  builder: (context, child) => VartaButton(
-                      variant: VartaButtonVariant.primary,
-                      size: VartaButtonSize.large,
-                      label: "Verify",
-                      fullWidth: true,
-                      onPressed: () =>
-                          handleVerificationClick(context, loginState),
-                      isLoading: isLoading,
-                      isDisabled: loginState.data.inputData == null ||
-                          !isEmailValid(loginState.data.inputData ?? "")),
-                )
-              ],
-            )));
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: Spacing.sm),
+                  // TextButton(
+                  //     onPressed: () {
+                  //       Navigator.pushReplacement(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //           builder: (context) => LoginProvider(
+                  //               state: loginState, child: const PhoneLogin()),
+                  //         ),
+                  //       );
+                  //     },
+                  //     child: Text("Use Phone Number Instead",
+                  //         style: Theme.of(context)
+                  //             .textTheme
+                  //             .labelLarge
+                  //             ?.copyWith(color: TWColor.blue600))),
+                  const Spacer(),
+                  ListenableBuilder(
+                    listenable: loginState,
+                    builder: (context, child) => VartaButton(
+                        variant: VartaButtonVariant.primary,
+                        size: VartaButtonSize.large,
+                        label: "Verify",
+                        fullWidth: true,
+                        onPressed: () =>
+                            handleVerificationClick(context, loginState),
+                        isLoading: isLoading,
+                        isDisabled: loginState.data.inputData == null ||
+                            !isEmailValid(loginState.data.inputData ?? "")),
+                  )
+                ],
+              )),
+        ));
   }
 }
