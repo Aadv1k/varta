@@ -55,6 +55,14 @@ flutter:
     - assets/images/falling.svg
     - assets/images/relax.svg
 
+    - assets/icons/file-doc.svg
+    - assets/icons/file-pdf.svg
+    - assets/icons/file-ppt.svg
+    - assets/icons/file-xls.svg
+    - assets/icons/camera.svg
+    - assets/icons/video.svg
+
+
   fonts:
     - family: Geist
       fonts:

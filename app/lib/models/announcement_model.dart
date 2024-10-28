@@ -307,12 +307,16 @@ class AnnouncementScope {
 }
 
 class AttachmentSelectionData {
-  final String filepath;
-  final String filename;
+  final String filePath;
+  final String fileName;
   final bool isUrl;
+  final AnnouncementAttachmentFileType fileType;
 
   const AttachmentSelectionData(
-      {required this.filepath, required this.filename, this.isUrl = false});
+      {required this.filePath,
+      required this.fileName,
+      this.isUrl = false,
+      required this.fileType});
 }
 
 class AnnouncementCreationData {

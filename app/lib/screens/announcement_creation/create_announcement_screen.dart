@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:app/common/sizes.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/widgets/delete_confirmation_dialog.dart';
+import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/save_confirmation_dialog.dart';
 import 'package:app/widgets/varta_button.dart';
 import 'package:app/widgets/varta_chip.dart';
@@ -129,13 +131,34 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
   }
 
   void _handleAddAttachment(BuildContext context) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowedExtensions: ["png", "jpeg", "doc", "docx", "pdf", "xls", "xlsx"],
+        type: FileType.custom);
 
-    if (result != null) {
-      File file = File(result.files.single.path!);
-    } else {
-      // User canceled the picker
+    if (result == null) {
+      return;
     }
+
+    File file = File(result.files.single.path!);
+
+    Uint8List data = await file.readAsBytes();
+
+    if (data.length >= 1024 * 1024 * 10) {
+      const ErrorSnackbar(
+              innerText: "The max file-size is 10 MB per attachment.")
+          .show(context);
+      return;
+    }
+
+    setState(() {
+      _announcementData = _announcementData.copyWith(attachments: [
+        ..._announcementData.attachments,
+        AttachmentSelectionData(
+            filePath: file.path,
+            fileName: file.path.split("/").last,
+            fileType: AnnouncementAttachmentFileType.JPEG)
+      ]);
+    });
   }
 
   @override
@@ -284,25 +307,14 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                         ),
                   ),
                   const SizedBox(height: Spacing.lg),
-                  const Wrap(
+                  Wrap(
                       clipBehavior: Clip.none,
                       runSpacing: Spacing.sm,
                       spacing: Spacing.sm,
-                      children: [
-                        AttachmentPreviewBoxWidget(
-                            attachment: AttachmentSelectionData(
-                                filepath:
-                                    "https://crpf.gov.in/writereaddata/images/pdf/Think_Straight.pdf",
-                                filename: "Example file with a long name.pdf",
-                                isUrl: true)),
-                        AttachmentPreviewBoxWidget(
-                            attachment: AttachmentSelectionData(
-                                filepath:
-                                    "https://crpf.gov.in/writereaddata/images/pdf/Think_Straight.pdf",
-                                filename:
-                                    "Another file with a super long name.docx",
-                                isUrl: true)),
-                      ]),
+                      children: _announcementData.attachments
+                          .map((attachment) => AttachmentPreviewBoxWidget(
+                              attachment: attachment))
+                          .toList()),
                 ],
               )
             ],
@@ -319,11 +331,46 @@ class AttachmentPreviewBoxWidget extends StatelessWidget {
   const AttachmentPreviewBoxWidget({super.key, required this.attachment});
 
   String _truncateFileName(String fileName) {
-    if (fileName.length <= 32) {
+    if (fileName.length <= 28) {
       return fileName;
     }
 
-    return "${fileName.substring(0, 12)}...${fileName.substring(fileName.length - 12, fileName.length)}";
+    final chunks = fileName.split(".");
+
+    return "${chunks[0].substring(0, 8)}...${chunks[0].substring(chunks[0].length - 8, chunks[0].length).trim()}.${chunks[1]}";
+  }
+
+  Widget _getSvgIconFromFileType() {
+    String path;
+
+    switch (attachment.fileType) {
+      case AnnouncementAttachmentFileType.DOC:
+      case AnnouncementAttachmentFileType.DOCX:
+        path = "assets/icons/file-doc.svg";
+        break;
+      case AnnouncementAttachmentFileType.PPT:
+      case AnnouncementAttachmentFileType.PPTX:
+        path = "assets/icons/file-ppt.svg";
+        break;
+      case AnnouncementAttachmentFileType.XLS:
+      case AnnouncementAttachmentFileType.XLSX:
+        path = "assets/icons/file-xls.svg";
+        break;
+      case AnnouncementAttachmentFileType.PDF:
+        path = "assets/icons/file-pdf.svg";
+        break;
+      case AnnouncementAttachmentFileType.JPEG:
+      case AnnouncementAttachmentFileType.PNG:
+        return const Icon(Icons.photo_rounded,
+            color: PaletteNeutral.shade400, size: IconSizes.iconLg);
+      case AnnouncementAttachmentFileType.MP4:
+      case AnnouncementAttachmentFileType.MOV:
+      case AnnouncementAttachmentFileType.AVI:
+        return SvgPicture.asset("assets/icons/video.svg",
+            width: 28, height: 28);
+    }
+
+    return SvgPicture.asset(path, width: 32, height: 32);
   }
 
   @override
@@ -331,8 +378,8 @@ class AttachmentPreviewBoxWidget extends StatelessWidget {
     return Stack(clipBehavior: Clip.none, children: [
       Container(
         height: 94,
-        width: 126,
-        padding: const EdgeInsets.only(left: Spacing.xs),
+        width: 116,
+        padding: const EdgeInsets.only(left: Spacing.sm, right: Spacing.sm),
         decoration: BoxDecoration(
             color: PaletteNeutral.shade030,
             border: Border.all(color: PaletteNeutral.shade040),
@@ -341,22 +388,21 @@ class AttachmentPreviewBoxWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SvgPicture.asset("assets/icons/file-pdf.svg",
-                width: IconSizes.iconLg, height: IconSizes.iconLg),
+            _getSvgIconFromFileType(),
             const SizedBox(height: Spacing.xs),
-            Text(_truncateFileName(attachment.filename),
+            Text(_truncateFileName(attachment.fileName),
                 maxLines: 2, style: Theme.of(context).textTheme.bodySmall)
           ],
         ),
       ),
       Positioned(
-        right: -16,
-        top: -16,
+        right: -18,
+        top: -18,
         child: IconButton.filled(
             style: const ButtonStyle(
                 backgroundColor:
                     WidgetStatePropertyAll(PaletteNeutral.shade200)),
-            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
             onPressed: () {},
             padding: EdgeInsets.zero,
             icon: const Icon(Icons.close,

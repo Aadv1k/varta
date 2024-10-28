@@ -1,6 +1,8 @@
 import 'package:app/common/varta_theme.dart';
 import 'package:app/firebase_options.dart';
+import 'package:app/models/announcement_model.dart';
 import 'package:app/models/login_data.dart';
+import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
 import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/services/notification_service.dart';
@@ -79,34 +81,38 @@ class _VartaAppState extends State<VartaApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Varta',
-        debugShowCheckedModeBanner: false,
-        theme: VartaTheme().data,
-        home: FutureBuilder(
-            future: _initializedApp,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SizedBox.shrink();
-              }
+      title: 'Varta',
+      debugShowCheckedModeBanner: false,
+      theme: VartaTheme().data,
+      home: CreateAnnouncementScreen(onCreate: (data) {
+        print(data);
+      }),
+      // FutureBuilder(
+      //     future: _initializedApp,
+      //     builder: (context, snapshot) {
+      //       if (snapshot.connectionState == ConnectionState.waiting) {
+      //         return const SizedBox.shrink();
+      //       }
 
-              FlutterNativeSplash.remove();
+      //       FlutterNativeSplash.remove();
 
-              if (snapshot.hasError) {
-                return GenericError(
-                  errorMessage: snapshot.error.toString(),
-                );
-              }
+      //       if (snapshot.hasError) {
+      //         return GenericError(
+      //           errorMessage: snapshot.error.toString(),
+      //         );
+      //       }
 
-              final appState = snapshot.data;
-              if (appState == null) {
-                return LoginProvider(
-                  state: LoginState(data: LoginData()),
-                  child: const WelcomeScreen(),
-                );
-              }
+      //       final appState = snapshot.data;
+      //       if (appState == null) {
+      //         return LoginProvider(
+      //           state: LoginState(data: LoginData()),
+      //           child: const WelcomeScreen(),
+      //         );
+      //       }
 
-              return AppProvider(
-                  state: appState, child: const AnnouncementInboxScreen());
-            }));
+      //       return AppProvider(
+      //           state: appState, child: const AnnouncementInboxScreen());
+      //     })
+    );
   }
 }
