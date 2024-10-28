@@ -10,6 +10,7 @@ import 'package:app/widgets/varta_chip.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:app/screens/announcement_creation/scope_selection_bottom_sheet.dart';
+import 'package:flutter_svg/svg.dart';
 
 class CreateAnnouncementScreen extends StatefulWidget {
   final Function(AnnouncementCreationData) onCreate;
@@ -263,6 +264,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
               const Divider(height: 1, color: AppColor.subtitleLighter),
               const SizedBox(height: Spacing.sm),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextField(
                     maxLines: null,
@@ -287,10 +289,19 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                       runSpacing: Spacing.sm,
                       spacing: Spacing.sm,
                       children: [
-                        AttachmentPreviewBoxWidget(),
-                        AttachmentPreviewBoxWidget(),
-                        AttachmentPreviewBoxWidget(),
-                        AttachmentPreviewBoxWidget(),
+                        AttachmentPreviewBoxWidget(
+                            attachment: AttachmentSelectionData(
+                                filepath:
+                                    "https://crpf.gov.in/writereaddata/images/pdf/Think_Straight.pdf",
+                                filename: "Example file with a long name.pdf",
+                                isUrl: true)),
+                        AttachmentPreviewBoxWidget(
+                            attachment: AttachmentSelectionData(
+                                filepath:
+                                    "https://crpf.gov.in/writereaddata/images/pdf/Think_Straight.pdf",
+                                filename:
+                                    "Another file with a super long name.docx",
+                                isUrl: true)),
                       ]),
                 ],
               )
@@ -303,17 +314,25 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
 }
 
 class AttachmentPreviewBoxWidget extends StatelessWidget {
-  const AttachmentPreviewBoxWidget({
-    super.key,
-  });
+  final AttachmentSelectionData attachment;
+
+  const AttachmentPreviewBoxWidget({super.key, required this.attachment});
+
+  String _truncateFileName(String fileName) {
+    if (fileName.length <= 32) {
+      return fileName;
+    }
+
+    return "${fileName.substring(0, 12)}...${fileName.substring(fileName.length - 12, fileName.length)}";
+  }
 
   @override
   Widget build(BuildContext context) {
     return Stack(clipBehavior: Clip.none, children: [
       Container(
         height: 94,
-        width: 120,
-        padding: const EdgeInsets.all(Spacing.xs),
+        width: 126,
+        padding: const EdgeInsets.only(left: Spacing.xs),
         decoration: BoxDecoration(
             color: PaletteNeutral.shade030,
             border: Border.all(color: PaletteNeutral.shade040),
@@ -322,9 +341,10 @@ class AttachmentPreviewBoxWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.image, size: IconSizes.iconLg),
+            SvgPicture.asset("assets/icons/file-pdf.svg",
+                width: IconSizes.iconLg, height: IconSizes.iconLg),
             const SizedBox(height: Spacing.xs),
-            Text("My example...file name.jpeg",
+            Text(_truncateFileName(attachment.filename),
                 maxLines: 2, style: Theme.of(context).textTheme.bodySmall)
           ],
         ),
