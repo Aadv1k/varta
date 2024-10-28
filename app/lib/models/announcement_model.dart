@@ -32,25 +32,25 @@ class AnnouncementAttachmentModel {
     required this.fileName,
   });
 
-  factory AnnouncementAttachmentModel.fromJson(Map<String, dynamic> data) {
-    final mimeTypeToEnum = {
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-          AnnouncementAttachmentFileType.DOCX,
-      'application/msword': AnnouncementAttachmentFileType.DOC,
-      'application/vnd.ms-powerpoint': AnnouncementAttachmentFileType.PPT,
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-          AnnouncementAttachmentFileType.PPTX,
-      'application/vnd.ms-excel': AnnouncementAttachmentFileType.XLS,
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-          AnnouncementAttachmentFileType.XLSX,
-      'application/pdf': AnnouncementAttachmentFileType.PDF,
-      'image/jpeg': AnnouncementAttachmentFileType.JPEG,
-      'image/png': AnnouncementAttachmentFileType.PNG,
-      'video/mp4': AnnouncementAttachmentFileType.MP4,
-      'video/quicktime': AnnouncementAttachmentFileType.MOV,
-      'video/x-msvideo': AnnouncementAttachmentFileType.AVI,
-    };
+  static final mimeTypeToEnum = {
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        AnnouncementAttachmentFileType.DOCX,
+    'application/msword': AnnouncementAttachmentFileType.DOC,
+    'application/vnd.ms-powerpoint': AnnouncementAttachmentFileType.PPT,
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        AnnouncementAttachmentFileType.PPTX,
+    'application/vnd.ms-excel': AnnouncementAttachmentFileType.XLS,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        AnnouncementAttachmentFileType.XLSX,
+    'application/pdf': AnnouncementAttachmentFileType.PDF,
+    'image/jpeg': AnnouncementAttachmentFileType.JPEG,
+    'image/png': AnnouncementAttachmentFileType.PNG,
+    'video/mp4': AnnouncementAttachmentFileType.MP4,
+    'video/quicktime': AnnouncementAttachmentFileType.MOV,
+    'video/x-msvideo': AnnouncementAttachmentFileType.AVI,
+  };
 
+  factory AnnouncementAttachmentModel.fromJson(Map<String, dynamic> data) {
     final fileType =
         mimeTypeToEnum[data['mimeType']] ?? AnnouncementAttachmentFileType.PDF;
 
@@ -64,25 +64,25 @@ class AnnouncementAttachmentModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    final enumToMimeType = {
-      AnnouncementAttachmentFileType.DOCX:
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      AnnouncementAttachmentFileType.DOC: 'application/msword',
-      AnnouncementAttachmentFileType.PPT: 'application/vnd.ms-powerpoint',
-      AnnouncementAttachmentFileType.PPTX:
-          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      AnnouncementAttachmentFileType.XLS: 'application/vnd.ms-excel',
-      AnnouncementAttachmentFileType.XLSX:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      AnnouncementAttachmentFileType.PDF: 'application/pdf',
-      AnnouncementAttachmentFileType.JPEG: 'image/jpeg',
-      AnnouncementAttachmentFileType.PNG: 'image/png',
-      AnnouncementAttachmentFileType.MP4: 'video/mp4',
-      AnnouncementAttachmentFileType.MOV: 'video/quicktime',
-      AnnouncementAttachmentFileType.AVI: 'video/x-msvideo',
-    };
+  static final enumToMimeType = {
+    AnnouncementAttachmentFileType.DOCX:
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    AnnouncementAttachmentFileType.DOC: 'application/msword',
+    AnnouncementAttachmentFileType.PPT: 'application/vnd.ms-powerpoint',
+    AnnouncementAttachmentFileType.PPTX:
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    AnnouncementAttachmentFileType.XLS: 'application/vnd.ms-excel',
+    AnnouncementAttachmentFileType.XLSX:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    AnnouncementAttachmentFileType.PDF: 'application/pdf',
+    AnnouncementAttachmentFileType.JPEG: 'image/jpeg',
+    AnnouncementAttachmentFileType.PNG: 'image/png',
+    AnnouncementAttachmentFileType.MP4: 'video/mp4',
+    AnnouncementAttachmentFileType.MOV: 'video/quicktime',
+    AnnouncementAttachmentFileType.AVI: 'video/x-msvideo',
+  };
 
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'key': key,

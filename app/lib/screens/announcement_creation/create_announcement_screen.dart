@@ -2,6 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:app/common/sizes.dart';
+import 'package:mime/mime.dart';
+
+import 'package:path/path.dart' as path;
+
 import 'package:app/common/colors.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/widgets/delete_confirmation_dialog.dart';
@@ -99,6 +103,15 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
     });
   }
 
+  void _handleDeleteAttachment(int index) {
+    print("I was called brother");
+    setState(() {
+      _announcementData = _announcementData.copyWith(
+        attachments: [..._announcementData.attachments]..removeAt(index),
+      );
+    });
+  }
+
   void _handleCreateAnnouncement() {
     widget.onCreate(_announcementData);
     Navigator.pop(context);
@@ -131,6 +144,12 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
   }
 
   void _handleAddAttachment(BuildContext context) async {
+    if (_announcementData.attachments.length == 4) {
+      const ErrorSnackbar(innerText: "Can't attach more than 4 attachments")
+          .show(context);
+      return;
+    }
+
     FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowedExtensions: ["png", "jpeg", "doc", "docx", "pdf", "xls", "xlsx"],
         type: FileType.custom);
@@ -142,6 +161,23 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
     File file = File(result.files.single.path!);
 
     Uint8List data = await file.readAsBytes();
+
+    if (data.length < 1024) {
+      const ErrorSnackbar(
+              innerText: "The file is too small. It must atleast be 1KB")
+          .show(context);
+      return;
+    }
+
+    String? possibleMimeType =
+        lookupMimeType("null", headerBytes: data.sublist(0, 1024));
+
+    if (possibleMimeType == null) {
+      const ErrorSnackbar(
+              innerText: "Could not determine the type of the upload.")
+          .show(context);
+      return;
+    }
 
     if (data.length >= 1024 * 1024 * 10) {
       const ErrorSnackbar(
@@ -156,7 +192,9 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
         AttachmentSelectionData(
             filePath: file.path,
             fileName: file.path.split("/").last,
-            fileType: AnnouncementAttachmentFileType.JPEG)
+            fileType:
+                AnnouncementAttachmentModel.mimeTypeToEnum[possibleMimeType] ??
+                    AnnouncementAttachmentFileType.PDF)
       ]);
     });
   }
@@ -312,8 +350,12 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                       runSpacing: Spacing.sm,
                       spacing: Spacing.sm,
                       children: _announcementData.attachments
-                          .map((attachment) => AttachmentPreviewBoxWidget(
-                              attachment: attachment))
+                          .asMap()
+                          .entries
+                          .map((entry) => AttachmentPreviewBoxWidget(
+                              onDelete: () =>
+                                  _handleDeleteAttachment(entry.key),
+                              attachment: entry.value))
                           .toList()),
                 ],
               )
@@ -327,17 +369,20 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
 
 class AttachmentPreviewBoxWidget extends StatelessWidget {
   final AttachmentSelectionData attachment;
+  final VoidCallback onDelete;
 
-  const AttachmentPreviewBoxWidget({super.key, required this.attachment});
+  const AttachmentPreviewBoxWidget(
+      {super.key, required this.attachment, required this.onDelete});
 
   String _truncateFileName(String fileName) {
     if (fileName.length <= 28) {
       return fileName;
     }
 
-    final chunks = fileName.split(".");
+    String body = path.withoutExtension(fileName);
+    String ext = path.extension(fileName);
 
-    return "${chunks[0].substring(0, 8)}...${chunks[0].substring(chunks[0].length - 8, chunks[0].length).trim()}.${chunks[1]}";
+    return "${body.substring(0, 12).trim()}...${body.substring(body.length - 12, body.length).trim()}$ext";
   }
 
   Widget _getSvgIconFromFileType() {
@@ -377,9 +422,9 @@ class AttachmentPreviewBoxWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(clipBehavior: Clip.none, children: [
       Container(
-        height: 94,
-        width: 116,
-        padding: const EdgeInsets.only(left: Spacing.sm, right: Spacing.sm),
+        height: 100,
+        width: 120,
+        padding: const EdgeInsets.only(left: Spacing.xs, right: Spacing.xs),
         decoration: BoxDecoration(
             color: PaletteNeutral.shade030,
             border: Border.all(color: PaletteNeutral.shade040),
@@ -388,7 +433,9 @@ class AttachmentPreviewBoxWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _getSvgIconFromFileType(),
+            Padding(
+                padding: const EdgeInsets.only(left: Spacing.xs),
+                child: _getSvgIconFromFileType()),
             const SizedBox(height: Spacing.xs),
             Text(_truncateFileName(attachment.fileName),
                 maxLines: 2, style: Theme.of(context).textTheme.bodySmall)
@@ -403,7 +450,7 @@ class AttachmentPreviewBoxWidget extends StatelessWidget {
                 backgroundColor:
                     WidgetStatePropertyAll(PaletteNeutral.shade200)),
             constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-            onPressed: () {},
+            onPressed: onDelete,
             padding: EdgeInsets.zero,
             icon: const Icon(Icons.close,
                 color: AppColor.activeChipFg, size: IconSizes.iconSm)),
