@@ -1,12 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/search_data.dart';
-import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
 import 'package:app/services/api_service.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
+import 'package:uuid/v4.dart';
 
 class AnnouncementIncrementalChange {
   int timeStamp;
@@ -55,6 +57,19 @@ class AnnouncementsRepository {
 
     return PaginatedAnnouncementModelList(data["metadata"]["page_number"],
         data["metadata"]["total_pages"], parsedData);
+  }
+
+  Future<AnnouncementAttachmentModel> uploadAttachment(
+      AttachmentSelectionData data) async {
+    final response =
+        await _apiService.makeRequest(HTTPMethod.POST, "/attachments");
+
+    if (response.statusCode != 201) {
+      throw ApiException.fromResponse(response);
+    }
+
+    var data = jsonDecode(response.body)["data"];
+    return AnnouncementAttachmentModel.fromJson(data);
   }
 
   Future<AnnouncementIncrementalChange> fetchLatestChanges(

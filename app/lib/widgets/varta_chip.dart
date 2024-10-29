@@ -56,10 +56,7 @@ class VartaChip extends StatelessWidget {
 
     switch (size) {
       case VartaChipSize.small:
-        padding = const EdgeInsets.symmetric(
-          horizontal: Spacing.xs,
-          vertical: Spacing.xs,
-        );
+        padding = EdgeInsets.zero;
         height = 28.0;
         break;
       case VartaChipSize.medium:

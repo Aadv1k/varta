@@ -81,38 +81,34 @@ class _VartaAppState extends State<VartaApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Varta',
-      debugShowCheckedModeBanner: false,
-      theme: VartaTheme().data,
-      home: CreateAnnouncementScreen(onCreate: (data) {
-        print(data);
-      }),
-      // FutureBuilder(
-      //     future: _initializedApp,
-      //     builder: (context, snapshot) {
-      //       if (snapshot.connectionState == ConnectionState.waiting) {
-      //         return const SizedBox.shrink();
-      //       }
+        title: 'Varta',
+        debugShowCheckedModeBanner: false,
+        theme: VartaTheme().data,
+        home: FutureBuilder(
+            future: _initializedApp,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox.shrink();
+              }
 
-      //       FlutterNativeSplash.remove();
+              FlutterNativeSplash.remove();
 
-      //       if (snapshot.hasError) {
-      //         return GenericError(
-      //           errorMessage: snapshot.error.toString(),
-      //         );
-      //       }
+              if (snapshot.hasError) {
+                return GenericError(
+                  errorMessage: snapshot.error.toString(),
+                );
+              }
 
-      //       final appState = snapshot.data;
-      //       if (appState == null) {
-      //         return LoginProvider(
-      //           state: LoginState(data: LoginData()),
-      //           child: const WelcomeScreen(),
-      //         );
-      //       }
+              final appState = snapshot.data;
+              if (appState == null) {
+                return LoginProvider(
+                  state: LoginState(data: LoginData()),
+                  child: const WelcomeScreen(),
+                );
+              }
 
-      //       return AppProvider(
-      //           state: appState, child: const AnnouncementInboxScreen());
-      //     })
-    );
+              return AppProvider(
+                  state: appState, child: const AnnouncementInboxScreen());
+            }));
   }
 }

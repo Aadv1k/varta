@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:app/common/exceptions.dart';
-import 'package:app/common/sizes.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/repository/announcements_repo.dart';
@@ -55,15 +54,21 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     if (!context.mounted) return [];
     var appState = AppProvider.of(context).state;
 
-		List<AnnouncementModel> initialAnnouncements = [...appState.announcements];
-		initialAnnouncements = initialAnnouncements.where((announcement) => !changes.deleted.contains(announcement)).toList();
-		initialAnnouncements = initialAnnouncements.map((announcement)  {
-			var updated = changes.updated.firstWhereOrNull((updatedAnn) => updatedAnn == announcement);
-			if (updated != null) return updated;
-			return announcement;
-		}).toList();
+    List<AnnouncementModel> initialAnnouncements = [...appState.announcements];
+    initialAnnouncements = initialAnnouncements
+        .where((announcement) => !changes.deleted.contains(announcement))
+        .toList();
+    initialAnnouncements = initialAnnouncements.map((announcement) {
+      var updated = changes.updated
+          .firstWhereOrNull((updatedAnn) => updatedAnn == announcement);
+      if (updated != null) return updated;
+      return announcement;
+    }).toList();
 
-		final List<AnnouncementModel> finalAnnouncements = [...changes.created, ...initialAnnouncements];
+    final List<AnnouncementModel> finalAnnouncements = [
+      ...changes.created,
+      ...initialAnnouncements
+    ];
 
     return finalAnnouncements;
   }
@@ -102,6 +107,10 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     if (_isLoading) setState(() => _isLoading = false);
     if (!context.mounted) return;
 
+    setState(() {
+      _hasError = false;
+    });
+
     var cacheService = SimpleCacheService();
 
     var cache = await cacheService.fetchOrNull("announcements");
@@ -116,22 +125,28 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
       var changes = await _announcementRepo.fetchLatestChanges(cache.cachedAt);
       var newAnnouncements = _getUpdatedAnnouncements(changes);
 
-			state.setAnnouncements(newAnnouncements);
-			cacheService.store(
-					"announcements",
-					jsonEncode(
-							state.announcements.map((elem) => elem.toJson()).toList()));
-
+      state.setAnnouncements(newAnnouncements);
+      cacheService.store(
+          "announcements",
+          jsonEncode(
+              state.announcements.map((elem) => elem.toJson()).toList()));
     } catch (exc) {
       if (exc is ApiTokenExpiredException) {
         clearAndNavigateBackToLogin(context);
         return;
       }
-      ErrorSnackbar(
-              innerText: exc is ApiException
-                  ? exc.toString()
-                  : "Couldn't load more announcements. Please check your connection and try again")
-          .show(context);
+
+      if (exc is ApiClientException) {
+        setState(() {
+          _hasError = true;
+        });
+      } else {
+        ErrorSnackbar(
+                innerText: exc is ApiException
+                    ? exc.toString()
+                    : "Couldn't load more announcements. Please check your connection and try again")
+            .show(context);
+      }
     }
   }
 
@@ -198,10 +213,10 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
       child: GenericError(
           size: ErrorSize.medium,
           svgPath: "relax.svg",
-					onTryAgain: _handlePoll,
-					onTryAgainLabel: "Refresh",
-          errorMessage: "Nothing here yet. Announcements for you will show up here."),
-					
+          onTryAgain: _handlePoll,
+          onTryAgainLabel: "Refresh",
+          errorMessage:
+              "Nothing here yet. Announcements for you will show up here."),
     );
   }
 

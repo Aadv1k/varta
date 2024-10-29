@@ -47,6 +47,28 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
     var initialAnnouncements =
         List<AnnouncementModel>.from(appState.userAnnouncements);
 
+    List<AnnouncementAttachmentModel> announcementAttachmentData = [];
+
+    data.attachments
+        .map((attachment) => AnnouncementAttachmentModel(
+            id: "OPTIMISTIC-${Uuid().v4()}",
+            createdAt: DateTime.now(),
+            key: "",
+            path: "",
+            fileType: attachment.fileType,
+            fileName: attachment.fileName))
+        .toList();
+
+    for (final rawAttachment in data.attachments) {
+      announcementAttachmentData.add(AnnouncementAttachmentModel(
+          id: Uuid().v4(),
+          createdAt: DateTime.now(),
+          key: "",
+          path: rawAttachment.filePath,
+          fileType: rawAttachment.fileType,
+          fileName: rawAttachment.fileName));
+    }
+
     var optimisticAnnouncement = AnnouncementModel(
       author: AnnouncementAuthorModel(
           firstName: appState.user!.firstName,
@@ -55,7 +77,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
       title: data.title,
       body: data.body,
       createdAt: DateTime.now(),
-      attachments: [], // TODO: implement the attachments here as well, assume everything is implemented correctly. YOU WOULD ALSO need to handle logic if the user clicks on the attachment when it isn't fully loaded (in this case maybe have the chip ignore )
+      attachments: announcementAttachmentData,
       id: "OPTMISTIC-${const Uuid().v1()}",
       scopes: data.scopes
           .map((rawScope) => rawScope.toAnnouncementScope())
@@ -65,19 +87,19 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
     appState
         .addAnnouncements([optimisticAnnouncement], isUserAnnouncement: true);
 
-    try {
-      String announcementId = await _announcementRepo.createAnnouncement(data);
+    // try {
+    //   String announcementId = await _announcementRepo.createAnnouncement(data);
 
-      appState.setAnnouncements([
-        optimisticAnnouncement.copyWith(id: announcementId),
-        ...initialAnnouncements
-      ], isUserAnnouncement: true);
-      appState.saveAnnouncementState(isUserAnnouncement: true);
-    } catch (exc) {
-      const ErrorSnackbar(innerText: "Couldn't create announcement.")
-          .show(context);
-      appState.setAnnouncements(initialAnnouncements, isUserAnnouncement: true);
-    }
+    //   appState.setAnnouncements([
+    //     optimisticAnnouncement.copyWith(id: announcementId),
+    //     ...initialAnnouncements
+    //   ], isUserAnnouncement: true);
+    //   appState.saveAnnouncementState(isUserAnnouncement: true);
+    // } catch (exc) {
+    //   const ErrorSnackbar(innerText: "Couldn't create announcement.")
+    //       .show(context);
+    //   appState.setAnnouncements(initialAnnouncements, isUserAnnouncement: true);
+    // }
   }
 
   void _handleFloatingButtonPress(context) {

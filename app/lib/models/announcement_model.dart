@@ -19,7 +19,7 @@ class AnnouncementAttachmentModel {
   final String id;
   final DateTime createdAt;
   final String key;
-  final String url;
+  final String path;
   final AnnouncementAttachmentFileType fileType;
   final String fileName;
 
@@ -27,7 +27,7 @@ class AnnouncementAttachmentModel {
     required this.id,
     required this.createdAt,
     required this.key,
-    required this.url,
+    required this.path,
     required this.fileType,
     required this.fileName,
   });
@@ -58,7 +58,7 @@ class AnnouncementAttachmentModel {
       id: data['id'],
       createdAt: DateTime.parse(data['createdAt']),
       key: data['key'],
-      url: data['url'],
+      path: data['url'],
       fileType: fileType,
       fileName: data['fileName'],
     );
@@ -86,7 +86,7 @@ class AnnouncementAttachmentModel {
     return {
       'id': id,
       'key': key,
-      'url': url,
+      'url': path,
       'mimeType': enumToMimeType[fileType],
       'fileName': fileName,
     };

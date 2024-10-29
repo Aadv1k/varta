@@ -2,8 +2,10 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
+import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
 import 'package:app/widgets/delete_confirmation_dialog.dart';
 import 'package:app/widgets/varta_button.dart';
+import 'package:app/widgets/varta_chip.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -93,6 +95,25 @@ class UserAnnouncementListItem extends StatelessWidget {
                     .bodyMedium
                     ?.copyWith(color: AppColor.body),
               ),
+              const SizedBox(height: Spacing.sm),
+              if (announcement.attachments.isNotEmpty)
+                Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  AttachmentPreviewBoxWidget(
+                    attachment: AttachmentSelectionData(
+                      filePath: announcement.attachments.first.path,
+                      fileName: announcement.attachments.first.fileName,
+                      fileType: announcement.attachments.first.fileType,
+                    ),
+                    isCompact: true,
+                  ),
+                  const SizedBox(width: Spacing.sm),
+                  if (announcement.attachments.length > 1)
+                    Text("+${announcement.attachments.length - 1} more",
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall!
+                            .copyWith(color: AppColor.subtitle)),
+                ]),
             ],
           ),
         ),
