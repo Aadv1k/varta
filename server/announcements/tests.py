@@ -5,12 +5,12 @@ from typing import Tuple, List, Optional
 from schools.models import School, AcademicYear
 from accounts.models import User, Classroom, StudentDetail, TeacherDetail, Department
 from .models import Announcement, AnnouncementScope
+
+from attachments.models import Attachment
 import math
 import datetime
 
 from django.conf import settings
-
-import tempfile
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -692,3 +692,45 @@ class UpdatedSinceAnnouncementTestCase(BaseAnnouncementTestCase):
         self.assertEqual(len(response.data["data"]["deleted"]), 0)
         self.assertEqual(len(response.data["data"]["updated"]), 0)
         self.assertEqual(response.data["data"]["new"][0]["id"], announcement_id)
+
+class AnnouncementAttachmentSerializer(BaseAnnouncementTestCase):
+    fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
+
+    def setUp(self):
+        self.school = School.objects.create(
+            name="Delhi Public School",
+            address="Sector 24, Phase III, Rohini, New Delhi, Delhi 110085, India",
+            phone_number="+911123456789",
+            email="info@dpsrohini.com",
+            website="https://www.dpsrohini.com"
+        )
+
+        self.teacher, self.teacher_token = self.create_teacher_and_token(self.school, ["lang/english"], subject_teacher_of=["12A", "12B", "12C", "12D"], class_teacher_of="12D")
+
+        self.student, self.student_token = self.create_student_and_token(self.school, "9A")
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.teacher_token)
+        response = self.client.post(
+            reverse("attachment_upload"),
+            data={
+                "file": SimpleUploadedFile(
+                    "hello.txt",
+                    b"0" * 1024 * 10,
+                    content_type="text/plain",
+                )
+            },
+        )
+        self.client.post(reverse("announcement_list"), data={
+            "title": "Hello this is an example announcement", 
+            "body": "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua", 
+            "scopes": [{"filter": AnnouncementScope.FilterType.EVERYONE}],
+            "attachments": [response.data["data"]["id"]]
+        }, format="json")
+
+    def test_get_announcement_with_attachment(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.student_token)
+        response = self.client.get(reverse("announcement_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("attachments", response.data["data"][0])
+        

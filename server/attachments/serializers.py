@@ -1,5 +1,5 @@
 from django.conf import settings
-from rest_framework.serializers import Serializer, FileField, ValidationError, CharField, ModelSerializer
+from rest_framework.serializers import Serializer, FileField, ValidationError, URLField, ModelSerializer, SerializerMethodField
 from django.core.files import File
 
 from common.services.bucket_store import BucketStoreFactory
@@ -18,9 +18,14 @@ SAFE_FILENAME_PATTERN = re.compile(r"^[\w][\w\-. ]{0,252}[\w]$")
 bucket_store = BucketStoreFactory()
 
 class AttachmentOutputSerializer(ModelSerializer):
+    url = SerializerMethodField()
+
+    def get_url(self, obj):
+        return bucket_store.get_url(obj.key)
+
     class Meta:
         model = Attachment
-        exclude = ["user", "announcement"]
+        exclude = ["user", "announcement", "key"]
 
 class AttachmentUploadSerializer(Serializer):
     file = FileField(
@@ -78,14 +83,10 @@ class AttachmentUploadSerializer(Serializer):
         attachment_id = uuid.uuid4()
         object_key = Attachment.get_object_key(user.public_id, attachment_id, file.name)
 
-        url = bucket_store.upload(file.read(), object_key)
-        file.seek(0)
-
         mimetype = magic.from_buffer(file.read(2048), mime=True)
         attachment = Attachment.objects.create(
             id=attachment_id,
             user=user,
-            url=url,
             file_size_in_bytes=file.size,
             key=object_key,
             file_type=mimetype,

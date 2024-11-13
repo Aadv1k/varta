@@ -2,12 +2,14 @@ from attachments.models import Attachment
 from announcements.tests import BaseAnnouncementTestCase 
 from announcements.models import AnnouncementScope
 
-
 from schools.models import School
 import tempfile
 
 from django.conf import settings
 from django.urls import reverse
+
+from common.services.bucket_store import BucketStoreFactory
+bucket_store = BucketStoreFactory()
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -118,8 +120,6 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
 
         self.assertEqual(response.status_code, 400)
 
-        
-
     def test_user_can_create_announcement_with_valid_attachments(self):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
 
@@ -158,6 +158,7 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
             ],
             "attachments": [attachment_id]
         }, format="json")
+
 
         self.client.delete(reverse("announcement_detail", kwargs={ "pk": response.data["data"]["id"] }))
 

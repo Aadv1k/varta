@@ -34,7 +34,6 @@ class Attachment(models.Model):
     announcement = models.ForeignKey(Announcement, related_name="attachments", on_delete=models.CASCADE, null=True)
 
     key = models.CharField(max_length=512, unique=True)
-    url = models.URLField(max_length=1024, unique=True)
     file_type = models.CharField(max_length=76, choices=AttachmentType.choices)
     file_name = models.CharField(max_length=255)
     file_size_in_bytes = models.IntegerField()
