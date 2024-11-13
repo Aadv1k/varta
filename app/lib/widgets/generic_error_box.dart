@@ -5,17 +5,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 enum ErrorSize { small, medium, large }
 
-class GenericError extends StatelessWidget {
+class GenericErrorBox extends StatelessWidget {
   final VoidCallback? onTryAgain;
-	final String? onTryAgainLabel;
+  final String? onTryAgainLabel;
   final ErrorSize size;
   final String? svgPath;
   final String errorMessage;
 
-  const GenericError({
+  const GenericErrorBox({
     super.key,
     this.onTryAgain,
-		this.onTryAgainLabel,
+    this.onTryAgainLabel,
     this.size = ErrorSize.medium,
     this.svgPath,
     this.errorMessage = "Something went wrong. Please try again later.",

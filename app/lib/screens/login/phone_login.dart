@@ -8,9 +8,8 @@ import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/screens/login/otp_verification/otp_verification.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/widgets/state/login_state.dart';
-import 'package:app/widgets/basic_app_bar.dart';
-import 'package:app/widgets/button.dart';
-import 'package:app/widgets/phone_number_input.dart';
+import 'package:app/screens/login/phone_number_input.dart';
+import 'package:app/widgets/varta_app_bar.dart';
 import 'package:app/widgets/varta_button.dart';
 import 'package:flutter/material.dart';
 
@@ -90,7 +89,10 @@ class _PhoneLoginState extends State<PhoneLogin> {
 
     return Scaffold(
         backgroundColor: AppColor.primaryBg,
-        appBar: BasicAppBar(title: loginState.data.schoolIDAndName!.$2),
+        appBar: VartaAppBar(
+            actions: const [],
+            hasTitle: true,
+            title: loginState.data.schoolIDAndName!.$2),
         body: Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.only(

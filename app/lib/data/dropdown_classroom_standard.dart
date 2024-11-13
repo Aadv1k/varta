@@ -1,4 +1,4 @@
-import 'package:app/screens/announcement_creation/scope_selection_bottom_sheet.dart';
+import 'package:app/screens/announcement/scope_selection_bottom_sheet.dart';
 
 List<ScopeSelectionDropdownOption> dropdownClassroomStandardOptions = [
   ScopeSelectionDropdownOption("6th Standard", "6"),

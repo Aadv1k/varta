@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:app/common/colors.dart';
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/models/login_data.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/repository/user_repo.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
@@ -12,15 +11,12 @@ import 'package:app/services/notification_service.dart';
 import 'package:app/services/simple_cache_service.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
-// import 'package:app/screens/announcement_inbox/mobile/announcement_feed.dart';
 import 'package:app/screens/login/otp_verification/timed_text_button.dart';
 import 'package:app/services/auth_service.dart';
-import 'package:app/widgets/basic_app_bar.dart';
-import 'package:app/widgets/button.dart';
 import 'package:app/widgets/error_text.dart';
 import 'package:app/widgets/state/app_state.dart';
+import 'package:app/widgets/varta_app_bar.dart';
 import 'package:app/widgets/varta_button.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
@@ -96,8 +92,10 @@ class _OTPVerificationState extends State<OTPVerification> {
 
     return Scaffold(
       backgroundColor: AppColor.primaryBg,
-      appBar:
-          BasicAppBar(title: loginData.schoolIDAndName?.$2 ?? "Unknown School"),
+      appBar: VartaAppBar(
+        title: loginData.schoolIDAndName!.$2,
+        actions: const [],
+      ),
       body: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.only(

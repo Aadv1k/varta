@@ -1,13 +1,12 @@
-import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/search_data.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/repository/announcements_repo.dart';
 import 'package:app/repository/school_repository.dart';
 import 'package:app/repository/user_repo.dart';
+import 'package:app/screens/announcement/announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_list_item.dart';
-import 'package:app/screens/announcement_inbox/view_announcement_readonly_screen.dart';
-import 'package:app/widgets/connection_error.dart';
+import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
@@ -175,13 +174,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
                   if (snapshot.hasError) {
                     return const Center(
-                        child: GenericError(size: ErrorSize.medium));
+                        child: GenericErrorBox(size: ErrorSize.medium));
                   }
 
                   if (snapshot.data!.isEmpty) {
                     return const Center(
                         heightFactor: 0.8,
-                        child: GenericError(
+                        child: GenericErrorBox(
                           svgPath: "falling.svg",
                           errorMessage:
                               "It looks like your search didn't yield any results!",
@@ -215,8 +214,11 @@ class _SearchScreenState extends State<SearchScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            ViewAnnouncementReadonlyScreen(
-                                          announcement: snapshot.data![index],
+                                            AnnouncementScreen(
+                                          screenState:
+                                              AnnouncementScreenState.viewOnly,
+                                          initialAnnouncement:
+                                              snapshot.data![index],
                                         ),
                                       ),
                                     ),
@@ -228,7 +230,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 })
             : const Center(
                 heightFactor: 0.75,
-                child: GenericError(
+                child: GenericErrorBox(
                   errorMessage:
                       "Nothing here yet. Begin searching to see results.",
                   svgPath: "abstract-1.svg",
@@ -499,7 +501,7 @@ class _PostedByBottomSheetState extends State<PostedByBottomSheet> {
                 if (snapshot.hasError) {
                   return Center(
                       heightFactor: 0.8,
-                      child: GenericError(
+                      child: GenericErrorBox(
                         size: ErrorSize.medium,
                         errorMessage: snapshot.error.toString(),
                       ));

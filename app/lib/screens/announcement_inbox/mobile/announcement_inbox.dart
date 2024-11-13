@@ -4,7 +4,7 @@ import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/repository/announcements_repo.dart';
-import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
+import 'package:app/screens/announcement/announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/for_you_announcement_feed.dart';
 import 'package:app/screens/announcement_inbox/user_announcements_feed.dart';
 import 'package:app/screens/user_profile/user_profile_screen.dart';
@@ -106,8 +106,10 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) =>
-                CreateAnnouncementScreen(onCreate: _handleCreateAnnouncement)));
+            builder: (context) => AnnouncementScreen(
+                  onCreate: _handleCreateAnnouncement,
+                  screenState: AnnouncementScreenState.create,
+                )));
   }
 
   @override

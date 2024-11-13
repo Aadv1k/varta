@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
@@ -7,8 +6,6 @@ import 'package:app/models/search_data.dart';
 import 'package:app/services/api_service.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:uuid/uuid.dart';
-import 'package:uuid/v4.dart';
 
 class AnnouncementIncrementalChange {
   int timeStamp;

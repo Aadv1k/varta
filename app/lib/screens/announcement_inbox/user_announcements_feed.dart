@@ -4,11 +4,11 @@ import 'package:app/common/exceptions.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/repository/announcements_repo.dart';
-import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
+import 'package:app/screens/announcement/announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/placeholder_announcement_list_view.dart';
 import 'package:app/screens/announcement_inbox/mobile/user_announcement_list_item.dart';
 import 'package:app/services/simple_cache_service.dart';
-import 'package:app/widgets/connection_error.dart';
+import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/state/app_state.dart';
@@ -172,7 +172,7 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
     if (_hasError) {
       return Center(
         heightFactor: 0.75,
-        child: GenericError(
+        child: GenericErrorBox(
             onTryAgain: () {
               setState(() {
                 _hasError = false;
@@ -188,7 +188,7 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
 
     return const Center(
       heightFactor: 0.75,
-      child: GenericError(
+      child: GenericErrorBox(
           size: ErrorSize.medium,
           svgPath: "relax.svg",
           errorMessage: "You haven't created any announcements yet."),
@@ -226,9 +226,11 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  CreateAnnouncementScreen(
-                                                      isUpdate: true,
-                                                      onSave: (data) {
+                                                  AnnouncementScreen(
+                                                      screenState:
+                                                          AnnouncementScreenState
+                                                              .modify,
+                                                      onModify: (data) {
                                                         Navigator.pop(context);
                                                         _handleUpdateAnnouncement(
                                                             index, data);
@@ -237,10 +239,6 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
                                                         Navigator.pop(context);
                                                         _handleDeleteAnnouncement(
                                                             index);
-                                                      },
-                                                      onCreate: (data) {
-                                                        assert(false,
-                                                            "It should not be possible that when isUpdate is set to true the CreateANnouncemnetScreen can invoke this");
                                                       },
                                                       initialAnnouncement: state
                                                               .userAnnouncements[

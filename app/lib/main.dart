@@ -1,13 +1,11 @@
 import 'package:app/common/varta_theme.dart';
 import 'package:app/firebase_options.dart';
-import 'package:app/models/announcement_model.dart';
 import 'package:app/models/login_data.dart';
-import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
 import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/services/notification_service.dart';
 import 'package:app/services/token_service.dart';
-import 'package:app/widgets/connection_error.dart';
+import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/widgets/state/app_state.dart';
@@ -94,11 +92,10 @@ class _VartaAppState extends State<VartaApp> {
               FlutterNativeSplash.remove();
 
               if (snapshot.hasError) {
-                return GenericError(
+                return GenericErrorBox(
                   errorMessage: snapshot.error.toString(),
                 );
               }
-
               final appState = snapshot.data;
               if (appState == null) {
                 return LoginProvider(

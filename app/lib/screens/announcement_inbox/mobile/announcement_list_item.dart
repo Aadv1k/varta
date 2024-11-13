@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 
 class AnnouncementListItem extends StatelessWidget {
   final AnnouncementModel announcement;
-  bool? allowEditing = false;
-  VoidCallback? onPressed;
-  VoidCallback? onDelete;
+  final bool allowEditing;
+  final VoidCallback? onPressed;
+  final VoidCallback? onDelete;
 
-  AnnouncementListItem(
+  const AnnouncementListItem(
       {super.key,
       required this.announcement,
-      this.allowEditing,
+      this.allowEditing = false,
       this.onDelete,
       this.onPressed});
 

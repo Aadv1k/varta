@@ -1,16 +1,13 @@
-import 'dart:isolate';
-
 import 'package:app/common/colors.dart';
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/screens/login/otp_verification/otp_verification.dart';
-import 'package:app/screens/login/phone_login.dart';
 import 'package:app/services/auth_service.dart';
-import 'package:app/widgets/basic_app_bar.dart';
-import 'package:app/widgets/email_input.dart';
+import 'package:app/screens/login/email_input.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/widgets/state/login_state.dart';
+import 'package:app/widgets/varta_app_bar.dart';
 import 'package:app/widgets/varta_button.dart';
 import 'package:flutter/material.dart';
 
@@ -74,7 +71,10 @@ class _EmailLoginState extends State<EmailLogin> {
 
     return Scaffold(
         backgroundColor: AppColor.primaryBg,
-        appBar: BasicAppBar(title: loginState.data.schoolIDAndName!.$2),
+        appBar: VartaAppBar(
+          title: loginState.data.schoolIDAndName!.$2,
+          actions: const [],
+        ),
         body: SafeArea(
           child: Container(
               alignment: Alignment.center,

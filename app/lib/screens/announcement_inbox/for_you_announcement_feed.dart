@@ -4,10 +4,10 @@ import 'package:app/common/exceptions.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/repository/announcements_repo.dart';
+import 'package:app/screens/announcement/announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/placeholder_announcement_list_view.dart';
-import 'package:app/screens/announcement_inbox/view_announcement_readonly_screen.dart';
 import 'package:app/services/simple_cache_service.dart';
-import 'package:app/widgets/connection_error.dart';
+import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/state/app_state.dart';
@@ -194,7 +194,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     if (_hasError) {
       return Center(
         heightFactor: 0.75,
-        child: GenericError(
+        child: GenericErrorBox(
             onTryAgain: () {
               setState(() {
                 _hasError = false;
@@ -210,7 +210,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
 
     return Center(
       heightFactor: 0.75,
-      child: GenericError(
+      child: GenericErrorBox(
           size: ErrorSize.medium,
           svgPath: "relax.svg",
           onTryAgain: _handlePoll,
@@ -256,8 +256,11 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    ViewAnnouncementReadonlyScreen(
-                                                        announcement:
+                                                    AnnouncementScreen(
+                                                        screenState:
+                                                            AnnouncementScreenState
+                                                                .viewOnly,
+                                                        initialAnnouncement:
                                                             state.announcements[
                                                                 index])));
                                       },

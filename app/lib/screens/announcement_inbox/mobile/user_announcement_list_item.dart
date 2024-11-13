@@ -2,21 +2,16 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
-import 'package:app/screens/announcement_creation/create_announcement_screen.dart';
+import 'package:app/screens/announcement/attachment_preview_box.dart';
 import 'package:app/widgets/delete_confirmation_dialog.dart';
-import 'package:app/widgets/varta_button.dart';
-import 'package:app/widgets/varta_chip.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
 
 class UserAnnouncementListItem extends StatelessWidget {
   final AnnouncementModel announcement;
-  VoidCallback? onPressed;
-  VoidCallback? onDelete;
+  final VoidCallback? onPressed;
+  final VoidCallback? onDelete;
 
-  UserAnnouncementListItem(
+  const UserAnnouncementListItem(
       {super.key, required this.announcement, this.onDelete, this.onPressed});
 
   @override
@@ -98,7 +93,7 @@ class UserAnnouncementListItem extends StatelessWidget {
               const SizedBox(height: Spacing.sm),
               if (announcement.attachments.isNotEmpty)
                 Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                  AttachmentPreviewBoxWidget(
+                  AttachmentPreviewBox(
                     attachment: AttachmentSelectionData(
                       filePath: announcement.attachments.first.path,
                       fileName: announcement.attachments.first.fileName,

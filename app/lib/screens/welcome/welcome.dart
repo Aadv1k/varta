@@ -6,12 +6,10 @@ import 'package:app/models/school_model.dart';
 import 'package:app/screens/login/email_login.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/repository/school_repository.dart';
-import 'package:app/screens/login/phone_login.dart';
 import 'package:app/screens/welcome/school_bottom_sheet_select.dart';
 import 'package:app/widgets/button.dart';
 import 'package:app/widgets/error_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
