@@ -36,13 +36,43 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
             "title": "Test Announcement",
             "body": "This is a test announcement",
             "scopes": [
-                {"filter": AnnouncementScope.FilterType.EVERYONE},
+                {"filter": AnnouncementScope.FilterType.EVERYONE },
             ],
             "attachments": ["30f0dbcd-5363-4fea-a910-ff7ae9eb757a"]
         }, format="json")
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["errors"][0]["field"], "attachments")
+
+    def test_user_cannot_reference_attachment_that_already_belongs_to_announcement(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
+
+        with open("./attachments/tests/test-image-v3.jpg", "rb") as test_file:
+            response = self.client.post(reverse("attachment_upload"), data={ "file": SimpleUploadedFile("testing.jpg", content=test_file.read(), content_type="application/pdf") }) 
+
+            attachment_id = response.data["data"]["id"]
+
+        response = self.client.post(reverse("announcement_list"), data={
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ],
+            "attachments": [ attachment_id ]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.post(reverse("announcement_list"), data={
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ],
+            "attachments": [ attachment_id ]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 400)
 
 
     def test_user_cannot_have_duplicate_attachments_in_announcement(self):
@@ -66,17 +96,16 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
         self.assertEqual(response.data["errors"][0]["field"], "attachments")
 
 
-    def test_user_cannot_create_announcement_with_too_many_attachments(self):
+    def test_user_cannot_create_announcement_with_attachments_that_exceed_the_storage_cap(self):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
+        
         attachment_ids = []
+        
+        for _ in range(3):
+            response = self.client.post(reverse("attachment_upload"), data={ "file": SimpleUploadedFile("testing.pdf", content=b"0" * (settings.MAX_UPLOAD_FILE_SIZE_IN_BYTES - 12))})
 
-        with open("./attachments/tests/test-image-v3.jpg", "rb") as test_file:
-            for _ in range(5):
-                response = self.client.post(reverse("attachment_upload"), data={ "file": SimpleUploadedFile("testing.jpg", content=test_file.read(), content_type="application/pdf") }) 
-                attachment_ids.append(response.data["data"]["id"])
-                test_file.seek(0)
-
-        self.assertEqual(Attachment.objects.all().count(), 5)
+            self.assertEqual(response.status_code, 201)
+            attachment_ids.append(response.data["data"]["id"])
 
         response = self.client.post(reverse("announcement_list"), data={
             "title": "Test Announcement",
@@ -88,7 +117,8 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
         }, format="json")
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data["errors"][0]["field"], "attachments")
+
+        
 
     def test_user_can_create_announcement_with_valid_attachments(self):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
@@ -132,9 +162,3 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
         self.client.delete(reverse("announcement_detail", kwargs={ "pk": response.data["data"]["id"] }))
 
         self.assertFalse(Attachment.objects.filter(id=attachment_id).exists())
-
-    def test_user_can_delete_individual_attachments_by_id(self):
-        pass
-
-    def test_user_deleting_announcement_will_delete_attachments_unless_it_is_references_elsewhere(self):
-        pass

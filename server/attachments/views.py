@@ -1,4 +1,4 @@
-from .serializers import AttachmentUploadSerializer, AttachmentSerializer
+from .serializers import AttachmentUploadSerializer, AttachmentOutputSerializer
 
 from announcements.views import IsOwner
 from accounts.permissions import IsJWTAuthenticated , IsTeacher
@@ -8,8 +8,6 @@ from common.services.bucket_store import BucketStoreFactory
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import MultiPartParser
-
-from rest_framework.request import Request
 
 bucket_store = BucketStoreFactory()
 
@@ -52,7 +50,7 @@ def upload_attachment(request):
         
         return SuccessResponseBuilder() \
                 .set_message("Your attachment was uploaded successfully")\
-                .set_data(AttachmentSerializer(attachment).data)\
+                .set_data(AttachmentOutputSerializer(attachment).data)\
                 .set_code(201)\
                 .build()
     except Exception as exc :

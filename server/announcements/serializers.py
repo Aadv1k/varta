@@ -11,7 +11,8 @@ from common.fields.AcademicYearField import AcademicYearField
 from common.services.notification_queue import NotificationQueueFactory
 from common.services.notification_service import send_notification
 
-from attachments.models import Attachment, AnnouncementAttachment
+from attachments.models import Attachment
+from attachments.serializers import AttachmentOutputSerializer
 
 from django.conf import settings
 
@@ -37,6 +38,11 @@ def validate_department(data: str):
         Department.objects.get(department_code=data)
     except Department.DoesNotExist:
         raise ValidationError(f"Couldn't find a department of code \"{data}\".")
+
+class SimpleAnnouncementAuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "public_id"]
 
 class AnnouncementScopeSerializer(serializers.ModelSerializer):
     filter = serializers.ChoiceField(required=True, choices=AnnouncementScope.FilterType.choices)
@@ -81,21 +87,28 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     attachments = serializers.ListSerializer(
         required=False,
         child=serializers.UUIDField(),
-        max_length=settings.MAX_ATTACHMENTS_PER_ANNOUNCEMENT,
+        max_length=8,
         allow_empty=True
     )
 
     def validate_attachments(self, attachments):
         attachments_set = set()
+        total_size = 0
         
         for attachment_id in attachments:
             if str(attachment_id) in attachments_set:
                 raise ValidationError("Duplicate attachment detected. Each attachment must be unique.")
             try:
-                Attachment.objects.get(id=attachment_id)
+                found_attachment = Attachment.objects.get(id=attachment_id)
+                if found_attachment.announcement is not None:
+                    raise ValidationError("Trying to add an attachment that already belongs to another to announcement")
+                total_size += found_attachment.file_size_in_bytes
                 attachments_set.add(str(attachment_id))
             except Attachment.DoesNotExist:
-                raise ValidationError("Duplicate attachment detected. Each attachment must be unique.")
+                raise ValidationError("Trying to add a non-existent attachment")
+            
+        if total_size > settings.MAX_UPLOAD_QUOTA_PER_ANNOUNCEMENT_IN_BYTES:
+            raise ValidationError("The total file-size of all the attachments exceeds the maximum quota allowed for each announcement")
 
         return attachments
 
@@ -131,10 +144,11 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             AnnouncementScope.objects.create(announcement=announcement, **scope)
 
         for attachment_id in attachments:
-            AnnouncementAttachment.objects.create(
-                announcement=announcement,
-                attachment=Attachment.objects.get(id=attachment_id)
+            found_attachment = Attachment.objects.get(
+                id=attachment_id
             )
+            found_attachment.announcement = announcement
+            found_attachment.save()
 
         notification_queue.enqueue(str(announcement.id))
 
@@ -158,29 +172,11 @@ class AnnouncementSerializer(serializers.ModelSerializer):
 
         return instance
 
-class SimpleAnnouncementAuthorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["first_name", "last_name", "public_id"]
-
-class AttachmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attachment
-        fields = "__all__"
-
-class AnnouncementAttachmentToAttachmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AnnouncementAttachment
-        fields = ["announcement"]
-
-    def to_representation(self, instance):
-        return AttachmentSerializer(instance.attachment).data
-
 class AnnouncementOutputSerializer(serializers.ModelSerializer):
     author = SimpleAnnouncementAuthorSerializer()
     scopes = AnnouncementScopeSerializer(many=True)
     academic_year = AcademicYearField() 
-    attachments = AnnouncementAttachmentToAttachmentSerializer(many=True)
+    attachments = AttachmentOutputSerializer(many=True)
 
     class Meta:
         model = Announcement

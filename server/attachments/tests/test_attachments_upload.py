@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 import tempfile
 
-class AttachmentTestCase(BaseAnnouncementTestCase):
+class AttachmentUploadTestCase(BaseAnnouncementTestCase):
     fixtures = ["initial_academic_year.json", "initial_classrooms.json", "initial_departments.json"]
 
     def setUp(self):
@@ -57,12 +57,13 @@ class AttachmentTestCase(BaseAnnouncementTestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
         large_file = SimpleUploadedFile(
             "test.pdf", 
-            b"0" * 1024 * 1024 * 15, # ~ 15 MB
+            b"0" * (settings.MAX_UPLOAD_FILE_SIZE_IN_BYTES + 8),
             content_type="application/pdf"
         )
         response = self.client.post(reverse("attachment_upload"), data={
             "file": large_file
         })
+
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["errors"][0]["field"], "file")
 

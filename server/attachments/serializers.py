@@ -17,10 +17,10 @@ SAFE_FILENAME_PATTERN = re.compile(r"^[\w][\w\-. ]{0,252}[\w]$")
 
 bucket_store = BucketStoreFactory()
 
-class AttachmentSerializer(ModelSerializer):
+class AttachmentOutputSerializer(ModelSerializer):
     class Meta:
         model = Attachment
-        fields = "__all__"
+        exclude = ["user", "announcement"]
 
 class AttachmentUploadSerializer(Serializer):
     file = FileField(
@@ -86,6 +86,7 @@ class AttachmentUploadSerializer(Serializer):
             id=attachment_id,
             user=user,
             url=url,
+            file_size_in_bytes=file.size,
             key=object_key,
             file_type=mimetype,
             file_name=file.name,

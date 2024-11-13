@@ -4,12 +4,10 @@ import os
 import sys
 
 from dotenv import load_dotenv
-load_dotenv() 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-%erff=vl*7gn6gw9n)wgbs6b7m*un!)35687)kr9n&@*nsjd75'
 
-DEBUG = os.getenv("DEBUG", False)
 
 ALLOWED_HOSTS = [ "*" ]
 
@@ -109,24 +107,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ========================== #
 
 
-CORS_ALLOW_ALL_ORIGINS = True
-
-FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS=30
-
-MAX_UPLOAD_FILE_SIZE_IN_BYTES = 10 * 1024 * 1024 # 10MB
-MAX_ATTACHMENTS_PER_ANNOUNCEMENT = 4
+DEBUG = bool(os.getenv("DEBUG", True))
 
 # https://stackoverflow.com/questions/6957016/detect-django-testing-mode
 TESTING = sys.argv[1:2] == ['test']
 
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT", "5432") 
-DB_USER = os.getenv("DB_USER") 
+if DEBUG or TESTING:
+    load_dotenv(".env.development") 
 
-if not DB_PASSWORD or not DB_USER or not DB_NAME or not DB_HOST:
-    raise Exception("BAD CONFIG: DB_USER, DB_PASSWORD, DB_NAME, and DB_HOST are required to setup the database")
+CORS_ALLOW_ALL_ORIGINS = True
+
+FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS=30
+
+MAX_UPLOAD_FILE_SIZE_IN_BYTES = 100 * 1024 * 1024 # ~ 105 MB
+MAX_UPLOAD_QUOTA_PER_ANNOUNCEMENT_IN_BYTES = 150 * 1024 * 1024 # ~ 157 MB
+MAX_ATTACHMENTS_PER_ANNOUNCEMENT = 12 # roughly gives the user 13 mb per attachment, otherwise completely arbitiary 
 
 ZEPTOMAIL_TOKEN = os.getenv("ZEPTOMAIL_TOKEN")
 ZEPTOMAIL_FROM_ADDRESS = os.getenv("ZEPTOMAIL_FROM_ADDRESS")
@@ -144,8 +139,7 @@ if not REDIS_HOST or not REDIS_PORT:
 if not (GOOGLE_APPLICATION_CREDENTIALS := os.getenv("GOOGLE_APPLICATION_CREDENTIALS")):
     raise Exception("BAD CONFIG: GOOGLE_APPLICATION_CREDENTIALS needs to be provided for notifications to work")
 
-
-if TESTING:
+if TESTING or DEBUG:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -153,6 +147,14 @@ if TESTING:
         }
     }
 else:
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+    DB_NAME = os.getenv("DB_NAME")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT", "5432") 
+    DB_USER = os.getenv("DB_USER") 
+
+    if not DB_PASSWORD or not DB_USER or not DB_NAME or not DB_HOST:
+        raise Exception("BAD CONFIG: DB_USER, DB_PASSWORD, DB_NAME, and DB_HOST are required to setup the database")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",

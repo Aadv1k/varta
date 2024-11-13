@@ -7,19 +7,7 @@ from schools.models import AcademicYear
 
 from datetime import datetime, timezone
 
-class AnnouncementManager(models.Manager):
-    def belong_to_user_school(self, user):
-        return self.filter(author__school__id=user.school.id, deleted_at__isnull=True)
-
-    def get_by_user(self, user):
-        return self.filter(author=user, deleted_at__isnull=True)
-    
-    def deleted_belong_to_user_school(self, user):
-        return self.filter(author__school__id=user.school.id, deleted_at__isnull=False)
-
 class Announcement(models.Model):
-    objects = AnnouncementManager()
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     deleted_at = models.DateTimeField(null=True)
@@ -30,11 +18,11 @@ class Announcement(models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
 
+    # NOTE: this behaviour must be documented as soft-deleting WILL delete all the attachments too
     def soft_delete(self):
         self.deleted_at = datetime.now(timezone.utc)
-
         for attachment in self.attachments.all():
-            attachment.attachment.delete()
+            attachment.delete()
 
         self.save()
 
