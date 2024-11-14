@@ -4,11 +4,13 @@ import 'dart:typed_data';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/utils.dart';
+import 'package:app/main.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/screens/user_profile/teacher_card.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/state/app_state.dart';
+import 'package:app/widgets/varta_app_bar.dart';
 import 'package:app/widgets/varta_button.dart';
 import 'package:flutter/material.dart';
 
@@ -55,26 +57,14 @@ class UserProfileScreen extends StatelessWidget {
     bool isTeacher = appState.user?.userType == UserType.teacher;
 
     return Scaffold(
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: AppColor.primaryBg,
-        toolbarHeight: 48,
-        titleSpacing: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: Spacing.sm),
-          child: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.chevron_left,
-                  color: AppColor.body, size: IconSizes.iconMd)),
-        ),
+      appBar: const VartaAppBar(
+        actions: [],
       ),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 420),
           padding: const EdgeInsets.only(
-              left: Spacing.sm, right: Spacing.sm, bottom: Spacing.md),
+              left: Spacing.md, right: Spacing.md, bottom: Spacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

@@ -7,10 +7,10 @@ class DeleteConfirmationDialog extends StatelessWidget {
   final VoidCallback onCancel;
 
   const DeleteConfirmationDialog({
-    Key? key,
+    super.key,
     required this.onDelete,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

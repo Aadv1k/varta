@@ -1,94 +1,72 @@
 import 'package:app/common/utils.dart';
 
 enum AnnouncementAttachmentFileType {
-  DOCX,
-  DOC,
-  PPT,
-  PPTX,
-  XLS,
-  XLSX,
-  PDF,
-  JPEG,
-  PNG,
-  MP4,
-  MOV,
-  AVI
+  docx(
+    ext: "docx",
+    mime:
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ),
+  doc(ext: "doc", mime: "application/msword"),
+  ppt(ext: "ppt", mime: "application/vnd.ms-powerpoint"),
+  pptx(
+      ext: "pptx",
+      mime:
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+  xls(ext: "xls", mime: "application/vnd.ms-excel"),
+  xlsx(
+      ext: "xlsx",
+      mime:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+  pdf(ext: "pdf", mime: "application/pdf"),
+  jpeg(ext: "jpeg", mime: "image/jpeg"),
+  png(ext: "png", mime: "image/png"),
+  mp4(ext: "mp4", mime: "video/mp4"),
+  mov(ext: "mov", mime: "video/quicktime"),
+  avi(ext: "avi", mime: "video/x-msvideo");
+
+  final String ext;
+  final String mime;
+
+  const AnnouncementAttachmentFileType({required this.ext, required this.mime});
 }
 
 class AnnouncementAttachmentModel {
-  final String id;
   final DateTime createdAt;
-  final String key;
-  final String path;
+  final String id;
+  final String url;
   final AnnouncementAttachmentFileType fileType;
   final String fileName;
+  final int fileSizeInBytes;
 
   AnnouncementAttachmentModel({
+    required this.url,
+    required this.fileSizeInBytes,
     required this.id,
     required this.createdAt,
-    required this.key,
-    required this.path,
     required this.fileType,
     required this.fileName,
   });
 
-  static final mimeTypeToEnum = {
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        AnnouncementAttachmentFileType.DOCX,
-    'application/msword': AnnouncementAttachmentFileType.DOC,
-    'application/vnd.ms-powerpoint': AnnouncementAttachmentFileType.PPT,
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        AnnouncementAttachmentFileType.PPTX,
-    'application/vnd.ms-excel': AnnouncementAttachmentFileType.XLS,
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-        AnnouncementAttachmentFileType.XLSX,
-    'application/pdf': AnnouncementAttachmentFileType.PDF,
-    'image/jpeg': AnnouncementAttachmentFileType.JPEG,
-    'image/png': AnnouncementAttachmentFileType.PNG,
-    'video/mp4': AnnouncementAttachmentFileType.MP4,
-    'video/quicktime': AnnouncementAttachmentFileType.MOV,
-    'video/x-msvideo': AnnouncementAttachmentFileType.AVI,
-  };
-
   factory AnnouncementAttachmentModel.fromJson(Map<String, dynamic> data) {
-    final fileType =
-        mimeTypeToEnum[data['mimeType']] ?? AnnouncementAttachmentFileType.PDF;
-
     return AnnouncementAttachmentModel(
       id: data['id'],
-      createdAt: DateTime.parse(data['createdAt']),
-      key: data['key'],
-      path: data['url'],
-      fileType: fileType,
-      fileName: data['fileName'],
+      createdAt: DateTime.parse(data['created_at']),
+      fileType: AnnouncementAttachmentFileType.values
+          .firstWhere((val) => val.mime == data["file_type"]),
+      fileName: data["file_name"],
+      url: data["url"],
+      fileSizeInBytes: data["file_size_in_bytes"],
     );
   }
-
-  static final enumToMimeType = {
-    AnnouncementAttachmentFileType.DOCX:
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    AnnouncementAttachmentFileType.DOC: 'application/msword',
-    AnnouncementAttachmentFileType.PPT: 'application/vnd.ms-powerpoint',
-    AnnouncementAttachmentFileType.PPTX:
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    AnnouncementAttachmentFileType.XLS: 'application/vnd.ms-excel',
-    AnnouncementAttachmentFileType.XLSX:
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    AnnouncementAttachmentFileType.PDF: 'application/pdf',
-    AnnouncementAttachmentFileType.JPEG: 'image/jpeg',
-    AnnouncementAttachmentFileType.PNG: 'image/png',
-    AnnouncementAttachmentFileType.MP4: 'video/mp4',
-    AnnouncementAttachmentFileType.MOV: 'video/quicktime',
-    AnnouncementAttachmentFileType.AVI: 'video/x-msvideo',
-  };
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'key': key,
-      'url': path,
-      'mimeType': enumToMimeType[fileType],
-      'fileName': fileName,
+      'created_at': createdAt.toIso8601String(),
+      "url": url,
+      "file_type": fileType.mime,
+      "file_name": fileName,
+      "file_size_in_bytes": fileSizeInBytes,
     };
   }
 
@@ -96,18 +74,18 @@ class AnnouncementAttachmentModel {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! AnnouncementAttachmentModel) return false;
-    return id == other.id && key == other.key;
+    return id == other.id && url == other.url;
   }
 
   @override
-  int get hashCode => id.hashCode ^ key.hashCode;
+  int get hashCode => id.hashCode ^ url.hashCode;
 }
 
 class AnnouncementModel {
-  final String title;
-  final String body;
   final String id;
   final DateTime createdAt;
+  final String title;
+  final String body;
   final AnnouncementAuthorModel author;
   final List<AnnouncementScope> scopes;
   final List<AnnouncementAttachmentModel> attachments;
@@ -276,17 +254,17 @@ class AnnouncementScope {
   String toUserFriendlyLabel() {
     switch (filter) {
       case "t_class_teacher_of":
-        return "${filterData} Teacher";
+        return "$filterData Teacher";
       case "t_subject_teacher_of_standard":
-        return "${filterData}${ordinal(int.parse(filterData!))} Subject Teachers";
+        return "$filterData${ordinal(int.parse(filterData!))} Subject Teachers";
       case "t_subject_teacher_of_standard_division":
-        return "${filterData} Subject Teacher";
+        return "$filterData Subject Teacher";
       case "t_department":
         return "${filterData?[0].toUpperCase()}${filterData?.substring(1, filterData?.length).toLowerCase()} Department";
       case "stu_standard":
-        return "${filterData}${ordinal(int.parse(filterData!))} Students";
+        return "$filterData${ordinal(int.parse(filterData!))} Students";
       case "stu_standard_division":
-        return "${filterData} Students";
+        return "$filterData Students";
       case "stu_all":
         return "All Students";
       case "t_all":
@@ -356,7 +334,13 @@ class AnnouncementCreationData {
       scopes: model.scopes
           .map((e) => ScopeSelectionData.fromAnnouncementScope(e))
           .toList(),
-      attachments: [],
+      attachments: model.attachments
+          .map((e) => AttachmentSelectionData(
+              filePath: e.url,
+              fileName: e.fileName,
+              fileType: e.fileType,
+              isUrl: true))
+          .toList(),
     );
   }
 }

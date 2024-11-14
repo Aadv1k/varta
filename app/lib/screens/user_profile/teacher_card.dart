@@ -13,19 +13,12 @@ class TeacherCard extends StatelessWidget {
     TeacherDetails userDetails = user.details as TeacherDetails;
 
     String? primaryEmail = user.contacts
-        .firstWhereOrNull(
-          (contact) =>
-              contact.contactType == ContactType.email &&
-              contact.contactImportance == ContactImportance.primary,
-        )
+        .firstWhereOrNull((contact) => contact.contactType == ContactType.email)
         ?.contactData;
 
     String? primaryPhoneNumber = user.contacts
         .firstWhereOrNull(
-          (contact) =>
-              contact.contactType == ContactType.phoneNumber &&
-              contact.contactImportance == ContactImportance.primary,
-        )
+            (contact) => contact.contactType == ContactType.phoneNumber)
         ?.contactData;
 
     return Container(
@@ -165,22 +158,29 @@ class TeacherCard extends StatelessWidget {
                   children: [
                     if (primaryEmail != null)
                       Text(
-                        "EMAIL ${primaryEmail.toUpperCase()}",
+                        "EMAIL $primaryEmail",
                         style: Theme.of(context).textTheme.bodySmall!.copyWith(
                               fontFamily: "GeistMono",
                               color: AppColor.body,
                               letterSpacing: 0.5,
                             ),
                       ),
-                    const Spacer(),
-                    Text("TEACHER ID",
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              fontFamily: "GeistMono",
-                              color: AppColor.body,
-                              letterSpacing: 0.5,
-                            ))
                   ],
                 ),
+                const SizedBox(height: Spacing.sm),
+                Row(
+                  children: [
+                    const Spacer(),
+                    Text(
+                      "TEACHER ID",
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            fontFamily: "GeistMono",
+                            color: AppColor.body,
+                            letterSpacing: 0.5,
+                          ),
+                    ),
+                  ],
+                )
               ],
             ),
           ),

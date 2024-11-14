@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:app/models/school_model.dart';
 
 enum UserType { teacher, student }
@@ -75,13 +73,11 @@ class UserModel {
 
 class UserContact {
   ContactType contactType;
-  ContactImportance contactImportance;
   String contactData;
 
   UserContact({
     required this.contactType,
     required this.contactData,
-    required this.contactImportance,
   });
 
   factory UserContact.fromJson(Map<String, dynamic> json) {
@@ -90,9 +86,6 @@ class UserContact {
           ? ContactType.phoneNumber
           : ContactType.email,
       contactData: json['contact_data'],
-      contactImportance: json["contact_importance"] == "primary"
-          ? ContactImportance.primary
-          : ContactImportance.secondary,
     );
   }
 
@@ -101,16 +94,11 @@ class UserContact {
       'contact_type':
           contactType == ContactType.phoneNumber ? 'phone_number' : 'email',
       'contact_data': contactData,
-      'contact_importance': contactImportance == ContactImportance.primary
-          ? 'primary'
-          : 'secondary',
     };
   }
 }
 
 enum ContactType { email, phoneNumber }
-
-enum ContactImportance { primary, secondary }
 
 class TeacherDetails {
   final Classroom? classTeacherOf;

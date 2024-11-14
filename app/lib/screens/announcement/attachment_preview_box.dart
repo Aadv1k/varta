@@ -7,12 +7,12 @@ import 'package:path/path.dart' as path;
 
 class AttachmentPreviewBox extends StatelessWidget {
   final AttachmentSelectionData attachment;
-  VoidCallback? onDelete;
-  VoidCallback? onPressed;
+  final VoidCallback? onDelete;
+  final VoidCallback? onPressed;
   final bool isPressable;
   final bool isCompact;
 
-  AttachmentPreviewBox(
+  const AttachmentPreviewBox(
       {super.key,
       required this.attachment,
       this.onDelete,
@@ -33,55 +33,57 @@ class AttachmentPreviewBox extends StatelessWidget {
 
   Widget _getSvgIconFromFileType() {
     String path;
+    double size = isCompact ? 26 : 32;
 
     switch (attachment.fileType) {
-      case AnnouncementAttachmentFileType.DOC:
-      case AnnouncementAttachmentFileType.DOCX:
+      case AnnouncementAttachmentFileType.doc:
+      case AnnouncementAttachmentFileType.docx:
         path = "assets/icons/file-doc.svg";
         break;
-      case AnnouncementAttachmentFileType.PPT:
-      case AnnouncementAttachmentFileType.PPTX:
+      case AnnouncementAttachmentFileType.ppt:
+      case AnnouncementAttachmentFileType.pptx:
         path = "assets/icons/file-ppt.svg";
         break;
-      case AnnouncementAttachmentFileType.XLS:
-      case AnnouncementAttachmentFileType.XLSX:
+      case AnnouncementAttachmentFileType.xls:
+      case AnnouncementAttachmentFileType.xlsx:
         path = "assets/icons/file-xls.svg";
         break;
-      case AnnouncementAttachmentFileType.PDF:
+      case AnnouncementAttachmentFileType.pdf:
         path = "assets/icons/file-pdf.svg";
-        break;
-      case AnnouncementAttachmentFileType.JPEG:
-      case AnnouncementAttachmentFileType.PNG:
-        return const Icon(Icons.photo_rounded,
-            color: PaletteNeutral.shade400, size: IconSizes.iconLg);
-      case AnnouncementAttachmentFileType.MP4:
-      case AnnouncementAttachmentFileType.MOV:
-      case AnnouncementAttachmentFileType.AVI:
-        return SvgPicture.asset("assets/icons/video.svg",
-            width: 28, height: 28);
+      case AnnouncementAttachmentFileType.jpeg:
+      case AnnouncementAttachmentFileType.png:
+        path = "assets/icons/image.svg";
+        size = isCompact ? 22 : 24;
+      case AnnouncementAttachmentFileType.mp4:
+      case AnnouncementAttachmentFileType.mov:
+      case AnnouncementAttachmentFileType.avi:
+        path = "assets/icons/video.svg";
+        size = isCompact ? 22 : 24;
     }
 
-    return isCompact
-        ? SvgPicture.asset(path, width: 26, height: 26)
-        : SvgPicture.asset(path, width: 32, height: 32);
+    return SvgPicture.asset(path, width: size, height: size);
   }
 
   @override
   Widget build(BuildContext context) {
     if (isCompact) {
       return Container(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+          padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.sm, vertical: Spacing.sm),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             color: PaletteNeutral.shade030,
           ),
-          height: 36,
           child: Row(
             children: [
               _getSvgIconFromFileType(),
-              const SizedBox(width: Spacing.xs),
+              const SizedBox(width: Spacing.sm),
               Text(_truncateFileName(attachment.fileName),
-                  maxLines: 1, style: Theme.of(context).textTheme.bodySmall)
+                  maxLines: 1,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall!
+                      .copyWith(color: AppColor.body))
             ],
           ));
     }

@@ -37,9 +37,6 @@ class VartaButton extends StatelessWidget {
     Color fg, bg;
     BorderSide border;
 
-    Color disabledBg = PaletteNeutral.shade030;
-    Color disabledFg = PaletteNeutral.shade040;
-
     switch (variant) {
       case VartaButtonVariant.primary:
         bg = AppColor.primaryColor;

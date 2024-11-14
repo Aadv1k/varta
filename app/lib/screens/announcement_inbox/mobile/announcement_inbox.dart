@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/repository/announcements_repo.dart';
@@ -9,15 +6,13 @@ import 'package:app/screens/announcement_inbox/for_you_announcement_feed.dart';
 import 'package:app/screens/announcement_inbox/user_announcements_feed.dart';
 import 'package:app/screens/user_profile/user_profile_screen.dart';
 import 'package:app/widgets/error_snackbar.dart';
-import 'package:app/widgets/providers/announcement_provider.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/search_bar.dart';
-import 'package:app/widgets/state/announcement_state.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:uuid/uuid.dart';
 
 class AnnouncementInboxScreen extends StatefulWidget {
@@ -38,35 +33,27 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
   }
 
   void _handleCreateAnnouncement(AnnouncementCreationData data) async {
+    if (!context.mounted) return;
+
     setState(() {
       _isForYouView.value = false;
     });
 
     var appState = AppProvider.of(context).state;
 
-    var initialAnnouncements =
-        List<AnnouncementModel>.from(appState.userAnnouncements);
-
     List<AnnouncementAttachmentModel> announcementAttachmentData = [];
-
-    data.attachments
-        .map((attachment) => AnnouncementAttachmentModel(
-            id: "OPTIMISTIC-${Uuid().v4()}",
-            createdAt: DateTime.now(),
-            key: "",
-            path: "",
-            fileType: attachment.fileType,
-            fileName: attachment.fileName))
-        .toList();
 
     for (final rawAttachment in data.attachments) {
       announcementAttachmentData.add(AnnouncementAttachmentModel(
-          id: Uuid().v4(),
-          createdAt: DateTime.now(),
-          key: "",
-          path: rawAttachment.filePath,
-          fileType: rawAttachment.fileType,
-          fileName: rawAttachment.fileName));
+        id: "OPTIMISTIC-${const Uuid().v4()}",
+        createdAt: DateTime.now(),
+        fileType: rawAttachment.fileType,
+        fileName: rawAttachment.fileName,
+        /** These values don't matter much since this is just for placeholder */
+        url: "",
+        fileSizeInBytes: 1024,
+        /*********/
+      ));
     }
 
     var optimisticAnnouncement = AnnouncementModel(
@@ -84,22 +71,26 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           .toList(),
     );
 
+    var initialAnnouncements =
+        List<AnnouncementModel>.from(appState.userAnnouncements);
+
     appState
         .addAnnouncements([optimisticAnnouncement], isUserAnnouncement: true);
 
-    // try {
-    //   String announcementId = await _announcementRepo.createAnnouncement(data);
+    try {
+      String announcementId = await _announcementRepo.createAnnouncement(data);
 
-    //   appState.setAnnouncements([
-    //     optimisticAnnouncement.copyWith(id: announcementId),
-    //     ...initialAnnouncements
-    //   ], isUserAnnouncement: true);
-    //   appState.saveAnnouncementState(isUserAnnouncement: true);
-    // } catch (exc) {
-    //   const ErrorSnackbar(innerText: "Couldn't create announcement.")
-    //       .show(context);
-    //   appState.setAnnouncements(initialAnnouncements, isUserAnnouncement: true);
-    // }
+      appState.setAnnouncements([
+        optimisticAnnouncement.copyWith(id: announcementId),
+        ...initialAnnouncements
+      ], isUserAnnouncement: true);
+
+      appState.saveAnnouncementState(isUserAnnouncement: true);
+    } catch (exc) {
+      const ErrorSnackbar(innerText: "Couldn't create announcement.")
+          .show(context);
+      appState.setAnnouncements(initialAnnouncements, isUserAnnouncement: true);
+    }
   }
 
   void _handleFloatingButtonPress(context) {
@@ -143,7 +134,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           : null,
       backgroundColor: AppColor.primaryBg,
       appBar: AppBar(
-        toolbarHeight: 84,
+        toolbarHeight: 86,
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: AppColor.primaryBg,
@@ -154,11 +145,15 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           Padding(
             padding: const EdgeInsets.only(right: Spacing.md),
             child: CircleAvatar(
-              backgroundColor: AppColor.inactiveChipBg,
+              radius: 22,
+              backgroundColor: PaletteNeutral.shade030,
               child: IconButton(
                 splashColor: PaletteNeutral.shade060,
-                padding: EdgeInsets.zero,
-                iconSize: IconSizes.iconMd,
+                style: IconButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                      side: const BorderSide(color: PaletteNeutral.shade040)),
+                ),
                 onPressed: () {
                   Navigator.push(
                       context,
@@ -166,7 +161,12 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
                           builder: (context) => AppProvider(
                               state: appState, child: UserProfileScreen())));
                 },
-                icon: const Center(child: Icon(Icons.person)),
+                icon: Center(
+                    child: SvgPicture.asset(
+                  "assets/icons/person.svg",
+                  width: 22,
+                  height: 22,
+                )),
               ),
             ),
           )

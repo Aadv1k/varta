@@ -6,7 +6,6 @@ class VartaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onNavigateBack;
   final List<Widget> actions;
 
-  final bool hasTitle;
   final String? title;
 
   static const double defaultHeight = 54.0;
@@ -15,7 +14,6 @@ class VartaAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.onNavigateBack,
     required this.actions,
-    this.hasTitle = false,
     this.title,
   });
 
@@ -26,8 +24,8 @@ class VartaAppBar extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: 0,
       toolbarHeight: defaultHeight,
       titleSpacing: 0,
-      centerTitle: hasTitle,
-      title: hasTitle
+      centerTitle: title != null,
+      title: title != null
           ? Text(title!, style: Theme.of(context).textTheme.titleSmall)
           : null,
       leading: Padding(

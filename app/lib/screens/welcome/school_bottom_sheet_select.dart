@@ -32,67 +32,58 @@ class SchoolBottomSheetSelect extends StatelessWidget {
                   return Container(
                     padding: const EdgeInsets.symmetric(vertical: Spacing.md),
                     width: double.infinity,
-                    height: MediaQuery.sizeOf(context).height / 2,
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: Spacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
+                    height: MediaQuery.sizeOf(context).height / 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: Spacing.md),
+                          child: Text(
                             "Select School",
                             textAlign: TextAlign.start,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
-                          Expanded(
-                            child: ListView(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: Spacing.md),
-                              children: schools.map((school) {
-                                bool isSelected = school == selectedSchool;
-                                return ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: Spacing.md,
-                                      vertical: Spacing.xs),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  enabled: !disabled,
-                                  onTap: !isSelected && !disabled
-                                      ? () {
-                                          onSelect(school);
-                                          Navigator.pop(context);
-                                        }
-                                      : null,
-                                  tileColor: isSelected
-                                      ? PaletteNeutral.shade040
-                                      : Colors.transparent,
-                                  title: Text(
-                                    school.schoolName,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.copyWith(color: AppColor.heading),
-                                  ),
-                                  subtitle: Text(
-                                    school.schoolAddress,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(color: AppColor.subtitle),
-                                  ),
-                                  trailing: isSelected
-                                      ? const Icon(
-                                          Icons.check_circle,
-                                          color: AppColor.primaryColor,
-                                        )
-                                      : null,
-                                );
-                              }).toList(),
-                            ),
+                        ),
+                        Expanded(
+                          child: ListView(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: Spacing.md),
+                            children: schools.map((school) {
+                              bool isSelected = school == selectedSchool;
+                              return ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: Spacing.md,
+                                ),
+                                enabled: !disabled,
+                                onTap: !isSelected && !disabled
+                                    ? () {
+                                        onSelect(school);
+                                        Navigator.pop(context);
+                                      }
+                                    : null,
+                                tileColor: isSelected
+                                    ? PaletteNeutral.shade040
+                                    : Colors.transparent,
+                                title: Text(
+                                  school.schoolName,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                          color: PaletteNeutral.shade900),
+                                ),
+                                trailing: isSelected
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        color: PaletteNeutral.shade900,
+                                      )
+                                    : null,
+                              );
+                            }).toList(),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   );
                 },

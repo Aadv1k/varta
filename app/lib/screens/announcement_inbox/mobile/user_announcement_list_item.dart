@@ -16,8 +16,8 @@ class UserAnnouncementListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var announcementBody = announcement.body.replaceAll(RegExp(r'\r\n'), " ");
-
+    var announcementBody =
+        announcement.body.replaceAll(RegExp(r'\r\n|\n|\t'), " ");
     int scopeLength = announcement.scopes.length;
     String scopeSummary =
         "To ${announcement.scopes.sublist(0, scopeLength > 1 ? 1 : scopeLength).map((scope) => scope.toUserFriendlyLabel()).join(", ")}${scopeLength > 1 ? " +${scopeLength - 1}" : ""}";
@@ -95,7 +95,8 @@ class UserAnnouncementListItem extends StatelessWidget {
                 Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                   AttachmentPreviewBox(
                     attachment: AttachmentSelectionData(
-                      filePath: announcement.attachments.first.path,
+                      filePath: announcement.attachments.first.url,
+                      isUrl: true,
                       fileName: announcement.attachments.first.fileName,
                       fileType: announcement.attachments.first.fileType,
                     ),

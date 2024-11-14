@@ -190,8 +190,8 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     super.dispose();
   }
 
-  Widget _showErrorGraphic() {
-    if (_hasError) {
+  Widget _showErrorGraphic(AppState state) {
+    if (_hasError && state.announcements.isEmpty) {
       return Center(
         heightFactor: 0.75,
         child: GenericErrorBox(
@@ -206,18 +206,18 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
             errorMessage:
                 "Whoops! it looks like something went wrong, please check your connection and try again."),
       );
+    } else {
+      return Center(
+        heightFactor: 0.75,
+        child: GenericErrorBox(
+            size: ErrorSize.medium,
+            svgPath: "relax.svg",
+            onTryAgain: _handlePoll,
+            onTryAgainLabel: "Refresh",
+            errorMessage:
+                "Nothing here yet. Announcements for you will show up here."),
+      );
     }
-
-    return Center(
-      heightFactor: 0.75,
-      child: GenericErrorBox(
-          size: ErrorSize.medium,
-          svgPath: "relax.svg",
-          onTryAgain: _handlePoll,
-          onTryAgainLabel: "Refresh",
-          errorMessage:
-              "Nothing here yet. Announcements for you will show up here."),
-    );
   }
 
   @override
@@ -227,8 +227,9 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     // TODO: this is a bit sus
     return ListenableBuilder(
       listenable: state,
-      builder: (context, _) => _hasError || state.announcements.isEmpty
-          ? _showErrorGraphic()
+      builder: (context, _) => (_hasError || state.announcements.isEmpty) &&
+              !_isLoading
+          ? _showErrorGraphic(state)
           : RefreshIndicator(
               color: AppColor.primaryColor,
               backgroundColor: PaletteNeutral.shade000,

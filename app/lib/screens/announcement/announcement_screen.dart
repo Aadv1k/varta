@@ -1,24 +1,24 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:app/common/const.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/models/search_data.dart';
 import 'package:app/screens/announcement/attachment_preview_box.dart';
+import 'package:app/widgets/generic_confirmaton_dialog.dart';
 import 'package:app/widgets/varta_app_bar.dart';
+import 'package:collection/collection.dart';
 import 'package:mime/mime.dart';
-
-import 'package:path/path.dart' as path;
 
 import 'package:app/common/colors.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/widgets/delete_confirmation_dialog.dart';
-import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/save_confirmation_dialog.dart';
 import 'package:app/widgets/varta_button.dart';
 import 'package:app/widgets/varta_chip.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:app/screens/announcement/scope_selection_bottom_sheet.dart';
-import 'package:flutter_svg/svg.dart';
 
 enum AnnouncementScreenState { viewOnly, create, modify }
 
@@ -46,6 +46,7 @@ class AnnouncementScreen extends StatefulWidget {
 class _AnnouncementScreenState extends State<AnnouncementScreen> {
   late AnnouncementCreationData _announcementData;
   bool shouldDisableAdd = false;
+  int currentAttachmentSize = 0;
 
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
@@ -101,7 +102,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   }
 
   void _handleDeleteAttachment(int index) {
-    // TODO: add further logic here. this is incomplete
+    // We won't add any other logic in here. The deletion logic will only apply when a user modifies the announcement, in which case the onModify will handle the "update" for the upload
     setState(() {
       _announcementData = _announcementData.copyWith(
         attachments: [..._announcementData.attachments]..removeAt(index),
@@ -141,12 +142,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   }
 
   void _handleAddAttachment(BuildContext context) async {
-    // TODO: get back to this
-    if (_announcementData.attachments.length == 4) {
-      const ErrorSnackbar(innerText: "Can't attach more than 4 attachments")
-          .show(context);
-      return;
-    }
+    bool shouldShowUploadErrorDialog = false;
+    String? errorDialogMessage;
 
     FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowedExtensions: ["png", "jpeg", "doc", "docx", "pdf", "xls", "xlsx"],
@@ -157,44 +154,63 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     }
 
     File file = File(result.files.single.path!);
-
     Uint8List data = await file.readAsBytes();
+    int fileLength = data.length;
 
-    if (data.length < 1024) {
-      const ErrorSnackbar(
-              innerText: "The file is too small. It must atleast be 1KB")
-          .show(context);
-      return;
+    if (fileLength < 1024) {
+      shouldShowUploadErrorDialog = true;
+      errorDialogMessage =
+          "The selected file is too small. Minimum size is 1 KB.";
+    } else if (fileLength > maxUploadSizeInBytes) {
+      shouldShowUploadErrorDialog = true;
+      errorDialogMessage =
+          "The selected file is too large. Maximum size is ${maxUploadSizeInBytes / 2048} MB.";
+    } else {
+      String? possibleMimeType =
+          lookupMimeType("null", headerBytes: data.sublist(0, 1024));
+
+      if (possibleMimeType == null) {
+        shouldShowUploadErrorDialog = true;
+        errorDialogMessage =
+            "Unable to determine the file type. Please select a supported file format.";
+      } else if (currentAttachmentSize + data.length >
+          maxQuotaForAttachmentsInBytes) {
+        shouldShowUploadErrorDialog = true;
+        errorDialogMessage =
+            "Adding this file will exceed the total attachment size limit. Consider removing other attachments.";
+      } else {
+        setState(() {
+          currentAttachmentSize += data.length;
+          _announcementData = _announcementData.copyWith(attachments: [
+            ..._announcementData.attachments,
+            AttachmentSelectionData(
+                filePath: file.path,
+                fileName: file.path.split("/").last,
+                fileType: AnnouncementAttachmentFileType.values
+                        .firstWhereOrNull(
+                            (ft) => ft.mime == possibleMimeType) ??
+                    AnnouncementAttachmentFileType.pdf)
+          ]);
+        });
+      }
     }
 
-    String? possibleMimeType =
-        lookupMimeType("null", headerBytes: data.sublist(0, 1024));
-
-    if (possibleMimeType == null) {
-      const ErrorSnackbar(
-              innerText: "Could not determine the type of the upload.")
-          .show(context);
-      return;
+    if (shouldShowUploadErrorDialog) {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => GenericConfirmationDialog(
+          onConfirm: () {
+            Navigator.pop(context);
+          },
+          title: "Couldn't upload attachment",
+          body: errorDialogMessage ??
+              'An unknown error occurred while adding the attachment.',
+          confirmLabel: "OK",
+          primaryAction: GenericConfirmatonDialogAction.cancel,
+        ),
+      );
     }
-
-    if (data.length >= 1024 * 1024 * 10) {
-      const ErrorSnackbar(
-              innerText: "The max file-size is 10 MB per attachment.")
-          .show(context);
-      return;
-    }
-
-    setState(() {
-      _announcementData = _announcementData.copyWith(attachments: [
-        ..._announcementData.attachments,
-        AttachmentSelectionData(
-            filePath: file.path,
-            fileName: file.path.split("/").last,
-            fileType:
-                AnnouncementAttachmentModel.mimeTypeToEnum[possibleMimeType] ??
-                    AnnouncementAttachmentFileType.PDF)
-      ]);
-    });
   }
 
   @override
@@ -292,7 +308,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                       );
                     }).toList(),
                   ),
-                  if (_announcementData.scopes.isNotEmpty && !isCreateOrModify)
+                  if (_announcementData.scopes.isNotEmpty && isCreateOrModify)
                     const SizedBox(height: Spacing.sm),
                   if (isCreateOrModify)
                     VartaChip(
@@ -365,6 +381,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                   : null,
                               attachment: entry.value))
                           .toList()),
+                  const SizedBox(height: Spacing.sm),
                 ],
               )
             ],

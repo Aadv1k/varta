@@ -1,6 +1,7 @@
 import 'package:app/common/varta_theme.dart';
 import 'package:app/firebase_options.dart';
 import 'package:app/models/login_data.dart';
+import 'package:app/screens/announcement/announcement_screen.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
 import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/services/notification_service.dart';

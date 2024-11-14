@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:app/common/const.dart';
 import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/search_data.dart';
 import 'package:app/services/api_service.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class AnnouncementIncrementalChange {
   int timeStamp;
@@ -56,19 +59,6 @@ class AnnouncementsRepository {
         data["metadata"]["total_pages"], parsedData);
   }
 
-  Future<AnnouncementAttachmentModel> uploadAttachment(
-      AttachmentSelectionData data) async {
-    final response =
-        await _apiService.makeRequest(HTTPMethod.POST, "/attachments");
-
-    if (response.statusCode != 201) {
-      throw ApiException.fromResponse(response);
-    }
-
-    var data = jsonDecode(response.body)["data"];
-    return AnnouncementAttachmentModel.fromJson(data);
-  }
-
   Future<AnnouncementIncrementalChange> fetchLatestChanges(
       int timeSince) async {
     http.Response response = await _apiService.makeRequest(
@@ -94,9 +84,46 @@ class AnnouncementsRepository {
     );
   }
 
+  Future<AnnouncementAttachmentModel> uploadAttachment(
+      AttachmentSelectionData data) async {
+    var file = File(data.filePath);
+
+    final fileType = data.fileType.mime.split("/");
+    String prefix = fileType.first;
+    String suffix = fileType.last;
+
+    try {
+      final request = http.MultipartRequest(
+          "POST", Uri.parse("$baseApiUrl/attachments/upload"));
+      request.headers.addAll(await _apiService.getAuthHeaders());
+      request.files.add(await http.MultipartFile.fromPath("file", file.path,
+          contentType: MediaType(prefix, suffix)));
+
+      final response = await http.Response.fromStream(await request.send());
+
+      if (response.statusCode != 201) {
+        throw ApiException.fromResponse(response);
+      }
+
+      var responseData = jsonDecode(response.body);
+      return AnnouncementAttachmentModel.fromJson(responseData["data"]);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiClientException(e.toString());
+    }
+  }
+
   Future<String> createAnnouncement(
       AnnouncementCreationData creationData) async {
     try {
+      List<String> attachmentIds = [];
+
+      for (final attachmentData in creationData.attachments) {
+        final attachmentModel = await uploadAttachment(attachmentData);
+        attachmentIds.add(attachmentModel.id);
+      }
+
       http.Response response = await _apiService.makeRequest(
           HTTPMethod.POST, "/announcements/",
           isAuthenticated: true,
@@ -106,6 +133,7 @@ class AnnouncementsRepository {
             "scopes": creationData.scopes
                 .map((scope) => scope.toAnnouncementScope().toJson())
                 .toList(),
+            "attachments": attachmentIds
           });
 
       if (response.statusCode != 201) {
@@ -156,11 +184,11 @@ class AnnouncementsRepository {
 
   Future<List<AnnouncementModel>> searchAnnouncement(
       SearchData searchData) async {
-    const String apiUrl = '${ApiService.baseApiUrl}/announcements/search';
+    const String apiUrl = '$baseApiUrl/announcements/search';
 
     final Map<String, dynamic> queryParams = searchData.toQueryParameters();
     final Uri uri = Uri.parse(apiUrl).replace(queryParameters: queryParams);
-    var hackyFix = uri.toString().replaceAll(RegExp(ApiService.baseApiUrl), "");
+    var hackyFix = uri.toString().replaceAll(RegExp(baseApiUrl), "");
 
     try {
       final http.Response response = await _apiService

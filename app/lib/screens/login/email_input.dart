@@ -40,7 +40,7 @@ class _EmailInputState extends State<EmailInput> {
   @override
   Widget build(BuildContext context) {
     Color borderAccent =
-        widget.hasError ? AppColor.dangerBody : AppColor.appBarBottomBorder;
+        widget.hasError ? AppColor.dangerBody : AppColor.subtitleLighter;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +74,7 @@ class _EmailInputState extends State<EmailInput> {
                 border: InputBorder.none,
                 hintStyle: Theme.of(context)
                     .textTheme
-                    .bodyLarge!
+                    .bodyMedium!
                     .copyWith(color: AppColor.subtitle),
               ),
             ),
