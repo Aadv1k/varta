@@ -4,9 +4,9 @@ from common.fields.PhoneNumberField import PhoneNumberField
 
 class School(models.Model):
     name = models.CharField(max_length=255)
-    address = models.TextField()
     phone_number = PhoneNumberField()
     email = models.EmailField(unique=True)
+    address = models.TextField(blank=True, null=True)
     website = models.URLField(blank=True, null=True)
 
     def __str__(self):

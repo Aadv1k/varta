@@ -106,7 +106,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # == Custom Configuration == #
 # ========================== #
 
-
 DEBUG = bool(os.getenv("DEBUG", True))
 
 # https://stackoverflow.com/questions/6957016/detect-django-testing-mode
@@ -139,32 +138,25 @@ if not REDIS_HOST or not REDIS_PORT:
 if not (GOOGLE_APPLICATION_CREDENTIALS := os.getenv("GOOGLE_APPLICATION_CREDENTIALS")):
     raise Exception("BAD CONFIG: GOOGLE_APPLICATION_CREDENTIALS needs to be provided for notifications to work")
 
-if TESTING or DEBUG:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
-else:
-    DB_PASSWORD = os.getenv("DB_PASSWORD")
-    DB_NAME = os.getenv("DB_NAME")
-    DB_HOST = os.getenv("DB_HOST")
-    DB_PORT = os.getenv("DB_PORT", "5432") 
-    DB_USER = os.getenv("DB_USER") 
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("DB_NAME")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT", "5432") 
+DB_USER = os.getenv("DB_USER") 
 
-    if not DB_PASSWORD or not DB_USER or not DB_NAME or not DB_HOST:
-        raise Exception("BAD CONFIG: DB_USER, DB_PASSWORD, DB_NAME, and DB_HOST are required to setup the database")
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": DB_NAME,
-            "USER": DB_USER,
-            "PASSWORD": DB_PASSWORD,
-            "HOST": DB_HOST,
-            "PORT": DB_PORT,
-        }
+if not DB_PASSWORD or not DB_USER or not DB_NAME or not DB_HOST:
+    raise Exception("BAD CONFIG: DB_USER, DB_PASSWORD, DB_NAME, and DB_HOST are required to setup the database")
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": DB_NAME,
+        "USER": DB_USER,
+        "PASSWORD": DB_PASSWORD,
+        "HOST": DB_HOST,
+        "PORT": DB_PORT,
     }
+}
 
 # 5 minutes
 OTP_EXPIRY_IN_SECONDS = 300

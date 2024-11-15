@@ -10,14 +10,11 @@ class AnnouncementScopeInline(admin.TabularInline):
 
 
 class AnnouncementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'academic_year', 'created_at', 'updated_at', 'deleted_at', 'is_deleted')
+    list_display = ('title', 'author', 'academic_year', 'created_at', 'updated_at', 'deleted_at')
     search_fields = ('title', 'body', 'author__first_name', 'author__last_name')
     list_filter = ('academic_year', 'author', 'created_at', 'updated_at', 'deleted_at')
     readonly_fields = ('created_at', 'updated_at', 'deleted_at')
-    inlines = [AnnouncementScopeInline]
-
-    def is_deleted(self, obj):
-        return obj.deleted_at is not None
+    inlines = [ AnnouncementScopeInline ]
 
 class AnnouncementScopeAdmin(admin.ModelAdmin):
     list_display = ('announcement', 'filter', 'filter_data')

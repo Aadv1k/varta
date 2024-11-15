@@ -1,5 +1,5 @@
 from django.conf import settings
-from rest_framework.serializers import Serializer, FileField, ValidationError, URLField, ModelSerializer, SerializerMethodField
+from rest_framework.serializers import Serializer, FileField, ValidationError, URLField, ModelSerializer, SerializerMethodField, CharField
 from django.core.files import File
 
 from common.services.bucket_store import BucketStoreFactory
@@ -17,23 +17,21 @@ SAFE_FILENAME_PATTERN = re.compile(r"^[\w][\w\-. ]{0,252}[\w]$")
 
 bucket_store = BucketStoreFactory()
 
-class AttachmentOutputSerializer(ModelSerializer):
-    url = SerializerMethodField()
-
-    def get_url(self, obj):
-        return bucket_store.get_url(obj.key)
-
-    class Meta:
-        model = Attachment
-        exclude = ["user", "announcement", "key"]
-
 class AttachmentUploadSerializer(Serializer):
     file = FileField(
         max_length=255, allow_empty_file=False, use_url=True, required=True
     )
+    filename = CharField(max_length=255)
+
+    def validate_filename(self, filename: str) -> str:
+        filename = Path(filename).name
+        
+        if not filename or filename in {'.', '..'}:
+            raise ValidationError("Invalid filename")
+            
+        return filename
 
     def validate_file(self, file: File):
-        self.validate_filename(file.name)
         if file.size < 2048 or file.size >= settings.MAX_UPLOAD_FILE_SIZE_IN_BYTES:
             raise ValidationError(
                 "Invalid file size, it's either too large or too small."
@@ -46,36 +44,6 @@ class AttachmentUploadSerializer(Serializer):
             raise ValidationError("Unknown Filetype")
 
         return file
-
-    def validate_filename(self, filename: str):
-        if not all(
-            [
-                bool(SAFE_FILENAME_PATTERN.match(filename)),
-                ".." not in filename,
-                not filename.startswith("."),
-                len(Path(filename).suffixes) == 1,
-                len(Path(filename).suffix) <= 7,
-                filename == filename.strip(),
-                filename.lower()
-                not in {
-                    "con",
-                    "prn",
-                    "aux",
-                    "nul",
-                    "com1",
-                    "com2",
-                    "com3",
-                    "com4",
-                    "lpt1",
-                    "lpt2",
-                    "lpt3",
-                    "lpt4",
-                },
-            ]
-        ):
-            raise ValidationError("Illegal Filename")
-
-        return filename
 
     def save(self, user) -> Attachment:
         file: File = self.validated_data["file"]
@@ -94,3 +62,13 @@ class AttachmentUploadSerializer(Serializer):
         )
 
         return attachment 
+
+class AttachmentOutputSerializer(ModelSerializer):
+    url = SerializerMethodField()
+
+    def get_url(self, obj):
+        return bucket_store.get_url(obj.key)
+
+    class Meta:
+        model = Attachment
+        exclude = ["user", "announcement", "key"]

@@ -4,6 +4,8 @@ from accounts.models import User
 from announcements.models import Announcement
 
 from common.services.bucket_store import BucketStoreFactory
+from pathlib import Path
+
 
 import uuid
 
@@ -40,11 +42,11 @@ class Attachment(models.Model):
 
     @staticmethod
     def get_object_key(public_id, attachment_id, file_name):
-        return f"{public_id}/{attachment_id}/{file_name}"
+        return f"{public_id}/{attachment_id}.{Path(file_name).suffix}"
     
     @property
     def object_key(self):
-        return f"{self.user.public_id}/{self.id}/{self.file_name}" 
+        return f"{self.user.public_id}/{self.id}.{Path(file_name).suffix}"
 
     def delete(self):
         bucket_store.delete(self.key)

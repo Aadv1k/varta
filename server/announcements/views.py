@@ -152,7 +152,7 @@ class AnnouncementViewSet(viewsets.ViewSet):
 
         announcement = serializer.save()
         output_serializer = AnnouncementOutputSerializer(announcement)
-       
+
         return SuccessResponseBuilder() \
             .set_code(201) \
             .set_message("Created announcement successfully") \
@@ -284,11 +284,5 @@ class AnnouncementViewSet(viewsets.ViewSet):
         return SuccessResponseBuilder() \
             .set_code(200) \
             .set_message("Successfully updated announcement") \
-            .set_data({
-                "id": serializer.data["id"],
-                "title": serializer.data["title"],
-                "scopes": serializer.data["scopes"],
-                "body": serializer.data["body"],
-                "attachments": serializer.data["attachments"]
-            }) \
+            .set_data({}) \
             .build()
