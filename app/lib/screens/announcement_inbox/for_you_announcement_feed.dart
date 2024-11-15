@@ -141,10 +141,9 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
           _hasError = true;
         });
       } else {
-        ErrorSnackbar(
-                innerText: exc is ApiException
-                    ? exc.toString()
-                    : "Couldn't load more announcements. Please check your connection and try again")
+        const VartaSnackbar(
+                snackBarVariant: VartaSnackBarVariant.error,
+                innerText: "Couldn't load more announcements.")
             .show(context);
       }
     }
@@ -174,9 +173,9 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
         clearAndNavigateBackToLogin(context);
         return;
       }
-      const ErrorSnackbar(
-              innerText:
-                  "Couldn't load more announcements. Please check your connection and try again")
+      const VartaSnackbar(
+              snackBarVariant: VartaSnackBarVariant.error,
+              innerText: "Couldn't load more announcements.")
           .show(context);
     } finally {
       setState(() => _isLoading = false);

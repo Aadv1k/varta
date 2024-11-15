@@ -63,7 +63,7 @@ class SchoolBottomSheetSelect extends StatelessWidget {
                                       }
                                     : null,
                                 tileColor: isSelected
-                                    ? PaletteNeutral.shade040
+                                    ? PaletteNeutral.shade400
                                     : Colors.transparent,
                                 title: Text(
                                   school.schoolName,
@@ -71,12 +71,13 @@ class SchoolBottomSheetSelect extends StatelessWidget {
                                       .textTheme
                                       .titleSmall
                                       ?.copyWith(
-                                          color: PaletteNeutral.shade900),
+                                          color: PaletteNeutral.shade000),
                                 ),
                                 trailing: isSelected
                                     ? const Icon(
                                         Icons.check_circle,
-                                        color: PaletteNeutral.shade900,
+                                        color: PaletteNeutral.shade000,
+                                        size: IconSizes.iconMd,
                                       )
                                     : null,
                               );

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 class VartaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onNavigateBack;
   final List<Widget> actions;
+  final bool centerTitle;
 
   final String? title;
 
@@ -14,6 +15,7 @@ class VartaAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.onNavigateBack,
     required this.actions,
+    this.centerTitle = true,
     this.title,
   });
 
@@ -24,7 +26,7 @@ class VartaAppBar extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: 0,
       toolbarHeight: defaultHeight,
       titleSpacing: 0,
-      centerTitle: title != null,
+      centerTitle: centerTitle,
       title: title != null
           ? Text(title!, style: Theme.of(context).textTheme.titleSmall)
           : null,

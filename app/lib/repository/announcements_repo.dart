@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:app/common/const.dart';
 import 'package:app/common/exceptions.dart';
@@ -84,6 +85,18 @@ class AnnouncementsRepository {
     );
   }
 
+  Future<Uint8List> downloadAttachment(String attachmentUrl) async {
+    try {
+      http.Response response = await http.get(Uri.parse(attachmentUrl));
+      if (response.statusCode != 200) {
+        throw ApiException("Failed to download attachment", {});
+      }
+      return response.bodyBytes;
+    } on ApiException {
+      rethrow;
+    }
+  }
+
   Future<AnnouncementAttachmentModel> uploadAttachment(
       AttachmentSelectionData data) async {
     var file = File(data.filePath);
@@ -163,6 +176,25 @@ class AnnouncementsRepository {
   Future<void> updateAnnouncement(
       AnnouncementModel oldAnnouncement, AnnouncementCreationData data) async {
     try {
+      List<String> newAttachmentIds = [];
+      List<String> existingAttachmentIds = [];
+
+      for (final attachmentData in data.attachments) {
+        // This means the attachment is the old attachment and it isn't removed. So for this we will simply add it to the new list
+        // TODO: do some further testing to see how this will behave with expiring signed URLs
+        if (attachmentData.isUrl) {
+          final existingAttachmentId = oldAnnouncement.attachments
+              .firstWhere(
+                  (attachment) => attachment.url == attachmentData.filePath)
+              .id;
+          existingAttachmentIds.add(existingAttachmentId);
+          continue;
+        }
+
+        final attachment = await uploadAttachment(attachmentData);
+        newAttachmentIds.add(attachment.id);
+      }
+
       final http.Response response = await _apiService.makeRequest(
           HTTPMethod.PUT, "/announcements/${oldAnnouncement.id}",
           body: {
@@ -171,8 +203,14 @@ class AnnouncementsRepository {
             "scopes": data.scopes
                 .map((scope) => scope.toAnnouncementScope().toJson())
                 .toList(),
+            //"attachments": [...existingAttachmentIds, ...newAttachmentIds]
+            "attachments": []
           },
           isAuthenticated: true);
+
+      print("++++++++++++++++++");
+      print(response.body);
+      print("++++++++++++++++++");
 
       if (response.statusCode != 200) {
         throw ApiException.fromResponse(response);

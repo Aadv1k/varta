@@ -41,10 +41,10 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
 
     var appState = AppProvider.of(context).state;
 
-    List<AnnouncementAttachmentModel> announcementAttachmentData = [];
+    List<AnnouncementAttachmentModel> optimisticAttachments = [];
 
     for (final rawAttachment in data.attachments) {
-      announcementAttachmentData.add(AnnouncementAttachmentModel(
+      optimisticAttachments.add(AnnouncementAttachmentModel(
         id: "OPTIMISTIC-${const Uuid().v4()}",
         createdAt: DateTime.now(),
         fileType: rawAttachment.fileType,
@@ -64,7 +64,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
       title: data.title,
       body: data.body,
       createdAt: DateTime.now(),
-      attachments: announcementAttachmentData,
+      attachments: optimisticAttachments,
       id: "OPTMISTIC-${const Uuid().v1()}",
       scopes: data.scopes
           .map((rawScope) => rawScope.toAnnouncementScope())
@@ -87,7 +87,10 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
 
       appState.saveAnnouncementState(isUserAnnouncement: true);
     } catch (exc) {
-      const ErrorSnackbar(innerText: "Couldn't create announcement.")
+      const VartaSnackbar(
+              innerText: "Couldn't create announcement.",
+              snackBarVariant: VartaSnackBarVariant.error)
+          // ignore: use_build_context_synchronously
           .show(context);
       appState.setAnnouncements(initialAnnouncements, isUserAnnouncement: true);
     }
@@ -145,10 +148,11 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           Padding(
             padding: const EdgeInsets.only(right: Spacing.md),
             child: CircleAvatar(
-              radius: 22,
+              radius: 23,
               backgroundColor: PaletteNeutral.shade030,
               child: IconButton(
-                splashColor: PaletteNeutral.shade060,
+                splashColor: PaletteNeutral.shade050,
+                highlightColor: PaletteNeutral.shade040,
                 style: IconButton.styleFrom(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(100),

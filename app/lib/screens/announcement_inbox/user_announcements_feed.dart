@@ -119,9 +119,9 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
       await _announcementRepo.deleteAnnouncement(announcementToDelete);
       state.saveAnnouncementState(isUserAnnouncement: true);
     } catch (exc) {
-      const ErrorSnackbar(
-              innerText:
-                  "Couldn't delete announcement. Please try again later.")
+      const VartaSnackbar(
+              snackBarVariant: VartaSnackBarVariant.error,
+              innerText: "Couldn't delete announcement.")
           .show(context);
 
       List<AnnouncementModel> oldAnnouncements =
@@ -153,9 +153,9 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
       await _announcementRepo.updateAnnouncement(oldAnnouncement, creationData);
       state.saveAnnouncementState(isUserAnnouncement: true);
     } catch (exc) {
-      const ErrorSnackbar(
-              innerText:
-                  "Couldn't update announcement. Please try again later.")
+      const VartaSnackbar(
+              innerText: "Couldn't update announcement.",
+              snackBarVariant: VartaSnackBarVariant.error)
           .show(context);
       newAnnouncements[index] = oldAnnouncement;
       state.setAnnouncements(newAnnouncements, isUserAnnouncement: true);
