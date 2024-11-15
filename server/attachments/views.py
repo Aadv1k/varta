@@ -33,18 +33,12 @@ class AttachmentViewSet(ViewSet):
 @permission_classes([IsJWTAuthenticated, IsTeacher])
 @parser_classes([MultiPartParser])
 def upload_attachment(request):
-    print("FOO BARFA BAZX LA DO:")
     file = request.FILES.get("file")
-
-    print(file)
 
     upload_serializer = AttachmentUploadSerializer(data={
         "file": file,
         "filename": file.name
     })
-
-
-    print("I did reach here")
 
     if not upload_serializer.is_valid():
         return ErrorResponseBuilder() \
@@ -53,7 +47,6 @@ def upload_attachment(request):
                 .build()
 
     try:
-        print("I did reach here AS WELL LOL")
         attachment = upload_serializer.save(request.user)
         
         return SuccessResponseBuilder() \

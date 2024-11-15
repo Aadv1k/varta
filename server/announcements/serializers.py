@@ -100,7 +100,8 @@ class AnnouncementSerializer(serializers.ModelSerializer):
                 raise ValidationError("Duplicate attachment detected. Each attachment must be unique.")
             try:
                 found_attachment = Attachment.objects.get(id=attachment_id)
-                if found_attachment.announcement is not None:
+                # NOTE: A bit of a hacky fix. This would mean it IS possible to update your announcement to have someone elses attachment. Unlikely but possibly dangerous scenario. Probably should conduct a security audit
+                if found_attachment.announcement is not None and not self.partial:
                     raise ValidationError("Trying to add an attachment that already belongs to another to announcement")
                 total_size += found_attachment.file_size_in_bytes
                 attachments_set.add(str(attachment_id))
@@ -130,6 +131,7 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             # Hmm i think I am doing something VERY wrong here
             self.update(self.instance, self.validated_data)
             return
+
 
         data = {**self.validated_data}
 
@@ -166,6 +168,24 @@ class AnnouncementSerializer(serializers.ModelSerializer):
                 AnnouncementScope.objects.create(announcement=instance, **scope)
 
         instance.updated_at = datetime.now(timezone.utc)
+
+        new_attachments = validated_data.get("attachments")
+
+        if len(new_attachments) == 0:
+            for attachment in instance.attachments.all():
+                attachment.delete()
+        else:
+            for attachment in instance.attachments.all():
+                if str(attachment.id) not in new_attachments:
+                    attachment.delete()
+
+            for attachment_id in new_attachments:
+                found_attachment = Attachment.objects.filter(id=attachment_id)
+                if found_attachment.exists():
+                    found_attachment.announcement = instance
+                    found_attachment.save()
+                
+
         instance.save()
 
         notification_queue.enqueue(instance.id)

@@ -163,3 +163,76 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
         self.client.delete(reverse("announcement_detail", kwargs={ "pk": response.data["data"]["id"] }))
 
         self.assertFalse(Attachment.objects.filter(id=attachment_id).exists())
+
+    def test_when_announcement_is_updated_to_have_no_attachments_then_attachments_are_deleted(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
+
+        with open("./attachments/tests/test-image-v3.jpg", "rb") as test_file:
+            response = self.client.post(reverse("attachment_upload"), data={ "file": SimpleUploadedFile("testing.jpg", content=test_file.read(), content_type="application/pdf") }) 
+
+            self.assertEqual(response.status_code, 201)
+            attachment_id = response.data["data"]["id"]
+
+        response = self.client.post(reverse("announcement_list"), data={
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ],                
+            "attachments": [attachment_id]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.put(f"{reverse('announcement_detail', kwargs={'pk': response.data['data']['id']})}", data={
+            "title": "Test Announcement NOW UPDATED",
+            "body": "This is a test announcement NOW UPDATED",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ],                
+            "attachments": []
+        }, format="json")
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFalse(Attachment.objects.filter(id=attachment_id).exists())
+        
+
+    def test_when_announcement_is_updated_to_have_different_attachments_then_others_are_deleted(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
+
+        attachmentIds = []
+
+        with open("./attachments/tests/test-image-v3.jpg", "rb") as test_file:
+            response = self.client.post(reverse("attachment_upload"), data={ "file": SimpleUploadedFile("testing.jpg", content=test_file.read(), content_type="image/jpeg") }) 
+            self.assertEqual(response.status_code, 201)
+            attachmentIds.append(response.data["data"]["id"])
+
+            test_file.seek(0)
+
+            response = self.client.post(reverse("attachment_upload"), data={ "file": SimpleUploadedFile("testing2.jpg", content=test_file.read(), content_type="image/jpeg") }) 
+            self.assertEqual(response.status_code, 201)
+            attachmentIds.append(response.data["data"]["id"])
+
+        response = self.client.post(reverse("announcement_list"), data={
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ],                
+            "attachments": attachmentIds
+        }, format="json")
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.put(f"{reverse('announcement_detail', kwargs={'pk': response.data['data']['id']})}", data={
+            "title": "Test Announcement NOW UPDATED",
+            "body": "This is a test announcement NOW UPDATED",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ],                
+            "attachments": [attachmentIds[0]]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Attachment.objects.filter(id=attachmentIds[1]).exists())
