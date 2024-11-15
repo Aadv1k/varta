@@ -301,16 +301,18 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                       return VartaChip(
                         variant: VartaChipVariant.secondary,
                         text: entry.value.getUserFriendlyLabel(),
-                        onDeleted: isCreateOrModify
-                            ? () => _handleDeleteScope(entry.key)
-                            : null,
+                        onDeleted:
+                            widget.screenState == AnnouncementScreenState.create
+                                ? () => _handleDeleteScope(entry.key)
+                                : null,
                         size: VartaChipSize.small,
                       );
                     }).toList(),
                   ),
-                  if (_announcementData.scopes.isNotEmpty && isCreateOrModify)
+                  if (_announcementData.scopes.isNotEmpty &&
+                      widget.screenState == AnnouncementScreenState.create)
                     const SizedBox(height: Spacing.sm),
-                  if (isCreateOrModify)
+                  if (widget.screenState == AnnouncementScreenState.create)
                     VartaChip(
                       variant: VartaChipVariant.outlined,
                       isDisabled: shouldDisableAdd,
