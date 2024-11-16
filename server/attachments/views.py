@@ -1,4 +1,4 @@
-from .serializers import AttachmentUploadSerializer, AttachmentOutputSerializer
+from .serializers import AttachmentOutputSerializerWithUrl, AttachmentUploadSerializer, AttachmentOutputSerializer
 
 from .models import Attachment
 
@@ -27,7 +27,7 @@ class AttachmentViewSet(ViewSet):
 
         return SuccessResponseBuilder() \
                 .set_code(200) \
-                .set_data(AttachmentOutputSerializer(attachment.first()).data) \
+                .set_data(AttachmentOutputSerializerWithUrl(attachment.first()).data) \
                 .set_message("Successfully fetched the attachment") \
                 .set_metadata({"valid_for_seconds": "30"}) \
                 .build()

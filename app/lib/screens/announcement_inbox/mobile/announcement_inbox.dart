@@ -50,7 +50,6 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
         fileType: rawAttachment.fileType,
         fileName: rawAttachment.fileName,
         /** These values don't matter much since this is just for placeholder */
-        url: "",
         fileSizeInBytes: 1024,
         /*********/
       ));

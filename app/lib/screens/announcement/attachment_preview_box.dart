@@ -190,7 +190,7 @@ class ImageViewerScreen extends StatelessWidget {
               onPressed: () async {
                 try {
                   final attachmentBlob = await _announcementsRepository
-                      .downloadAttachment(attachment.filePath);
+                      .downloadAttachment(attachment.id!);
 
                   final tempDir = await getTemporaryDirectory();
 

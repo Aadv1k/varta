@@ -95,8 +95,7 @@ class UserAnnouncementListItem extends StatelessWidget {
                 Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                   AttachmentPreviewBox(
                     attachment: AttachmentSelectionData(
-                      filePath: announcement.attachments.first.url,
-                      isUrl: true,
+                      id: announcement.attachments.first.id,
                       fileName: announcement.attachments.first.fileName,
                       fileType: announcement.attachments.first.fileType,
                     ),

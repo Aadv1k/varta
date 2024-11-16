@@ -85,21 +85,13 @@ class AnnouncementsRepository {
     );
   }
 
-  Future<Uint8List> downloadAttachment(String attachmentUrl) async {
-    try {
-      http.Response response = await http.get(Uri.parse(attachmentUrl));
-      if (response.statusCode != 200) {
-        throw ApiException("Failed to download attachment", {});
-      }
-      return response.bodyBytes;
-    } on ApiException {
-      rethrow;
-    }
+  Future<Uint8List> downloadAttachment(String id) async {
+    throw AssertionError("Not implemented");
   }
 
   Future<AnnouncementAttachmentModel> uploadAttachment(
       AttachmentSelectionData data) async {
-    var file = File(data.filePath);
+    var file = File(data.filePath!);
 
     final fileType = data.fileType.mime.split("/");
     String prefix = fileType.first;
@@ -182,10 +174,9 @@ class AnnouncementsRepository {
       for (final attachmentData in data.attachments) {
         // This means the attachment is the old attachment and it isn't removed. So for this we will simply add it to the new list
         // TODO: do some further testing to see how this will behave with expiring signed URLs
-        if (attachmentData.isUrl) {
+        if (attachmentData.id != null) {
           final existingAttachmentId = oldAnnouncement.attachments
-              .firstWhere(
-                  (attachment) => attachment.url == attachmentData.filePath)
+              .firstWhere((attachment) => attachment.id == attachmentData.id!)
               .id;
           existingAttachmentIds.add(existingAttachmentId);
           continue;

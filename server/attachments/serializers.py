@@ -64,6 +64,12 @@ class AttachmentUploadSerializer(Serializer):
         return attachment 
 
 class AttachmentOutputSerializer(ModelSerializer):
+    class Meta:
+        model = Attachment
+        exclude = ["user", "announcement", "key"]
+
+
+class AttachmentOutputSerializerWithUrl(ModelSerializer):
     url = SerializerMethodField()
 
     def get_url(self, obj):

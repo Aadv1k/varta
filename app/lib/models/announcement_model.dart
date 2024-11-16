@@ -33,13 +33,11 @@ enum AnnouncementAttachmentFileType {
 class AnnouncementAttachmentModel {
   final DateTime createdAt;
   final String id;
-  final String url;
   final AnnouncementAttachmentFileType fileType;
   final String fileName;
   final int fileSizeInBytes;
 
   AnnouncementAttachmentModel({
-    required this.url,
     required this.fileSizeInBytes,
     required this.id,
     required this.createdAt,
@@ -54,7 +52,6 @@ class AnnouncementAttachmentModel {
       fileType: AnnouncementAttachmentFileType.values
           .firstWhere((val) => val.mime == data["file_type"]),
       fileName: data["file_name"],
-      url: data["url"],
       fileSizeInBytes: data["file_size_in_bytes"],
     );
   }
@@ -63,7 +60,6 @@ class AnnouncementAttachmentModel {
     return {
       'id': id,
       'created_at': createdAt.toIso8601String(),
-      "url": url,
       "file_type": fileType.mime,
       "file_name": fileName,
       "file_size_in_bytes": fileSizeInBytes,
@@ -74,11 +70,11 @@ class AnnouncementAttachmentModel {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! AnnouncementAttachmentModel) return false;
-    return id == other.id && url == other.url;
+    return id == other.id;
   }
 
   @override
-  int get hashCode => id.hashCode ^ url.hashCode;
+  int get hashCode => id.hashCode;
 }
 
 class AnnouncementModel {
@@ -285,16 +281,13 @@ class AnnouncementScope {
 }
 
 class AttachmentSelectionData {
-  final String filePath;
+  final String? id;
+  final String? filePath;
   final String fileName;
-  final bool isUrl;
   final AnnouncementAttachmentFileType fileType;
 
   const AttachmentSelectionData(
-      {required this.filePath,
-      required this.fileName,
-      this.isUrl = false,
-      required this.fileType});
+      {this.id, this.filePath, required this.fileName, required this.fileType});
 }
 
 class AnnouncementCreationData {
@@ -336,10 +329,10 @@ class AnnouncementCreationData {
           .toList(),
       attachments: model.attachments
           .map((e) => AttachmentSelectionData(
-              filePath: e.url,
-              fileName: e.fileName,
-              fileType: e.fileType,
-              isUrl: true))
+                id: e.id,
+                fileName: e.fileName,
+                fileType: e.fileType,
+              ))
           .toList(),
     );
   }
