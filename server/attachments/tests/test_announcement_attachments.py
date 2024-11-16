@@ -236,6 +236,7 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Attachment.objects.filter(id=attachmentIds[1]).exists())
+        self.assertTrue(Attachment.objects.filter(id=attachmentIds[0]).exists())
 
     def test_can_get_the_attachment_url(self):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")

@@ -176,14 +176,13 @@ class AnnouncementSerializer(serializers.ModelSerializer):
                 attachment.delete()
         else:
             for attachment in instance.attachments.all():
-                if str(attachment.id) not in new_attachments:
+                if attachment.id not in new_attachments:
                     attachment.delete()
 
             for attachment_id in new_attachments:
                 found_attachment = Attachment.objects.filter(id=attachment_id)
                 if found_attachment.exists():
                     found_attachment.announcement = instance
-                    found_attachment.save()
                 
 
         instance.save()

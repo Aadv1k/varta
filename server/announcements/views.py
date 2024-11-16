@@ -284,5 +284,5 @@ class AnnouncementViewSet(viewsets.ViewSet):
         return SuccessResponseBuilder() \
             .set_code(200) \
             .set_message("Successfully updated announcement") \
-            .set_data({}) \
+            .set_data(AnnouncementOutputSerializer(Announcement.objects.get(id=pk)).data) \
             .build()
