@@ -66,7 +66,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Icon(
-            Icons.search_rounded,
+            Icons.search,
             size: IconSizes.iconMd,
             color: PaletteNeutral.shade200,
           ),

@@ -177,7 +177,8 @@ class AnnouncementsRepository {
     }
   }
 
-  Future<void> updateAnnouncement(
+  // TODO: this is a bit sus
+  Future<AnnouncementModel> updateAnnouncement(
       AnnouncementModel oldAnnouncement, AnnouncementCreationData data) async {
     try {
       List<String> newAttachmentIds = [];
@@ -206,18 +207,14 @@ class AnnouncementsRepository {
             "scopes": data.scopes
                 .map((scope) => scope.toAnnouncementScope().toJson())
                 .toList(),
-            //"attachments": [...existingAttachmentIds, ...newAttachmentIds]
-            "attachments": []
+            "attachments": [...existingAttachmentIds, ...newAttachmentIds]
           },
           isAuthenticated: true);
-
-      print("++++++++++++++++++");
-      print(response.body);
-      print("++++++++++++++++++");
 
       if (response.statusCode != 200) {
         throw ApiException.fromResponse(response);
       }
+      return AnnouncementModel.fromJson(jsonDecode(response.body)["data"]);
     } on ApiClientException catch (_) {
       rethrow;
     }

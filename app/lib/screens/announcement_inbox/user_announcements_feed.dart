@@ -15,6 +15,7 @@ import 'package:app/widgets/state/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:app/common/colors.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:uuid/uuid.dart';
 
 class UserAnnouncementFeed extends StatefulWidget {
   const UserAnnouncementFeed({super.key});
@@ -145,12 +146,25 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
       scopes: creationData.scopes
           .map((scope) => scope.toAnnouncementScope())
           .toList(),
+      attachments: creationData.attachments
+          .map((attachment) => AnnouncementAttachmentModel(
+              id: "OPTIMISTIC-${const Uuid().v4()}",
+              createdAt: DateTime.now(),
+              fileSizeInBytes: 420,
+              fileType: attachment.fileType,
+              fileName: attachment.fileName))
+          .toList(),
     );
 
     state.setAnnouncements(newAnnouncements, isUserAnnouncement: true);
 
     try {
-      await _announcementRepo.updateAnnouncement(oldAnnouncement, creationData);
+      final updatedAnnouncement = await _announcementRepo.updateAnnouncement(
+          oldAnnouncement, creationData);
+
+      newAnnouncements[index] = updatedAnnouncement;
+      state.setAnnouncements(newAnnouncements, isUserAnnouncement: true);
+
       state.saveAnnouncementState(isUserAnnouncement: true);
     } catch (exc) {
       const VartaSnackbar(

@@ -139,18 +139,23 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           : null,
       backgroundColor: AppColor.primaryBg,
       appBar: AppBar(
-        toolbarHeight: 86,
+        toolbarHeight: 78,
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: AppColor.primaryBg,
-        centerTitle: true,
-        title: Text("Varta", style: Theme.of(context).textTheme.titleMedium),
-        leading: const SizedBox.shrink(),
+        centerTitle: false,
+        title: Text("Varta",
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                fontWeight: FontWeight.w400,
+                color: AppColor.heading,
+                fontSize: FontSize.textLg)),
+        titleSpacing: Spacing.lg,
+        leading: null,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: Spacing.md),
             child: CircleAvatar(
-              radius: 23,
+              radius: 20,
               backgroundColor: PaletteNeutral.shade030,
               child: IconButton(
                 splashColor: PaletteNeutral.shade050,
@@ -170,8 +175,8 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
                 icon: Center(
                     child: SvgPicture.asset(
                   "assets/icons/person.svg",
-                  width: 22,
-                  height: 22,
+                  width: 20,
+                  height: 20,
                 )),
               ),
             ),
