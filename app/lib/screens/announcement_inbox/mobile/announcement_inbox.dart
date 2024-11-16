@@ -77,10 +77,13 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
         .addAnnouncements([optimisticAnnouncement], isUserAnnouncement: true);
 
     try {
-      String announcementId = await _announcementRepo.createAnnouncement(data);
+      AnnouncementModel announcementModel =
+          await _announcementRepo.createAnnouncement(data);
 
       appState.setAnnouncements([
-        optimisticAnnouncement.copyWith(id: announcementId),
+        optimisticAnnouncement.copyWith(
+            id: announcementModel.id,
+            attachments: announcementModel.attachments),
         ...initialAnnouncements
       ], isUserAnnouncement: true);
 

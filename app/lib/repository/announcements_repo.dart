@@ -85,7 +85,19 @@ class AnnouncementsRepository {
     );
   }
 
-  Future<Uint8List> downloadAttachment(String id) async {
+  Future<String> getPresignedAttachmentUrl(String attachmentId) async {
+    final response = await _apiService.makeRequest(
+        HTTPMethod.GET, "/attachments/$attachmentId",
+        isAuthenticated: true);
+
+    if (response.statusCode != 200) {
+      throw ApiException.fromResponse(response);
+    }
+
+    return jsonDecode(response.body)["data"]["url"];
+  }
+
+  Future<Uint8List> downloadAttachment(String url) async {
     throw AssertionError("Not implemented");
   }
 
@@ -119,7 +131,7 @@ class AnnouncementsRepository {
     }
   }
 
-  Future<String> createAnnouncement(
+  Future<AnnouncementModel> createAnnouncement(
       AnnouncementCreationData creationData) async {
     try {
       List<String> attachmentIds = [];
@@ -145,7 +157,7 @@ class AnnouncementsRepository {
         throw ApiException.fromResponse(response);
       }
       var data = jsonDecode(response.body)["data"];
-      return data["id"];
+      return AnnouncementModel.fromJson(data);
     } on ApiClientException catch (_) {
       rethrow;
     }

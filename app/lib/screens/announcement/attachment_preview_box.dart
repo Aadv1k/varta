@@ -6,6 +6,7 @@ import 'package:app/common/sizes.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/repository/announcements_repo.dart';
 import 'package:app/widgets/error_snackbar.dart';
+import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/varta_app_bar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -122,7 +123,7 @@ class AttachmentPreviewBox extends StatelessWidget {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => ImageViewerScreen(
+                  builder: (context) => AttachmentPreviewScreen(
                         attachment: attachment,
                       )));
           onPressed?.call();
@@ -167,12 +168,16 @@ class AttachmentPreviewBox extends StatelessWidget {
   }
 }
 
-class ImageViewerScreen extends StatelessWidget {
+class AttachmentPreviewScreen extends StatelessWidget {
   final AttachmentSelectionData attachment;
   final AnnouncementsRepository _announcementsRepository =
       AnnouncementsRepository();
+  late final Future<String> _attachmentUrlFuture;
 
-  ImageViewerScreen({super.key, required this.attachment});
+  AttachmentPreviewScreen({super.key, required this.attachment}) {
+    _attachmentUrlFuture =
+        _announcementsRepository.getPresignedAttachmentUrl(attachment.id!);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -185,61 +190,102 @@ class ImageViewerScreen extends StatelessWidget {
       backgroundColor: AppColor.primaryBg,
       appBar: VartaAppBar(
         actions: [
-          IconButton(
-              padding: EdgeInsets.zero,
-              onPressed: () async {
-                try {
-                  final attachmentBlob = await _announcementsRepository
-                      .downloadAttachment(attachment.id!);
+          FutureBuilder<String>(
+            future: _attachmentUrlFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox(
+                  width: IconSizes.iconMd,
+                  height: IconSizes.iconMd,
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                );
+              }
 
-                  final tempDir = await getTemporaryDirectory();
+              if (snapshot.hasError || !snapshot.hasData) {
+                return const SizedBox.shrink();
+              }
 
-                  final tempFile = File(
-                      "${tempDir.path}/${const Uuid().v4()}.${attachment.fileType.ext}");
-
-                  await tempFile.writeAsBytes(attachmentBlob);
-
-                  FilePicker.platform
-                      .saveFile(
-                        fileName: attachment.fileName,
-                        type: FileType.image,
-                        bytes: tempFile.readAsBytesSync(),
-                      )
-                      .then((_) async => await tempFile.delete());
-                } catch (exc) {
-                  VartaSnackbar(
-                          innerText: exc is ApiException
-                              ? "Failed to download attachment"
-                              : "Unable to save the file",
-                          snackBarVariant: VartaSnackBarVariant.error)
-                      .show(context);
-                  return;
-                }
-              },
-              icon: const Icon(Icons.download, size: IconSizes.iconMd),
-              color: AppColor.subtitle),
+              return IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () async {
+                  try {
+                    final attachmentBlob = await _announcementsRepository
+                        .downloadAttachment(attachment.id!);
+                    final tempDir = await getTemporaryDirectory();
+                    final tempFile = File(
+                        "${tempDir.path}/${const Uuid().v4()}.${attachment.fileType.ext}");
+                    await tempFile.writeAsBytes(attachmentBlob);
+                    await FilePicker.platform.saveFile(
+                      fileName: attachment.fileName,
+                      type: FileType.image,
+                      bytes: tempFile.readAsBytesSync(),
+                    );
+                    await tempFile.delete();
+                  } catch (exc) {
+                    if (context.mounted) {
+                      VartaSnackbar(
+                        innerText: exc is ApiException
+                            ? "Failed to download attachment"
+                            : "Unable to save the file",
+                        snackBarVariant: VartaSnackBarVariant.error,
+                      ).show(context);
+                    }
+                  }
+                },
+                icon: const Icon(Icons.download, size: IconSizes.iconMd),
+                color: AppColor.subtitle,
+              );
+            },
+          ),
         ],
         centerTitle: false,
         title: AttachmentPreviewBox.truncateFileName(attachment.fileName),
       ),
       body: Center(
-          child: isImage
+          child: FutureBuilder<String>(
+        future: _attachmentUrlFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+
+          if (snapshot.hasError || !snapshot.hasData) {
+            return GenericErrorBox(
+              size: ErrorSize.medium,
+              errorMessage:
+                  "Couldn't load the attachment: ${snapshot.error.toString()}",
+            );
+          }
+
+          return isImage
               ? SizedBox(
                   height: double.infinity,
                   child: InteractiveViewer(
-                      child: Image.network(
-                    "https://placehold.co/1920x1080@2x.png",
-                    loadingBuilder: (context, child, loadingProgress) =>
-                        loadingProgress == null
-                            ? child
-                            : const Center(child: CircularProgressIndicator()),
-                  )),
+                    child: Image.network(
+                      snapshot.data!,
+                      loadingBuilder: (context, child, loadingProgress) =>
+                          loadingProgress == null
+                              ? child
+                              : const Center(
+                                  child: CircularProgressIndicator()),
+                    ),
+                  ),
                 )
               : Opacity(
                   opacity: 0.25,
                   child: SvgPicture.asset(
-                      AttachmentPreviewBox.getSvgFileFromFileType(
-                          attachment.fileType)))),
+                    AttachmentPreviewBox.getSvgFileFromFileType(
+                        attachment.fileType),
+                  ),
+                );
+        },
+      )),
     );
   }
 }
