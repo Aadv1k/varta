@@ -236,3 +236,28 @@ class AnnouncementAttachmentTestCase(BaseAnnouncementTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Attachment.objects.filter(id=attachmentIds[1]).exists())
+
+    def test_can_get_the_attachment_url(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.teacher_token}")
+
+        with open("./attachments/tests/test-image-v3.jpg", "rb") as test_file:
+            response = self.client.post(reverse("attachment_upload"), data={ "file": SimpleUploadedFile("testing.jpg", content=test_file.read(), content_type="application/pdf") }) 
+
+            self.assertEqual(response.status_code, 201)
+            attachment_id = response.data["data"]["id"]
+
+        response = self.client.post(reverse("announcement_list"), data={
+            "title": "Test Announcement",
+            "body": "This is a test announcement",
+            "scopes": [
+                {"filter": AnnouncementScope.FilterType.EVERYONE},
+            ],
+            "attachments": [attachment_id]
+        }, format="json")
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get(f"{reverse('attachment_detail', kwargs={'pk': attachment_id})}")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("url", response.data['data'])

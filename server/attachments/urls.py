@@ -11,7 +11,7 @@ urlpatterns = [
 
 
     path("attachments/<uuid:pk>", AttachmentViewSet.as_view({
-        "delete": "destroy"
+        "get": "retrieve"
     }), name="attachment_detail")
 
 ]

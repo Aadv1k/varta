@@ -1,5 +1,7 @@
 from .serializers import AttachmentUploadSerializer, AttachmentOutputSerializer
 
+from .models import Attachment
+
 from announcements.views import IsOwner
 from accounts.permissions import IsJWTAuthenticated , IsTeacher
 from common.response_builder import SuccessResponseBuilder, ErrorResponseBuilder
@@ -12,21 +14,23 @@ from rest_framework.parsers import MultiPartParser
 bucket_store = BucketStoreFactory()
 
 class AttachmentViewSet(ViewSet):
-    def get_permissions(self):
-        perms = [ IsJWTAuthenticated ] 
+    perms = [ IsJWTAuthenticated ] 
 
-        if self.action == "create":
-            perms += [IsTeacher]
-        elif self.action == "destroy":
-            perms += [IsTeacher, IsOwner]
-        
-        return [perm() for perm in perms]
+    def retrieve(self, request, pk):
+        attachment = Attachment.objects.filter(id=pk)
 
-    def create(self, reqeust):
-        pass
+        if not attachment.exists():
+            return ErrorResponseBuilder() \
+                    .set_code(404) \
+                    .set_message("Attachment not found") \
+                    .build()
 
-    def destroy(self, request, pk=None):
-        pass
+        return SuccessResponseBuilder() \
+                .set_code(200) \
+                .set_data(AttachmentOutputSerializer(attachment.first()).data) \
+                .set_message("Successfully fetched the attachment") \
+                .set_metadata({"valid_for_seconds": "30"}) \
+                .build()
 
 
 @api_view(["POST"])
