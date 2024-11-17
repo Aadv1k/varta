@@ -51,6 +51,12 @@ class AttachmentUploadSerializer(Serializer):
         attachment_id = uuid.uuid4()
         object_key = Attachment.get_object_key(user.public_id, attachment_id, file.name)
 
+        url = bucket_store.upload(file.read(), object_key)
+
+        if not url:
+            raise ValidationError("Could not upload the file to s3 bucket")
+        file.seek(0)
+
         mimetype = magic.from_buffer(file.read(2048), mime=True)
         attachment = Attachment.objects.create(
             id=attachment_id,

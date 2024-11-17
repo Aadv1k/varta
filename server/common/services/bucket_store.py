@@ -24,14 +24,33 @@ class GenericBucketStore(ABC):
         pass
 
 class S3BucketStore(GenericBucketStore):
+    def __init__(self):
+        self.client = boto3.client("s3")
+        self.s3_bucket = "varta-bucket"
+
     def upload(self, file_content: bytes, object_key: str) -> Optional[str]:
-        raise AssertionError("NOT IMPLEMENTED")
+        try:
+            self.client.put_object(
+                    Bucket=self.s3_bucket,
+                    Key=object_key,
+                    Body=file_content
+            )
+            object_url = f"https://{self.s3_bucket}.s3.amazonaws.com/{object_key}"
+            return object_url
+        except Exception as e: 
+            print(f"Something went wrong while uploading file to S3: {e}")
+            return None
 
-    def get_url(self, object_key):
-        raise AssertionError("NOT IMPLEMENTED")
 
+    def get_url(self, object_key) -> str:
+        return self.client.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': self.s3_bucket, 'Key': object_key},
+            ExpiresIn=3600
+        )
+        
     def delete(self, object_key: str):
-        raise AssertionError("NOT IMPLEMENTED")
+        self.client.delete_object(Bucket=self.s3_bucket, Key=object_key)
 
 class LocalBucketStore(GenericBucketStore):
     def __init__(self):
