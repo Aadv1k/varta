@@ -5,6 +5,8 @@ import 'package:app/models/announcement_model.dart';
 import 'package:app/widgets/delete_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 
+import '../../announcement/attachment_preview_box.dart';
+
 class AnnouncementListItem extends StatelessWidget {
   final AnnouncementModel announcement;
   final bool allowEditing;
@@ -68,6 +70,25 @@ class AnnouncementListItem extends StatelessWidget {
                     ?.copyWith(color: AppColor.body),
               ),
             ),
+            const SizedBox(height: Spacing.sm),
+            if (announcement.attachments.isNotEmpty)
+              Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                AttachmentPreviewBox(
+                  attachment: AttachmentSelectionData(
+                    id: announcement.attachments.first.id,
+                    fileName: announcement.attachments.first.fileName,
+                    fileType: announcement.attachments.first.fileType,
+                  ),
+                  isCompact: true,
+                ),
+                const SizedBox(width: Spacing.sm),
+                if (announcement.attachments.length > 1)
+                  Text("+${announcement.attachments.length - 1} more",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .copyWith(color: AppColor.subtitle)),
+              ]),
           ],
         ),
       ),
