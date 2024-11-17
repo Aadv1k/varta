@@ -106,13 +106,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # == Custom Configuration == #
 # ========================== #
 
-DEBUG = bool(os.getenv("DEBUG", True))
+DEBUG = os.getenv("DEBUG", "False").lower() in ('true', '1', 't', "True")
+
+load_dotenv()
 
 # https://stackoverflow.com/questions/6957016/detect-django-testing-mode
 TESTING = sys.argv[1:2] == ['test']
-
-if DEBUG or TESTING:
-    load_dotenv(".env.development") 
 
 CORS_ALLOW_ALL_ORIGINS = True
 

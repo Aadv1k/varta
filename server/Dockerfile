@@ -7,10 +7,11 @@ WORKDIR /varta-server
 
 COPY requirements.txt /varta-server
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libmagic1 libmagic-dev && \
+    pip install --no-cache-dir -r requirements.txt
 
 COPY . /varta-server/
 
-CMD ["apt-get", "install", "libmagic1"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
+~                                                         
