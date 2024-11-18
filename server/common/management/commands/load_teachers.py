@@ -38,17 +38,14 @@ class Command(BaseCommand):
                 last_name=data.get("last_name") or "", 
                 user_type=User.UserType.TEACHER
             )
-            class_teacher = None
-            if data.get("class_teacher_of"):
-                class_teacher = Classroom.get_by_std_div_or_none(data["class_teacher_of"])
-            
-            details = TeacherDetail.objects.create(
-                user=user,
-                class_teacher_of=class_teacher
-            )
 
-            if data.get("subject_teacher_of"):
-                for std_div in data["subject_teacher_of"]:
+            details = TeacherDetail.objects.create( user=user )
+
+            if (classroom_std_div := data.get("class_teacher_of")):
+                details.class_teacher_of = Classroom.get_by_std_div_or_none(classroom_std_div)
+
+            if (classrooms_std_div := data.get("subject_teacher_of")):
+                for std_div in classrooms_std_div:
                     classroom = Classroom.get_by_std_div_or_none(std_div)
                     if classroom:
                         details.subject_teacher_of.add(classroom)
@@ -58,5 +55,7 @@ class Command(BaseCommand):
                     department = Department.get_by_name_or_none(dept)
                     if department:
                         details.departments.add(department)
+
+            details.save()
 
             self.stdout.write(self.style.SUCCESS(f"Done."))

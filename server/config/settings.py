@@ -107,9 +107,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # == Custom Configuration == #
 # ========================== #
 
-DEBUG = os.getenv("DEBUG", "False").lower() in ('true', '1', 't', "True")
-
 load_dotenv()
+DEBUG = os.getenv("DEBUG", "true")
+
 
 # https://stackoverflow.com/questions/6957016/detect-django-testing-mode
 TESTING = sys.argv[1:2] == ['test']
