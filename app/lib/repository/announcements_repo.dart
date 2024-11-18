@@ -66,6 +66,11 @@ class AnnouncementsRepository {
     http.Response response = await _apiService.makeRequest(
         HTTPMethod.GET, "/announcements/updated-since?timestamp=$timeSince",
         isAuthenticated: true);
+
+    if (response.statusCode == 403) {
+      throw ApiTokenExpiredException();
+    }
+
     if (response.statusCode != 200) {
       throw ApiException.fromResponse(response);
     }
