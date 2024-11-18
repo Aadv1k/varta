@@ -7,6 +7,7 @@ import 'package:app/common/exceptions.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/search_data.dart';
 import 'package:app/services/api_service.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -98,13 +99,17 @@ class AnnouncementsRepository {
   }
 
   Future<Uint8List> downloadAttachment(String url) async {
-    throw AssertionError("Not implemented");
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode != 200) {
+      throw ApiException("Unable to download attachment", {});
+    }
+
+    return response.bodyBytes;
   }
 
   Future<AnnouncementAttachmentModel> uploadAttachment(
       AttachmentSelectionData data) async {
-    var file = File(data.filePath!);
-
     final fileType = data.fileType.mime.split("/");
     String prefix = fileType.first;
     String suffix = fileType.last;
@@ -113,8 +118,15 @@ class AnnouncementsRepository {
       final request = http.MultipartRequest(
           "POST", Uri.parse("$baseApiUrl/attachments/upload"));
       request.headers.addAll(await _apiService.getAuthHeaders());
-      request.files.add(await http.MultipartFile.fromPath("file", file.path,
-          contentType: MediaType(prefix, suffix)));
+
+      if (kIsWeb) {
+        request.files.add(http.MultipartFile.fromBytes("file", data.fileData!,
+            filename: data.fileName, contentType: MediaType(prefix, suffix)));
+      } else {
+        request.files.add(await http.MultipartFile.fromPath(
+            "file", File(data.filePath!).readAsStringSync(),
+            contentType: MediaType(prefix, suffix)));
+      }
 
       final response = await http.Response.fromStream(await request.send());
 

@@ -81,7 +81,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
       final cachedAnnouncements =
           await cacheService.fetchOrNull("announcements");
 
-      if (cachedAnnouncements != null) {
+      if (cachedAnnouncements != null && cachedAnnouncements.data.isNotEmpty) {
         _handlePoll();
         return;
       }

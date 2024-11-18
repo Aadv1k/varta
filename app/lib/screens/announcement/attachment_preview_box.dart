@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:html' as html;
 
 import 'package:app/common/colors.dart';
 import 'package:app/common/exceptions.dart';
@@ -9,14 +9,10 @@ import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/varta_app_bar.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
-
-import 'package:http/http.dart' as http;
-import 'package:share_plus/share_plus.dart';
-import 'package:uuid/uuid.dart';
 
 class AttachmentPreviewBox extends StatelessWidget {
   final AttachmentSelectionData attachment;
@@ -29,7 +25,7 @@ class AttachmentPreviewBox extends StatelessWidget {
       {super.key,
       required this.attachment,
       this.onDelete,
-      this.isPressable = false,
+      this.isPressable = true,
       this.isCompact = false,
       this.onPressed});
 
@@ -119,15 +115,17 @@ class AttachmentPreviewBox extends StatelessWidget {
     }
     return Stack(clipBehavior: Clip.none, children: [
       GestureDetector(
-        onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => AttachmentPreviewScreen(
-                        attachment: attachment,
-                      )));
-          onPressed?.call();
-        },
+        onTap: isPressable
+            ? () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AttachmentPreviewScreen(
+                              attachment: attachment,
+                            )));
+                onPressed?.call();
+              }
+            : null,
         child: Container(
           height: 100,
           width: 120,
@@ -152,17 +150,14 @@ class AttachmentPreviewBox extends StatelessWidget {
       ),
       if (onDelete != null)
         Positioned(
-          right: -18,
-          top: -18,
-          child: IconButton.filled(
-              style: const ButtonStyle(
-                  backgroundColor:
-                      WidgetStatePropertyAll(PaletteNeutral.shade200)),
-              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+          right: Spacing.xs,
+          top: Spacing.xs,
+          child: IconButton(
+              constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
               onPressed: onDelete,
               padding: EdgeInsets.zero,
               icon: const Icon(Icons.close,
-                  color: AppColor.activeChipFg, size: IconSizes.iconSm)),
+                  color: PaletteNeutral.shade600, size: 22)),
         ),
     ]);
   }
@@ -215,19 +210,22 @@ class AttachmentPreviewScreen extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 onPressed: () async {
                   try {
-                    final attachmentBlob = await _announcementsRepository
-                        .downloadAttachment(attachment.id!);
-                    final tempDir = await getTemporaryDirectory();
-                    final tempFile = File(
-                        "${tempDir.path}/${const Uuid().v4()}.${attachment.fileType.ext}");
-                    await tempFile.writeAsBytes(attachmentBlob);
-                    await FilePicker.platform.saveFile(
-                      fileName: attachment.fileName,
-                      type: FileType.image,
-                      bytes: tempFile.readAsBytesSync(),
-                    );
-                    await tempFile.delete();
+                    if (kIsWeb) {
+                      final element = html.AnchorElement(href: snapshot.data);
+                      element.download = snapshot.data;
+                      element.click();
+                    } else {
+                      final attachmentBlob = await _announcementsRepository
+                          .downloadAttachment(snapshot.data!);
+
+                      await FilePicker.platform.saveFile(
+                        fileName: attachment.fileName,
+                        type: FileType.image,
+                        bytes: attachmentBlob,
+                      );
+                    }
                   } catch (exc) {
+                    print(exc);
                     if (context.mounted) {
                       VartaSnackbar(
                         innerText: exc is ApiException
@@ -269,6 +267,13 @@ class AttachmentPreviewScreen extends StatelessWidget {
                   child: InteractiveViewer(
                     child: Image.network(
                       snapshot.data!,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(
+                        child: GenericErrorBox(
+                          size: ErrorSize.medium,
+                          errorMessage: "Couldn't load the image",
+                        ),
+                      ),
                       loadingBuilder: (context, child, loadingProgress) =>
                           loadingProgress == null
                               ? child

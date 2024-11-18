@@ -5,9 +5,11 @@ import 'package:app/common/const.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/search_data.dart';
 import 'package:app/screens/announcement/attachment_preview_box.dart';
+import 'package:app/screens/login/email_login.dart';
 import 'package:app/widgets/generic_confirmaton_dialog.dart';
 import 'package:app/widgets/varta_app_bar.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 
 import 'package:app/common/colors.dart';
@@ -153,9 +155,16 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
       return;
     }
 
-    File file = File(result.files.single.path!);
-    Uint8List data = await file.readAsBytes();
-    int fileLength = data.length;
+    File? attachedFile;
+    Uint8List attachedFileData;
+
+    if (kIsWeb) {
+      attachedFileData = result.files.single.bytes!;
+    } else {
+      attachedFile = File(result.files.single.path!);
+      attachedFileData = await attachedFile.readAsBytes();
+    }
+    int fileLength = attachedFileData.length;
 
     if (fileLength < 1024) {
       shouldShowUploadErrorDialog = true;
@@ -166,30 +175,39 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
       errorDialogMessage =
           "The selected file is too large. Maximum size is ${maxUploadSizeInBytes / 2048} MB.";
     } else {
-      String? possibleMimeType =
-          lookupMimeType("null", headerBytes: data.sublist(0, 1024));
+      String? possibleMimeType = lookupMimeType("null",
+          headerBytes: attachedFileData.sublist(0, 1024));
 
       if (possibleMimeType == null) {
         shouldShowUploadErrorDialog = true;
         errorDialogMessage =
             "Unable to determine the file type. Please select a supported file format.";
-      } else if (currentAttachmentSize + data.length >
+      } else if (currentAttachmentSize + attachedFileData.length >
           maxQuotaForAttachmentsInBytes) {
         shouldShowUploadErrorDialog = true;
         errorDialogMessage =
             "Adding this file will exceed the total attachment size limit. Consider removing other attachments.";
       } else {
         setState(() {
-          currentAttachmentSize += data.length;
+          currentAttachmentSize += attachedFileData.length;
           _announcementData = _announcementData.copyWith(attachments: [
             ..._announcementData.attachments,
-            AttachmentSelectionData(
-                filePath: file.path,
-                fileName: file.path.split("/").last,
-                fileType: AnnouncementAttachmentFileType.values
-                        .firstWhereOrNull(
-                            (ft) => ft.mime == possibleMimeType) ??
-                    AnnouncementAttachmentFileType.pdf)
+            if (kIsWeb)
+              AttachmentSelectionData(
+                  fileData: attachedFileData,
+                  fileName: result.files.single.name,
+                  fileType: AnnouncementAttachmentFileType.values
+                          .firstWhereOrNull(
+                              (ft) => ft.mime == possibleMimeType) ??
+                      AnnouncementAttachmentFileType.pdf)
+            else
+              AttachmentSelectionData(
+                  filePath: attachedFile!.path,
+                  fileName: result.files.single.name,
+                  fileType: AnnouncementAttachmentFileType.values
+                          .firstWhereOrNull(
+                              (ft) => ft.mime == possibleMimeType) ??
+                      AnnouncementAttachmentFileType.pdf)
           ]);
         });
       }
@@ -378,6 +396,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                           .asMap()
                           .entries
                           .map((entry) => AttachmentPreviewBox(
+                              isPressable: widget.screenState !=
+                                  AnnouncementScreenState.create,
                               onDelete: isCreateOrModify
                                   ? () => _handleDeleteAttachment(entry.key)
                                   : null,

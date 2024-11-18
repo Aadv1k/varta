@@ -17,6 +17,7 @@ import 'package:app/widgets/error_text.dart';
 import 'package:app/widgets/state/app_state.dart';
 import 'package:app/widgets/varta_app_bar.dart';
 import 'package:app/widgets/varta_button.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
@@ -60,10 +61,9 @@ class _OTPVerificationState extends State<OTPVerification> {
       final appState = await AppState.initialize(user: user);
 
       final notificationService = NotificationService();
-      bool hasAllowedNotifications =
-          await notificationService.didAllowNotifications();
+      final settings = await notificationService.notificationSettings;
 
-      if (!hasAllowedNotifications) {
+      if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
         await notificationService.initNotifications(loginData.inputData!);
       }
 
@@ -79,7 +79,7 @@ class _OTPVerificationState extends State<OTPVerification> {
         hasError = true;
         errorMessage = exc is ApiException
             ? exc.message
-            : "Looks like something went wrong. Check your details or try again later.";
+            : "Something unexpected went wrong: $exc";
       });
     } finally {
       setState(() => isLoading = false);
@@ -165,7 +165,9 @@ class _OTPVerificationState extends State<OTPVerification> {
                 }),
             const SizedBox(height: Spacing.md),
             if (hasError && errorMessage != null)
-              SizedBox(width: 280, child: ErrorText(text: errorMessage!)),
+              SizedBox(
+                  width: 320,
+                  child: ErrorText(width: 320, text: errorMessage!)),
             const SizedBox(height: Spacing.sm),
             TimedTextButton(onPressed: () {
               handleVerificationClick(context);

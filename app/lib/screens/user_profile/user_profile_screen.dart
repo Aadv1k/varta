@@ -8,10 +8,13 @@ import 'package:app/main.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/screens/user_profile/teacher_card.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:app/services/notification_service.dart';
+import 'package:app/widgets/generic_confirmaton_dialog.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/state/app_state.dart';
 import 'package:app/widgets/varta_app_bar.dart';
 import 'package:app/widgets/varta_button.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:app/screens/user_profile/user_card.dart';
@@ -29,10 +32,16 @@ class UserProfileScreen extends StatelessWidget {
     // TODO: weird case where the rawImage is null
     Uint8List? rawImage = await _screenshotController.capture(
       delay: const Duration(milliseconds: 100),
-      pixelRatio: 3,
+      pixelRatio: 1.5,
     );
 
     if (rawImage == null) {
+      return;
+    }
+
+    if (kIsWeb) {
+      await Share.shareXFiles(
+          [XFile.fromData(rawImage, name: "varta-card.png")]);
       return;
     }
 
@@ -43,12 +52,26 @@ class UserProfileScreen extends StatelessWidget {
     await tempFile.writeAsBytes(rawImage);
 
     await Share.shareXFiles([XFile(tempFilePath)]);
+
+    await tempFile.delete();
   }
 
   void _handleLogout(BuildContext context) {
-    AuthService().logout();
-    AppProvider.of(context).logout();
-    clearAndNavigateBackToLogin(context);
+    showDialog(
+        context: context,
+        builder: (context) => GenericConfirmationDialog(
+              title: "Logout",
+              body: 'Are you sure you want to logout?',
+              primaryAction: GenericConfirmatonDialogAction.confirm,
+              onCancel: () => Navigator.pop(context),
+              onConfirm: () {
+                AuthService().logout();
+                AppProvider.of(context).logout();
+                clearAndNavigateBackToLogin(context);
+              },
+              cancelLabel: "Cancel",
+              confirmLabel: "Logout",
+            ));
   }
 
   @override
@@ -99,13 +122,6 @@ class UserProfileScreen extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              const VartaButton(
-                variant: VartaButtonVariant.secondary,
-                label: "Send Feedback",
-                fullWidth: true,
-                leadingIcon: Icon(Icons.feedback,
-                    color: AppColor.inactiveChipFg, size: IconSizes.iconMd),
-              ),
               const SizedBox(height: Spacing.sm),
               VartaButton(
                 variant: VartaButtonVariant.error,

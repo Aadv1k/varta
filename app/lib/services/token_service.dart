@@ -1,9 +1,6 @@
-import 'package:app/services/shared_pref_service.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-import 'dart:io' show Platform;
 
 import 'package:shared_preferences/shared_preferences.dart';
 

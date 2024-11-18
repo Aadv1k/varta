@@ -1,7 +1,6 @@
 import 'package:app/common/exceptions.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationService {
@@ -9,18 +8,14 @@ class NotificationService {
   final AuthService _authService = AuthService();
   SharedPreferencesAsync prefs = SharedPreferencesAsync();
 
-  Future<bool> didAllowNotifications() async {
-    return (await prefs.getBool("hasAllowedNotifications")) ?? false;
-  }
+  Future<NotificationSettings> get notificationSettings async =>
+      await firebaseMessaging.requestPermission(alert: true);
 
   Future initNotifications(String contactData) async {
     try {
-      final permission = await firebaseMessaging.requestPermission(alert: true);
+      final status = (await notificationSettings).authorizationStatus;
 
-      if (permission.authorizationStatus != AuthorizationStatus.authorized) {
-        await prefs.setBool("hasAllowedNotifications", false);
-        return;
-      }
+      if (status != AuthorizationStatus.authorized) return;
 
       String? fcmToken = await firebaseMessaging.getToken();
 
@@ -29,7 +24,6 @@ class NotificationService {
       }
 
       await _authService.registerDevice(fcmToken, contactData);
-      await prefs.setBool("hasAllowedNotifications", true);
 
       await firebaseMessaging.setForegroundNotificationPresentationOptions(
         alert: true,
@@ -37,12 +31,8 @@ class NotificationService {
         sound: true,
       );
 
-
-			FirebaseMessaging.onMessageOpenedApp.listen((_) async {
-				// await prefs.setBool("openedAppFromNotification", true);
-			});
-
       firebaseMessaging.onTokenRefresh.listen((token) async {
+        print("HELLO WORLD!!!!");
         await _authService.registerDevice(token, contactData);
       });
     } catch (e) {

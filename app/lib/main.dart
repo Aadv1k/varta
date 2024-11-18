@@ -11,6 +11,7 @@ import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/widgets/state/app_state.dart';
 import 'package:app/widgets/state/login_state.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -54,10 +55,9 @@ class _VartaAppState extends State<VartaApp> {
       var appState = await AppState.initialize();
 
       NotificationService service = NotificationService();
-      bool hasAllowedNotifications = await service.didAllowNotifications();
+      final settings = await service.notificationSettings;
 
-      if (!hasAllowedNotifications) {
-        // NOTE: ideally the initialization for notifications is done during login not this.
+      if (settings.authorizationStatus != AuthorizationStatus.denied) {
         if (appState.user?.contacts != null &&
             appState.user!.contacts.isNotEmpty) {
           await service

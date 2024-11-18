@@ -56,7 +56,6 @@ class _UserAnnouncementFeedState extends State<UserAnnouncementFeed> {
 
       if (cachedAnnouncements != null &&
           jsonDecode(cachedAnnouncements.data).isNotEmpty) {
-        print(cachedAnnouncements.data);
         setState(() => _isLoading = false);
         return;
       }

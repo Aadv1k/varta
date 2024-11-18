@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:app/common/utils.dart';
 
 enum AnnouncementAttachmentFileType {
@@ -283,11 +285,16 @@ class AnnouncementScope {
 class AttachmentSelectionData {
   final String? id;
   final String? filePath;
+  final Uint8List? fileData;
   final String fileName;
   final AnnouncementAttachmentFileType fileType;
 
   const AttachmentSelectionData(
-      {this.id, this.filePath, required this.fileName, required this.fileType});
+      {this.id,
+      this.filePath,
+      required this.fileName,
+      required this.fileType,
+      this.fileData});
 }
 
 class AnnouncementCreationData {
