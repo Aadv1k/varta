@@ -177,7 +177,7 @@ class TeacherAnnouncementTestCase(BaseAnnouncementTestCase):
         self.mathematics_subject_teacher_10th = self.create_teacher_and_token(self.school, ["mathematics"], subject_teacher_of=["10A", "10B"])
         self.mathematics_subject_teacher_10th_2nd = self.create_teacher_and_token(self.school, ["mathematics"], subject_teacher_of=["10A", "10C"])
 
-        self.primary_english_class_teacher_4th = self.create_teacher_and_token(self.school, ["lang/english"], subject_teacher_of=["4A", "4B", "4C"], class_teacher_of="4A")
+        self.primary_english_class_teacher_4th = self.create_teacher_and_token(self.school, ["lang/english"], subject_teacher_of=["7A", "7B", "7C"], class_teacher_of="7A")
 
         self.admin = self.create_teacher_and_token(self.school, ["admin"])
 

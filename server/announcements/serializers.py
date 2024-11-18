@@ -169,7 +169,7 @@ class AnnouncementSerializer(serializers.ModelSerializer):
 
         instance.updated_at = datetime.now(timezone.utc)
 
-        new_attachments = validated_data.get("attachments")
+        new_attachments = validated_data.get("attachments", [])
 
         if len(new_attachments) == 0:
             for attachment in instance.attachments.all():

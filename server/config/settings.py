@@ -161,7 +161,9 @@ DATABASES = {
 # 5 minutes
 OTP_EXPIRY_IN_SECONDS = 300
 OTP_LENGTH = 6 
-MASTER_OTP = "000000"
+
+ADMIN_MASTER_OTP = os.getenv("ADMIN_MASTER_OTP", "000000")
+ADMIN_EMAILS =  [email.strip() for email in os.getenv("ADMIN_EMAILS", "").split(",")]
 
 
 REST_FRAMEWORK = {
