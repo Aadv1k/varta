@@ -61,6 +61,7 @@ class UserLoginSerializer(serializers.Serializer):
 
 class UserDeviceSerializer(serializers.ModelSerializer):
     logged_in_through = serializers.CharField(max_length=255)
+    device_token = serializers.CharField(max_length=255)
 
     def validate_logged_in_through(self, value):
         try:
@@ -70,11 +71,29 @@ class UserDeviceSerializer(serializers.ModelSerializer):
         
         return value
 
+    def validate_device_token(self, value):
+        # this is deliberate as we allow for the client to make calls for the same token. 
+        # We handle the validation for it in the save method. This is done to reduce complexity and validation logic
+        return value
+
+
     def save(self, **kwargs):
         logged_in_through = self.validated_data.pop("logged_in_through")
         contact_instance = UserContact.objects.get(user=self.validated_data["user"], contact_data=logged_in_through)
 
-        return UserDevice.objects.create(logged_in_through=contact_instance, **self.validated_data)
+        try:
+            user_device = UserDevice.objects.get(device_token=self.validated_data["device_token"])
+            if (user_device.is_expired):
+                user_device.delete()
+                user_device = None
+        except UserDevice.DoesNotExist:
+            user_device = None
+
+        if not user_device:
+            user_device = UserDevice.objects.create(logged_in_through=contact_instance, **self.validated_data)
+
+
+        return user_device
 
     class Meta:
         model = UserDevice

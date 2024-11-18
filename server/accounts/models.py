@@ -5,7 +5,9 @@ import uuid
 import re
 
 from django.conf import settings
-from datetime import timezone, timedelta, datetime
+
+from django.utils import timezone
+from datetime import timedelta
 
 class Classroom(models.Model):
     STANDARD_CHOICES = [(str(i), str(i)) for i in range(1, 13)]
@@ -160,14 +162,23 @@ class UserDevice(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'device_token') 
         verbose_name = "User Device"
         verbose_name_plural = "User Devices"
 
     @property
     def is_expired(self):
         expiry_days = getattr(settings, 'FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS', 30)
-        return self.created_at <= datetime.now(timezzone.utc) - timedelta(days=expiry_days)
+        
+        now = timezone.now()
+        
+        if self.created_at is None:
+            return True
+        
+        if timezone.is_naive(self.created_at):
+            self.created_at = timezone.make_aware(self.created_at, timezone.get_current_timezone())
+        
+        expiry_time = now - timedelta(days=expiry_days)
+        return self.created_at <= expiry_time
 
     def __str__(self):
         return f"{self.user}'s {self.device_type} device"

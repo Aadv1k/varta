@@ -67,12 +67,10 @@ class AnnouncementScope(models.Model):
     filter_data = models.CharField(max_length=255, null=True, blank=True) 
 
     def matches_for_user(self, user: User) -> bool:
-        if self.filter == self.FilterType.EVERYONE:
+        if self.filter in { self.FilterType.EVERYONE, self.FilterType.ALL_STUDENTS }:
             return True
-        
+
         if user.user_type == User.UserType.STUDENT:
-            if self.filter == self.FilterType.ALL_STUDENTS:
-                return True
             if self.filter == self.FilterType.STU_STANDARD and user.student_details.classroom.standard == self.filter_data:
                 return True
             if self.filter == self.FilterType.STU_STANDARD_DIVISION and user.student_details.classroom.equals_std_div_str(self.filter_data):
