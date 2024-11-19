@@ -104,6 +104,9 @@ class _EmailLoginState extends State<EmailLogin> {
                             },
                             hasError: hasError,
                             errorMessage: errorMessage,
+                            onSubmit: (String email) {
+                              handleVerificationClick(context, loginState);
+                            },
                           ),
                         ),
                       ],
@@ -131,7 +134,7 @@ class _EmailLoginState extends State<EmailLogin> {
                     builder: (context, child) => VartaButton(
                         variant: VartaButtonVariant.primary,
                         size: VartaButtonSize.large,
-                        label: "Verify",
+                        label: "Login",
                         fullWidth: true,
                         onPressed: () =>
                             handleVerificationClick(context, loginState),

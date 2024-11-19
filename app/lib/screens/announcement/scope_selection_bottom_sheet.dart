@@ -133,7 +133,7 @@ class _ScopeSelectionBottomSheetState extends State<ScopeSelectionBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: MediaQuery.sizeOf(context).height * 0.75,
+        height: MediaQuery.sizeOf(context).height * 0.80,
         width: double.infinity,
         padding: const EdgeInsets.symmetric(
             horizontal: Spacing.lg, vertical: Spacing.lg),

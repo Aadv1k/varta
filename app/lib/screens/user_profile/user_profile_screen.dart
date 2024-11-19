@@ -1,14 +1,11 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/utils.dart';
-import 'package:app/main.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/screens/user_profile/teacher_card.dart';
 import 'package:app/services/auth_service.dart';
-import 'package:app/services/notification_service.dart';
 import 'package:app/widgets/generic_confirmaton_dialog.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/state/app_state.dart';
@@ -40,8 +37,9 @@ class UserProfileScreen extends StatelessWidget {
     }
 
     if (kIsWeb) {
-      await Share.shareXFiles(
-          [XFile.fromData(rawImage, name: "varta-card.png")]);
+      await Share.shareXFiles([
+        XFile.fromData(rawImage, name: "varta-card.png", mimeType: "image/png")
+      ]);
       return;
     }
 
@@ -56,9 +54,9 @@ class UserProfileScreen extends StatelessWidget {
     await tempFile.delete();
   }
 
-  void _handleLogout(BuildContext context) {
+  void _handleLogout(BuildContext parentContext) {
     showDialog(
-        context: context,
+        context: parentContext,
         builder: (context) => GenericConfirmationDialog(
               title: "Logout",
               body: 'Are you sure you want to logout?',
@@ -66,7 +64,7 @@ class UserProfileScreen extends StatelessWidget {
               onCancel: () => Navigator.pop(context),
               onConfirm: () {
                 AuthService().logout();
-                AppProvider.of(context).logout();
+                AppProvider.of(parentContext).logout();
                 clearAndNavigateBackToLogin(context);
               },
               cancelLabel: "Cancel",

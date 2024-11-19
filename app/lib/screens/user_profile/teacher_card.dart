@@ -42,8 +42,8 @@ class TeacherCard extends StatelessWidget {
           Positioned(
             top: Spacing.xs,
             right: Spacing.xs,
-            child: Container(
-              height: 240,
+            child: SizedBox(
+              height: 260,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [

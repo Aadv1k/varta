@@ -98,24 +98,21 @@ class _OTPVerificationState extends State<OTPVerification> {
       ),
       body: Container(
         alignment: Alignment.center,
-        padding: const EdgeInsets.only(
-          top: Spacing.xl,
-          bottom: Spacing.lg,
-          left: Spacing.xl,
-          right: Spacing.xl,
-        ),
+        padding: const EdgeInsets.symmetric(
+            vertical: Spacing.lg, horizontal: Spacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
               width: 420,
               child: Text(
                 "Verification Code",
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineLarge,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: Spacing.sm),
             SizedBox(
               width: 280,
               child: RichText(
@@ -139,6 +136,7 @@ class _OTPVerificationState extends State<OTPVerification> {
                 listenable: LoginProvider.of(context).state,
                 builder: (context, child) {
                   return OtpTextField(
+                    autoFocus: true,
                     numberOfFields: 6,
                     textStyle: const TextStyle(
                       fontSize: FontSize.textLg,
@@ -163,11 +161,17 @@ class _OTPVerificationState extends State<OTPVerification> {
                     },
                   );
                 }),
-            const SizedBox(height: Spacing.md),
+            const SizedBox(height: Spacing.sm),
             if (hasError && errorMessage != null)
-              SizedBox(
-                  width: 320,
-                  child: ErrorText(width: 320, text: errorMessage!)),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(Icons.error,
+                    color: TWColor.red600, size: IconSizes.iconSm),
+                const SizedBox(width: Spacing.sm),
+                Text(errorMessage!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: TWColor.red600,
+                        )),
+              ]),
             const SizedBox(height: Spacing.sm),
             TimedTextButton(onPressed: () {
               handleVerificationClick(context);
@@ -180,7 +184,6 @@ class _OTPVerificationState extends State<OTPVerification> {
               fullWidth: true,
               onPressed: () => handleVerificationClick(context),
               isLoading: isLoading,
-              // isDisabled: validateOtp(loginData.otp!) == false,
             )
           ],
         ),

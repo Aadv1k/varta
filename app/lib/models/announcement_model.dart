@@ -77,6 +77,17 @@ class AnnouncementAttachmentModel {
 
   @override
   int get hashCode => id.hashCode;
+
+  @override
+  String toString() {
+    return 'AnnouncementAttachmentModel('
+        'id: $id, '
+        'createdAt: ${createdAt.toIso8601String()}, '
+        'fileType: ${fileType.mime}, '
+        'fileName: $fileName, '
+        'fileSizeInBytes: $fileSizeInBytes'
+        ')';
+  }
 }
 
 class AnnouncementModel {

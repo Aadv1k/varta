@@ -1,6 +1,5 @@
-import 'dart:html' as html;
-
 import 'package:app/common/colors.dart';
+import 'package:app/common/download.dart';
 import 'package:app/common/exceptions.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/models/announcement_model.dart';
@@ -8,11 +7,14 @@ import 'package:app/repository/announcements_repo.dart';
 import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/varta_app_bar.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:path/path.dart' as path;
+
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
+import 'dart:typed_data';
 
 class AttachmentPreviewBox extends StatelessWidget {
   final AttachmentSelectionData attachment;
@@ -163,15 +165,54 @@ class AttachmentPreviewBox extends StatelessWidget {
   }
 }
 
-class AttachmentPreviewScreen extends StatelessWidget {
+class AttachmentPreviewScreen extends StatefulWidget {
   final AttachmentSelectionData attachment;
+
+  const AttachmentPreviewScreen({super.key, required this.attachment});
+
+  @override
+  _AttachmentPreviewScreenState createState() =>
+      _AttachmentPreviewScreenState();
+}
+
+class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen> {
   final AnnouncementsRepository _announcementsRepository =
       AnnouncementsRepository();
   late final Future<String> _attachmentUrlFuture;
+  Uint8List? _imageBytes;
+  bool _isLoading = true;
+  String? _errorMessage;
 
-  AttachmentPreviewScreen({super.key, required this.attachment}) {
-    _attachmentUrlFuture =
-        _announcementsRepository.getPresignedAttachmentUrl(attachment.id!);
+  @override
+  void initState() {
+    super.initState();
+    _attachmentUrlFuture = _announcementsRepository
+        .getPresignedAttachmentUrl(widget.attachment.id!);
+    _loadImage();
+  }
+
+  Future<void> _loadImage() async {
+    try {
+      final urlSnapshot = await _attachmentUrlFuture;
+      final response = await http.get(Uri.parse(urlSnapshot));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _imageBytes = response.bodyBytes;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = "Failed to load image: ${response.statusCode}";
+          _isLoading = false;
+        });
+      }
+    } catch (exc) {
+      setState(() {
+        _errorMessage = "Error loading image: $exc";
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -179,7 +220,7 @@ class AttachmentPreviewScreen extends StatelessWidget {
     bool isImage = {
       AnnouncementAttachmentFileType.jpeg,
       AnnouncementAttachmentFileType.png
-    }.contains(attachment.fileType);
+    }.contains(widget.attachment.fileType);
 
     return Scaffold(
       backgroundColor: AppColor.primaryBg,
@@ -210,22 +251,8 @@ class AttachmentPreviewScreen extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 onPressed: () async {
                   try {
-                    if (kIsWeb) {
-                      final element = html.AnchorElement(href: snapshot.data);
-                      element.download = snapshot.data;
-                      element.click();
-                    } else {
-                      final attachmentBlob = await _announcementsRepository
-                          .downloadAttachment(snapshot.data!);
-
-                      await FilePicker.platform.saveFile(
-                        fileName: attachment.fileName,
-                        type: FileType.image,
-                        bytes: attachmentBlob,
-                      );
-                    }
+                    await download(snapshot.data!, widget.attachment.fileName);
                   } catch (exc) {
-                    print(exc);
                     if (context.mounted) {
                       VartaSnackbar(
                         innerText: exc is ApiException
@@ -243,54 +270,35 @@ class AttachmentPreviewScreen extends StatelessWidget {
           ),
         ],
         centerTitle: false,
-        title: AttachmentPreviewBox.truncateFileName(attachment.fileName),
+        title:
+            AttachmentPreviewBox.truncateFileName(widget.attachment.fileName),
       ),
       body: Center(
-          child: FutureBuilder<String>(
-        future: _attachmentUrlFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
-
-          if (snapshot.hasError || !snapshot.hasData) {
-            return GenericErrorBox(
-              size: ErrorSize.medium,
-              errorMessage:
-                  "Couldn't load the attachment: ${snapshot.error.toString()}",
-            );
-          }
-
-          return isImage
-              ? SizedBox(
-                  height: double.infinity,
-                  child: InteractiveViewer(
-                    child: Image.network(
-                      snapshot.data!,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Center(
-                        child: GenericErrorBox(
-                          size: ErrorSize.medium,
-                          errorMessage: "Couldn't load the image",
+        child: _isLoading
+            ? const CircularProgressIndicator()
+            : _errorMessage != null
+                ? GenericErrorBox(
+                    size: ErrorSize.medium,
+                    errorMessage: _errorMessage!,
+                  )
+                : isImage && _imageBytes != null
+                    ? SizedBox(
+                        height: double.infinity,
+                        child: InteractiveViewer(
+                          child: Image.memory(
+                            _imageBytes!,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      )
+                    : Opacity(
+                        opacity: 0.25,
+                        child: SvgPicture.asset(
+                          AttachmentPreviewBox.getSvgFileFromFileType(
+                              widget.attachment.fileType),
                         ),
                       ),
-                      loadingBuilder: (context, child, loadingProgress) =>
-                          loadingProgress == null
-                              ? child
-                              : const Center(
-                                  child: CircularProgressIndicator()),
-                    ),
-                  ),
-                )
-              : Opacity(
-                  opacity: 0.25,
-                  child: SvgPicture.asset(
-                    AttachmentPreviewBox.getSvgFileFromFileType(
-                        attachment.fileType),
-                  ),
-                );
-        },
-      )),
+      ),
     );
   }
 }

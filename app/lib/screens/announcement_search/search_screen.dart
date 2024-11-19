@@ -194,7 +194,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: Spacing.lg),
+                              horizontal: Spacing.md),
                           child: Text("RESULTS",
                               style: Theme.of(context)
                                   .textTheme

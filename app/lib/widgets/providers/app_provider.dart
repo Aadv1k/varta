@@ -32,6 +32,7 @@ class AppProvider extends InheritedWidget {
 
     await cacheService.delete("announcements");
     await cacheService.delete("userAnnouncements");
+    await cacheService.delete("teachers");
     await cacheService.delete("user");
   }
 }

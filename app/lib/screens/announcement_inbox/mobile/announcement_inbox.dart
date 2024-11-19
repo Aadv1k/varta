@@ -143,7 +143,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: AppColor.primaryBg,
-        centerTitle: false,
+        centerTitle: true,
         title: Text("Varta",
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                 fontWeight: FontWeight.w400,
@@ -183,7 +183,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           )
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(isTeacher ? 84 : 48),
+          preferredSize: Size.fromHeight(isTeacher ? 72 : 48),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
             child: Column(
@@ -214,7 +214,6 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
                       ),
                     ],
                   ),
-                const SizedBox(height: Spacing.sm),
               ],
             ),
           ),

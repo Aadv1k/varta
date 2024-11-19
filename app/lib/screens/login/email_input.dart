@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 
 class EmailInput extends StatefulWidget {
   final Function(String) onInput;
+  final Function(String) onSubmit;
   final bool hasError;
   final String? errorMessage;
 
   const EmailInput({
     super.key,
     required this.onInput,
+    required this.onSubmit,
     required this.hasError,
     this.errorMessage,
   });
@@ -61,6 +63,7 @@ class _EmailInputState extends State<EmailInput> {
             child: TextField(
               keyboardType: TextInputType.emailAddress,
               controller: emailInputController,
+              onSubmitted: widget.onSubmit,
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge!
