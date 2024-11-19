@@ -101,7 +101,8 @@ def user_verify(request):
                 .build()
 
     contact_data, provided_otp = serializer.validated_data["input_data"], serializer.validated_data["otp"]
-    is_otp_valid = True if contact_data in settings.ADMIN_EMAILS and provided_otp == settings.ADMIN_MASTER_OTP else otp_service.verify_otp(contact_data, provided_otp)
+
+    is_otp_valid = True if (contact_data in settings.ADMIN_EMAILS or settings.DEBUG) and provided_otp == settings.ADMIN_MASTER_OTP else otp_service.verify_otp(contact_data, provided_otp)
 
     if not is_otp_valid:
         return ErrorResponseBuilder() \

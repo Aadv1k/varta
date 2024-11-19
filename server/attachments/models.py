@@ -46,8 +46,18 @@ class Attachment(models.Model):
     
     @property
     def object_key(self):
-        return f"{self.user.public_id}/{self.id}{Path(file_name).suffix}"
+        return f"{self.user.public_id}/{self.id}{Path(self.file_name).suffix}"
 
     def delete(self):
         bucket_store.delete(self.key)
         super().delete()
+
+    
+    def __str__(self):
+        return "{} - {}".format(self.file_name, self.file_type)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Attachment"
+        verbose_name_plural = "Attachments"
+

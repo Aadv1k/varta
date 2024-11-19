@@ -95,7 +95,7 @@ class User(models.Model):
         return f"{self.first_name} {'' if not self.middle_name else self.middle_name + '.'} {self.last_name or ''}"
     
     class Meta:
-        ordering = ['first_name', 'last_name']
+        ordering = ['first_name', ]
 
     indexes = [
         models.Index(fields=["user_type"]),

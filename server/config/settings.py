@@ -108,8 +108,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ========================== #
 
 load_dotenv()
-DEBUG = os.getenv("DEBUG", "TRUE") == "TRUE"
 
+DEBUG = os.getenv("DJANGO_DEBUG", "TRUE") == "TRUE"
 
 # https://stackoverflow.com/questions/6957016/detect-django-testing-mode
 TESTING = sys.argv[1:2] == ['test']
@@ -128,8 +128,8 @@ ZEPTOMAIL_FROM_ADDRESS = os.getenv("ZEPTOMAIL_FROM_ADDRESS")
 if not ZEPTOMAIL_TOKEN or not ZEPTOMAIL_FROM_ADDRESS:
     raise Exception("BAD CONFIG ZEPTOMAIL_TOKEN and ZEPTOMAIL_FROM_ADDRESS are required to setup the email service")
 
-REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = os.getenv("REDIS_PORT")
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 
 if not REDIS_HOST or not REDIS_PORT:
