@@ -70,11 +70,14 @@ class _PhoneLoginState extends State<PhoneLogin> {
     setState(() {
       isLoading = false;
     });
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => LoginProvider(
-                state: loginState, child: const OTPVerification())));
+
+    if (context.mounted) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => LoginProvider(
+                  state: loginState, child: const OTPVerification())));
+    }
   }
 
   @override
@@ -91,7 +94,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
         backgroundColor: AppColor.primaryBg,
         appBar: VartaAppBar(
             actions: const [],
-            hasTitle: true,
+            centerTitle: true,
             title: loginState.data.schoolIDAndName!.$2),
         body: Container(
             alignment: Alignment.center,

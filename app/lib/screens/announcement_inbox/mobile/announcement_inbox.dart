@@ -89,6 +89,15 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
 
       appState.saveAnnouncementState(isUserAnnouncement: true);
     } catch (exc) {
+      print("=====================");
+      print("=====================");
+      print("=====================");
+      print("=====================");
+      print(exc);
+      print("=====================");
+      print("=====================");
+      print("=====================");
+      print("=====================");
       const VartaSnackbar(
               innerText: "Couldn't create announcement.",
               snackBarVariant: VartaSnackBarVariant.error)

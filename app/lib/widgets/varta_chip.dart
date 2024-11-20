@@ -12,9 +12,9 @@ class VartaChip extends StatelessWidget {
   final VartaChipSize size;
   final VoidCallback? onPressed;
   final VoidCallback? onDeleted;
-  bool isDisabled = false;
+  final bool isDisabled;
 
-  VartaChip(
+  const VartaChip(
       {super.key,
       required this.text,
       this.variant = VartaChipVariant.primary,

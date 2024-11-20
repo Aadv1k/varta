@@ -1,18 +1,16 @@
 import 'dart:convert';
 
 import 'package:app/common/exceptions.dart';
-import 'package:app/models/announcement_model.dart';
 import 'package:app/models/school_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/services/api_service.dart';
 import 'package:app/services/simple_cache_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SchoolRepository {
   final ApiService _apiService = ApiService();
-  SimpleCacheService _cacheService = SimpleCacheService();
+  final SimpleCacheService _cacheService = SimpleCacheService();
   final _sharedPrefs = SharedPreferencesAsync();
 
   Future<List<SchoolModel>> getSchools() async {

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/user_model.dart';
-import 'package:app/repository/user_repo.dart';
 import 'package:app/services/simple_cache_service.dart';
 import 'package:flutter/material.dart';
 

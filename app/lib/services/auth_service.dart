@@ -5,7 +5,6 @@ import 'package:app/models/login_data.dart';
 import 'package:app/services/api_service.dart';
 import 'package:app/services/token_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 
 class AuthService {
   final ApiService _apiService = ApiService();
@@ -16,7 +15,6 @@ class AuthService {
       HTTPMethod.POST,
       "/me/verify",
       body: {
-        // TODO: ideally there would be a proper implementation for selecting the country code on the front-end. Currently this has to do
         "input_data": data.inputData,
         "school_id": data.schoolIDAndName!.$1,
         "otp": data.otp
@@ -44,7 +42,6 @@ class AuthService {
       HTTPMethod.POST,
       "/me/login",
       body: {
-        // TODO: ideally there would be a proper implementation for selecting the country code on the front-end. Currently this has to do
         "input_data": data.inputData,
         "input_format":
             data.inputType == LoginType.email ? "email" : "phone_number",

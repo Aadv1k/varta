@@ -1,11 +1,8 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:app/common/const.dart';
 import 'package:app/common/sizes.dart';
-import 'package:app/models/search_data.dart';
 import 'package:app/screens/announcement/attachment_preview_box.dart';
-import 'package:app/screens/login/email_login.dart';
 import 'package:app/widgets/generic_confirmaton_dialog.dart';
 import 'package:app/widgets/varta_app_bar.dart';
 import 'package:collection/collection.dart';
@@ -214,20 +211,22 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     }
 
     if (shouldShowUploadErrorDialog) {
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (context) => GenericConfirmationDialog(
-          onConfirm: () {
-            Navigator.pop(context);
-          },
-          title: "Couldn't upload attachment",
-          body: errorDialogMessage ??
-              'An unknown error occurred while adding the attachment.',
-          confirmLabel: "OK",
-          primaryAction: GenericConfirmatonDialogAction.cancel,
-        ),
-      );
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => GenericConfirmationDialog(
+            onConfirm: () {
+              Navigator.pop(context);
+            },
+            title: "Couldn't upload attachment",
+            body: errorDialogMessage ??
+                'An unknown error occurred while adding the attachment.',
+            confirmLabel: "OK",
+            primaryAction: GenericConfirmatonDialogAction.cancel,
+          ),
+        );
+      }
     }
   }
 

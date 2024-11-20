@@ -13,7 +13,6 @@ import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/screens/login/otp_verification/timed_text_button.dart';
 import 'package:app/services/auth_service.dart';
-import 'package:app/widgets/error_text.dart';
 import 'package:app/widgets/state/app_state.dart';
 import 'package:app/widgets/varta_app_bar.dart';
 import 'package:app/widgets/varta_button.dart';
@@ -29,9 +28,9 @@ class OTPVerification extends StatefulWidget {
 }
 
 class _OTPVerificationState extends State<OTPVerification> {
-  bool isLoading = false;
-  bool hasError = false;
-  String? errorMessage;
+  bool _isLoading = false;
+  bool _hasError = false;
+  String? _errorMessage;
 
   final AuthService _authService = AuthService();
   final UserRepository _userRepository = UserRepository();
@@ -42,9 +41,9 @@ class _OTPVerificationState extends State<OTPVerification> {
 
   Future handleVerificationClick(BuildContext context) async {
     setState(() {
-      isLoading = true;
-      hasError = false;
-      errorMessage = null;
+      _isLoading = true;
+      _hasError = false;
+      _errorMessage = null;
     });
 
     final loginData = LoginProvider.of(context).state.data;
@@ -76,13 +75,13 @@ class _OTPVerificationState extends State<OTPVerification> {
           (_) => false);
     } catch (exc) {
       setState(() {
-        hasError = true;
-        errorMessage = exc is ApiException
+        _hasError = true;
+        _errorMessage = exc is ApiException
             ? exc.message
             : "Something unexpected went wrong: $exc";
       });
     } finally {
-      setState(() => isLoading = false);
+      setState(() => _isLoading = false);
     }
   }
 
@@ -162,12 +161,12 @@ class _OTPVerificationState extends State<OTPVerification> {
                   );
                 }),
             const SizedBox(height: Spacing.sm),
-            if (hasError && errorMessage != null)
+            if (_hasError && _errorMessage != null)
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 const Icon(Icons.error,
                     color: TWColor.red600, size: IconSizes.iconSm),
                 const SizedBox(width: Spacing.sm),
-                Text(errorMessage!,
+                Text(_errorMessage!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: TWColor.red600,
                         )),
@@ -183,7 +182,7 @@ class _OTPVerificationState extends State<OTPVerification> {
               label: "Verify",
               fullWidth: true,
               onPressed: () => handleVerificationClick(context),
-              isLoading: isLoading,
+              isLoading: _isLoading,
             )
           ],
         ),

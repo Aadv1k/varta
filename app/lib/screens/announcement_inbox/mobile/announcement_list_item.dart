@@ -2,7 +2,6 @@ import 'package:app/common/colors.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
-import 'package:app/widgets/delete_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 
 import '../../announcement/attachment_preview_box.dart';

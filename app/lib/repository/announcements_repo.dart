@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:app/common/const.dart';
 import 'package:app/common/exceptions.dart';
@@ -129,7 +127,7 @@ class AnnouncementsRepository {
             filename: data.fileName, contentType: MediaType(prefix, suffix)));
       } else {
         request.files.add(await http.MultipartFile.fromPath(
-            "file", File(data.filePath!).readAsStringSync(),
+            "file", data.filePath!,
             contentType: MediaType(prefix, suffix)));
       }
 

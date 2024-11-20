@@ -63,6 +63,7 @@ class _EmailInputState extends State<EmailInput> {
             child: TextField(
               keyboardType: TextInputType.emailAddress,
               controller: emailInputController,
+              textCapitalization: TextCapitalization.sentences,
               onSubmitted: widget.onSubmit,
               style: Theme.of(context)
                   .textTheme

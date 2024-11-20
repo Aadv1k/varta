@@ -14,7 +14,6 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
-import 'dart:typed_data';
 
 class AttachmentPreviewBox extends StatelessWidget {
   final AttachmentSelectionData attachment;
@@ -152,8 +151,8 @@ class AttachmentPreviewBox extends StatelessWidget {
       ),
       if (onDelete != null)
         Positioned(
-          right: Spacing.xs,
-          top: Spacing.xs,
+          right: !kIsWeb ? -Spacing.xs : Spacing.xs,
+          top: !kIsWeb ? -Spacing.xs : Spacing.xs,
           child: IconButton(
               constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
               onPressed: onDelete,
