@@ -11,8 +11,18 @@ class TeacherDetailInline(admin.TabularInline):
     formset = TeacherDetailsInlineFormset
     extra = 0
 
+class StudentDetailsInlineFormset(BaseInlineFormSet):
+    model = StudentDetail
+    readonly_fields = ["classroom", ]
+
+class StudentDetailInline(admin.TabularInline):
+    model = StudentDetail
+    formset = StudentDetailsInlineFormset
+    extra = 0
+
+
 class UserAdmin(admin.ModelAdmin):
-    inlines = [TeacherDetailInline]
+    inlines = [TeacherDetailInline, StudentDetailInline]
     list_display = ('public_id', 'first_name', 'middle_name', 'last_name', 'user_type')
     search_fields = ('first_name', 'last_name', 'school__name') 
     list_filter = ('user_type', 'school') 

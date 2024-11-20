@@ -6,48 +6,65 @@
 
 <center>
 <p align="center" style="max-width: 320px;">
-    WhatsApp isn't built for one-way multi-channel comunications. We Are.
+    WhatsApp isn't built for one-way multi-channel school comunications. We Are.
 </p>
 </center>
 
 ## Introduction
 
-School communications are often highly fragmented, as not every piece of communication is meant for everyone. Due to this, students and even more so teachers end up juggling multiple WhatsApp groups with varying levels of importance and activity, having to sort through information that might be irrelevant to them just to get to the important announcements.
+School communications are often highly fragmented, with not every piece of communication being relevant to everyone. As a result, students—and even more so, teachers—find themselves juggling multiple small WhatsApp groups with varying levels of relevance and activity. This leads to sifting through a lot of irrelevant information just to find important announcements.
 
-Varta solves this by building scoped announcements on top of a comprehensive user identity system. While creating an announcement, a teacher can specify the exact audience the announcement should be visible to. For example, an announcement meant for all subject teachers of 9th, 10th, and 11th standards will ONLY be visible to those teachers and nobody else.
+Varta addresses this by implementing scoped announcements built on top of a rich user identity system. When creating an announcement, a teacher can specify the exact audience it should reach. For instance, an announcement intended for all subject teachers of 9th, 10th, and 11th standards will be visible ONLY to those teachers, ensuring no one else receives it.
 
 ## Features
 
-- **Scoped Announcements** allows teachers to specify one or multiple audiences to their announcement ensuring it reaches the relevant users. This allows for teacher-to-student as well as teacher-to-teacher communications.
-    - [x] Attachments: users can attach documents and media to their announcement
-    - [x] Multi-parameter search: the user can search through the relevant announcements based on the date-range, author and keywords within the body or title. 
-    - [x] Incremental Updates: the client can call to server to receive live-updates. 
-    - [ ] Scheduled Announcements: (Planned) Allow users to schedule announcements for future dates or setup reoccuring announcements.
-    - [ ] Priority-Based Filtering: (Planned) Enable users to filter announcements based on priority levels.
+- Password-less SMS and Email based OTP Login
+- instant Push Notifications
+- Live incremental updates
+- Scoped Announcement 
+    - [x] Attachments
+    - [x] Multi-parameter search
+    - [ ] Scheduled Announcements (Planned) 
+    - [ ] Priority-Based Filtering (Planned) 
+- Web Support
 
+## Screenshots
 
-<!-- ### Authentication
+<table style="border-collapse: collapse;">
+    <tr>
+        <td style="padding: 5px;">
+            <img src="./docs/screenshots/varta-scr-1.png" alt="Create an Announcement">
+        </td>
+        <td style="padding: 5px;">
+            <img src="./docs/screenshots/varta-scr-2.png" alt="Select one or multiple scopes">
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px;">
+            <img src="./docs/screenshots/varta-scr-3.png" alt="Add media or documents as needed">
+        </td>
+        <td style="padding: 5px;">
+            <img src="./docs/screenshots/varta-scr-4.png" alt="See announcements relevant to you">
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 5px;">
+            <img src="./docs/screenshots/varta-scr-5.png" alt="A powerful multi-parameter search functionality ">
+        </td>
+    </tr>
+</table>
 
-the user jwt token encodes the following information
+If you're interesting in adopting <img src="./app/assets/images/varta-logo-largest.png" width="16px">
+**Varta** for your organization or specific use-case, feel free to reach out to me at [aadv1k@outlook.com](mailto:aadv1k@outlook.com). I'll get back to to you as soon as I can! 
 
-- sub (the public id of the user)
-- iat 
-- exp: expiry of the token default `24h`
-- role: refers to the user type (student, teacher, admin)
-- iss: `varta.app` (in case of the APP login), `varta.web` (in case of web login)
+## Documentation
 
-### Permissions
+### See [`server/README.md`](./server/README.md) for back-end specific documentation
 
-- teachers
-    - view all their announcements
-    - create new announcements
-- students
-    - can only view announcements which are meant for them
-- admin
-    - can create new teachers
-        - assign teacher to a department
-        - assign teacher to a class
-    - can create new students
-        - assign student a class
-    - can create new academic years
-    - do CRUD on all incoming announcements  -->
+### See [`app/README.md`](./app/README.md) for App/UI specific documentation
+
+## Credits
+
+- The font used is [Geist Sans by Vercel](https://vercel.com/font)
+
+- [Popsy.co](https://popsy.co/illustrations) for the beautiful illustrations and graphics

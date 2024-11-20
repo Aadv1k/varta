@@ -1,17 +1,15 @@
 # Varta Server
 
+![Varta back-end system architecture explained using a graphic](../docs/varta-system-diagram-v1.png)
+
 - [🔨 Self-hosting Guide](#self-hosting-guide)
-- [📖 Reference](#reference)
-    - Configuration
-    - API
-    - Database
-- [🏗️ Architecture](#architecture)
+- [Configuration](#configuration)
 
 ## Self-hosting Guide
 
 You first need to accquire certain environment variables see [`.env.example`](./.env.example)
 
-```env
+```properties
 DB_HOST=""
 DB_PORT="5432"
 DB_PASSWORD=""
@@ -22,8 +20,9 @@ DB_USER=""
 ZEPTOMAIL_TOKEN="<ZeptoMail Token>"
 ZEPTOMAIL_FROM_ADDRESS="<ZeptoMail Domain>"
 
-REDIS_HOST=""
-REDIS_PORT=""
+# These allow you to bypass the OTP verification and prevent wasting email / sms calls.
+ADMIN_MASTER_OTP = "000000"
+ADMIN_EMAILS = "foo@example.com, bar@example.com"
 
 GOOGLE_APPLICATION_CREDENTIALS=".firebase/service-account.json"
 ```
@@ -35,6 +34,8 @@ Once you've set all the variables, you should first load all the data from the f
 ```shell
 python manage.py loaddata initial_classrooms initial_academic_year initial_departments
 ```
+
+> **NOTE** this is important. If you don't run this unexpected errors may occur
 
 Finally the server provides a [`compose.yml`](./compose.yml), which will run a local redis instance, start the RQ worker in the background and run the 
 
@@ -68,13 +69,15 @@ FIREBASE_SERVICE_ACCOUNT_JSON=/path/to/your/service-account.json
 docker compose -f ./compose.yml --env-file /path/to/env up
 ```
 
-## Reference 
+## Configuration
 
-### Configuration
+All configuration is done through [`config/setting.py`](./config/settings.py)
 
-All configuration is done through [`config/setting.py`]()
-
-### API
-### Database
-
-## Architecture
+- `OTP_EXPIRY_IN_SECONDS`
+- `OTP_LENGTH` 
+- `ADMIN_EMAILS`: a list of emails, that when logged in through an email won't be sent to them
+- `ADMIN_MASTER_OTP`: if the email is in `ADMIN_EMAILS` and the master OTP is provided the user can login without OTP verification
+- `FCM_DEVICE_TOKEN_EXPIRY_IN_DAYS`: controls the firebase devce token expiry, used for sending push notifications.
+- `MAX_UPLOAD_FILE_SIZE_IN_BYTES` controls the maximum file size of inidividual attachment
+- `MAX_UPLOAD_QUOTA_PER_ANNOUNCEMENT_IN_BYTES` controls the collective size of all attachments per announcement. (Eg 4 25mb attachments OR a single 100mb attachment)
+- `MAX_ATTACHMENTS_PER_ANNOUNCEMENT` 
