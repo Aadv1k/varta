@@ -18,15 +18,13 @@ Varta addresses this by implementing scoped announcements built on top of a rich
 
 ## Features
 
-- Password-less SMS and Email based OTP Login
-- instant Push Notifications
-- Live incremental updates
-- Scoped Announcement 
-    - [x] Attachments
-    - [x] Multi-parameter search
-    - [ ] Scheduled Announcements (Planned) 
-    - [ ] Priority-Based Filtering (Planned) 
-- Web Support
+- **Passwordless Authentication** use your email or phone number to login via OTP. Bid goodbye to passwords!
+- **Real-time Updates** get notified instantly of any new announcements or updates
+- **Scoped Announcement** define the exact audience you want your announcement to be visible to
+- **Rich Media Support** add documents, images and media to your announcement
+- **Multi-parameter Search** find your announcements based on multiple parameters
+- Scheduled Announcements (Planned) 
+- Priority-Based Filtering (Planned) 
 
 ## Screenshots
 
@@ -54,8 +52,8 @@ Varta addresses this by implementing scoped announcements built on top of a rich
     </tr>
 </table>
 
-If you're interesting in adopting <img src="./app/assets/images/varta-logo-largest.png" width="16px">
-**Varta** for your organization or specific use-case, feel free to reach out to me at [aadv1k@outlook.com](mailto:aadv1k@outlook.com). I'll get back to to you as soon as I can! 
+If you're interested in adopting <img src="./app/assets/images/varta-logo-largest.png" width="16px">
+**Varta** for your organization or other specific use-case, feel free to reach out to me at [aadv1k@outlook.com](mailto:aadv1k@outlook.com). I'll get back to to you as soon as I can! 
 
 ## Documentation
 
