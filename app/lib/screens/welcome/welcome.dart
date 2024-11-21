@@ -104,6 +104,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
             const Spacer(),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 ListenableBuilder(
                     listenable: loginState,
@@ -123,9 +124,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       );
                     }),
                 if (errorMessage != null)
-                  Padding(
-                      padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
-                      child: ErrorText(text: errorMessage!, center: true)),
+                  SizedBox(
+                      width: AppSharedStyle.maxButtonWidth,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: Spacing.xs, horizontal: Spacing.md),
+                        child: ErrorText(text: errorMessage!),
+                      )),
                 const SizedBox(height: Spacing.sm),
                 PrimaryButton(
                   text: "Get Started",

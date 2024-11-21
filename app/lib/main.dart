@@ -1,3 +1,4 @@
+import 'package:app/common/const.dart';
 import 'package:app/common/varta_theme.dart';
 import 'package:app/firebase_options.dart';
 import 'package:app/models/login_data.dart';
@@ -41,7 +42,16 @@ class _VartaAppState extends State<VartaApp> {
 
   Future<AppState?> _initializeApp() async {
     await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
+        options: FirebaseOptions(
+            apiKey: firebaseConfig["apiKey"]!,
+            authDomain: firebaseConfig["authDomain"]!,
+            storageBucket: firebaseConfig["storageBucket"]!,
+            appId: firebaseConfig["appId"]!,
+            messagingSenderId: firebaseConfig["messagingSenderId"]!,
+            projectId: firebaseConfig["projectId"]!));
+
+    // FirebaseMessaging.onMessage.listen((RemoteMessage message) { });
+    // FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async { });
 
     var tokenService = TokenService();
     final accessToken = await tokenService.getAccessToken();
@@ -55,7 +65,9 @@ class _VartaAppState extends State<VartaApp> {
       var appState = await AppState.initialize();
 
       NotificationService service = NotificationService();
-      final settings = await service.notificationSettings;
+
+      final settings =
+          await service.firebaseMessaging.getNotificationSettings();
 
       if (settings.authorizationStatus != AuthorizationStatus.denied) {
         if (appState.user?.contacts != null &&

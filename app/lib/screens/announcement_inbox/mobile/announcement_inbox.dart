@@ -192,9 +192,10 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           )
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(isTeacher ? 72 : 48),
+          preferredSize: Size.fromHeight(isTeacher ? 82 : 48),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.md, vertical: Spacing.sm),
             child: Column(
               children: [
                 const CustomSearchBar(navigational: true),

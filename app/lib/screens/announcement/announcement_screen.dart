@@ -275,6 +275,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
         child: SingleChildScrollView(
+          primary: false,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,

@@ -18,14 +18,16 @@ class ErrorText extends StatelessWidget {
         const Icon(Icons.error,
             color: AppColor.dangerBody, size: IconSizes.iconSm),
         const SizedBox(width: Spacing.xs),
-        SizedBox(
-          width: width,
-          child: Text(
-            text,
-            textAlign: center ? TextAlign.center : null,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColor.dangerBody,
-                ),
+        Expanded(
+          child: SizedBox(
+            width: width,
+            child: Text(
+              text,
+              textAlign: center ? TextAlign.center : null,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColor.dangerBody,
+                  ),
+            ),
           ),
         ),
       ],

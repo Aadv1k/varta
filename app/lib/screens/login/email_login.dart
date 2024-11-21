@@ -100,7 +100,8 @@ class _EmailLoginState extends State<EmailLogin> {
                           builder: (context, child) => EmailInput(
                             onInput: (e) {
                               loginState.setLoginData(loginState.data.copyWith(
-                                  inputType: LoginType.email, inputData: e));
+                                  inputType: LoginType.email,
+                                  inputData: e.toLowerCase()));
                             },
                             hasError: hasError,
                             errorMessage: errorMessage,

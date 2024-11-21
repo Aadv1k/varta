@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '791653531041',
     projectId: 'varta-app-5f6ac',
     authDomain: 'varta-app-5f6ac.firebaseapp.com',
-    storageBucket: 'varta-app-5f6ac.appspot.com',
+    storageBucket: 'varta-app-5f6ac.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -60,7 +60,7 @@ class DefaultFirebaseOptions {
     appId: '1:791653531041:android:d7a343671e918e2dd7dfe0',
     messagingSenderId: '791653531041',
     projectId: 'varta-app-5f6ac',
-    storageBucket: 'varta-app-5f6ac.appspot.com',
+    storageBucket: 'varta-app-5f6ac.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -68,7 +68,8 @@ class DefaultFirebaseOptions {
     appId: '1:791653531041:ios:05ed260a8e886ae1d7dfe0',
     messagingSenderId: '791653531041',
     projectId: 'varta-app-5f6ac',
-    storageBucket: 'varta-app-5f6ac.appspot.com',
+    storageBucket: 'varta-app-5f6ac.firebasestorage.app',
     iosBundleId: 'com.example.app',
   );
+
 }

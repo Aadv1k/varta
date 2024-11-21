@@ -60,9 +60,12 @@ class _OTPVerificationState extends State<OTPVerification> {
       final appState = await AppState.initialize(user: user);
 
       final notificationService = NotificationService();
-      final settings = await notificationService.notificationSettings;
 
-      if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+      final settings =
+          await notificationService.firebaseMessaging.getNotificationSettings();
+
+      if ({AuthorizationStatus.notDetermined, AuthorizationStatus.denied}
+          .contains(settings.authorizationStatus)) {
         await notificationService.initNotifications(loginData.inputData!);
       }
 
@@ -162,15 +165,30 @@ class _OTPVerificationState extends State<OTPVerification> {
                 }),
             const SizedBox(height: Spacing.sm),
             if (_hasError && _errorMessage != null)
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(Icons.error,
-                    color: TWColor.red600, size: IconSizes.iconSm),
-                const SizedBox(width: Spacing.sm),
-                Text(_errorMessage!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: TWColor.red600,
-                        )),
-              ]),
+              SizedBox(
+                width: 380,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: Spacing.xs, horizontal: Spacing.md),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error,
+                            color: TWColor.red600, size: IconSizes.iconSm),
+                        const SizedBox(width: Spacing.sm),
+                        Expanded(
+                          child: SizedBox(
+                              child: Text(_errorMessage!,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: TWColor.red600,
+                                      ))),
+                        ),
+                      ]),
+                ),
+              ),
             const SizedBox(height: Spacing.sm),
             TimedTextButton(onPressed: () {
               handleVerificationClick(context);

@@ -42,7 +42,7 @@ class AuthService {
       HTTPMethod.POST,
       "/me/login",
       body: {
-        "input_data": data.inputData,
+        "input_data": data.inputData!.toLowerCase(),
         "input_format":
             data.inputType == LoginType.email ? "email" : "phone_number",
         "school_id": data.schoolIDAndName!.$1
