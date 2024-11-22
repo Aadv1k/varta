@@ -49,7 +49,7 @@ class AnnouncementsRepository {
       throw ApiException.fromResponse(response);
     }
 
-    var data = jsonDecode(response.body);
+    var data = jsonDecode(utf8.decode(response.bodyBytes));
 
     List<AnnouncementModel> parsedData = (data["data"] as List)
         .map((element) => AnnouncementModel.fromJson(element))
@@ -73,7 +73,7 @@ class AnnouncementsRepository {
       throw ApiException.fromResponse(response);
     }
 
-    var data = jsonDecode(response.body)["data"];
+    var data = jsonDecode(utf8.decode(response.bodyBytes))["data"];
 
     return AnnouncementIncrementalChange(
       timeSince,
@@ -229,7 +229,9 @@ class AnnouncementsRepository {
       if (response.statusCode != 200) {
         throw ApiException.fromResponse(response);
       }
-      return AnnouncementModel.fromJson(jsonDecode(response.body)["data"]);
+
+      var resData = jsonDecode(utf8.decode(response.bodyBytes))["data"];
+      return AnnouncementModel.fromJson(resData as Map<String, dynamic>);
     } on ApiClientException catch (_) {
       rethrow;
     }

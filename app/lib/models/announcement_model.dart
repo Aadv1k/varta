@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:app/common/utils.dart';
@@ -154,10 +155,11 @@ Attachments: ${attachments.join(", ")}
     );
   }
 
+  // https://stackoverflow.com/questions/58942394/flutter-character-encoding-is-not-behaving-as-expected
   static AnnouncementModel fromJson(Map<String, dynamic> data) {
     return AnnouncementModel(
       title: data['title'] as String,
-      body: data['body'] as String,
+      body: utf8.decode(utf8.encode(data['body'])).toString(),
       id: data['id'] as String,
       createdAt: DateTime.parse(data['created_at'] as String),
       author: AnnouncementAuthorModel.fromJson(
@@ -177,7 +179,7 @@ Attachments: ${attachments.join(", ")}
   Map<String, dynamic> toJson() {
     return {
       'title': title,
-      'body': body,
+      'body': utf8.decode(utf8.encode(body)).toString(),
       'id': id,
       'created_at': createdAt.toIso8601String(),
       'author': author.toJson(),

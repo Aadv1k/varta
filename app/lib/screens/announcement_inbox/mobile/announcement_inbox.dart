@@ -148,7 +148,7 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           : null,
       backgroundColor: AppColor.primaryBg,
       appBar: AppBar(
-        toolbarHeight: 78,
+        toolbarHeight: 86,
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: AppColor.primaryBg,
@@ -158,13 +158,12 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
                 fontWeight: FontWeight.w400,
                 color: AppColor.heading,
                 fontSize: FontSize.textLg)),
-        titleSpacing: Spacing.lg,
         leading: null,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: Spacing.md),
             child: CircleAvatar(
-              radius: 20,
+              radius: 21,
               backgroundColor: PaletteNeutral.shade030,
               child: IconButton(
                 splashColor: PaletteNeutral.shade050,
@@ -194,8 +193,8 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(isTeacher ? 82 : 48),
           child: Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md, vertical: Spacing.sm),
+            padding: const EdgeInsets.only(
+                left: Spacing.md, right: Spacing.md, bottom: Spacing.sm),
             child: Column(
               children: [
                 const CustomSearchBar(navigational: true),

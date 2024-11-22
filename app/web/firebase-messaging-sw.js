@@ -21,12 +21,12 @@ messaging.onMessage(function(payload) {
 });
 
 messaging.onBackgroundMessage(function(payload) {
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: "/icons/icon-192.png",
-        badge: "/icons/icon-192.png",
-    };
-
-    return self.registration.showNotification(notificationTitle, notificationOptions);
+    // const notificationTitle = payload.notification.title;
+    // const notificationOptions = {
+    //     body: payload.notification.body,
+    //     icon: "/icons/icon-192.png",
+    //     badge: "/favicon.png",
+    //     image: "/icons/icon-512.png"
+    // };
+    // return self.registration.showNotification(notificationTitle, notificationOptions);
 });

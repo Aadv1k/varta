@@ -16,9 +16,19 @@ class ApiService {
 
     if (accessToken == null ||
         _tokenService.tokenExpiredOrInvalid(accessToken)) {
-      debugPrint(
-          "TODO: handle renewing the access token right here. Only throw this exception when the referesh token is expired as well");
-      throw ApiTokenExpiredException();
+      http.Response response = await http.post(
+          Uri.parse("$baseApiUrl/me/refresh"),
+          headers: {"Content-Type": "application/json;charset=UTF-8"},
+          body: jsonEncode(
+              {"refresh_token": await _tokenService.getRefreshToken()}));
+
+      if (response.statusCode != 200) {
+        throw ApiTokenExpiredException();
+      }
+      var data = jsonDecode(response.body);
+      _tokenService.storeAccessToken(data["data"]["access_token"]);
+
+      accessToken = data["data"]["access_token"];
     }
 
     return {HttpHeaders.authorizationHeader: "Bearer $accessToken"};
@@ -26,7 +36,9 @@ class ApiService {
 
   Future<http.Response> makeRequest(HTTPMethod method, String endpoint,
       {dynamic body, bool isAuthenticated = false}) async {
-    Map<String, String> headers = {"Content-Type": "application/json"};
+    Map<String, String> headers = {
+      "Content-Type": "application/json;charset=UTF-8"
+    };
     if (isAuthenticated) {
       headers = {...headers, ...await getAuthHeaders()};
     }

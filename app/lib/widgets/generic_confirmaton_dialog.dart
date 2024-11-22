@@ -14,6 +14,8 @@ class GenericConfirmationDialog extends StatelessWidget {
   final String title;
   final String body;
 
+  final bool danger;
+
   final GenericConfirmatonDialogAction primaryAction;
 
   const GenericConfirmationDialog({
@@ -25,6 +27,7 @@ class GenericConfirmationDialog extends StatelessWidget {
     this.cancelLabel,
     this.confirmLabel,
     required this.primaryAction,
+    this.danger = false,
   });
 
   @override
@@ -64,7 +67,9 @@ class GenericConfirmationDialog extends StatelessWidget {
               VartaButton(
                 size: VartaButtonSize.medium,
                 variant: primaryAction == GenericConfirmatonDialogAction.confirm
-                    ? VartaButtonVariant.primary
+                    ? (danger
+                        ? VartaButtonVariant.error
+                        : VartaButtonVariant.primary)
                     : VartaButtonVariant.secondary,
                 fullWidth: true,
                 onPressed: onConfirm,

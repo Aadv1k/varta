@@ -58,18 +58,19 @@ class UserProfileScreen extends StatelessWidget {
     showDialog(
         context: parentContext,
         builder: (context) => GenericConfirmationDialog(
-              title: "Logout",
-              body: 'Are you sure you want to logout?',
-              primaryAction: GenericConfirmatonDialogAction.confirm,
-              onCancel: () => Navigator.pop(context),
-              onConfirm: () {
-                AuthService().logout();
-                AppProvider.of(parentContext).logout();
-                clearAndNavigateBackToLogin(context);
-              },
-              cancelLabel: "Cancel",
-              confirmLabel: "Logout",
-            ));
+            title: "Are you sure you want to Log Out?",
+            body:
+                'You’ll be signed out of your account. Any unsaved progress may be lost.  Would you like to continue?',
+            primaryAction: GenericConfirmatonDialogAction.confirm,
+            onCancel: () => Navigator.pop(context),
+            onConfirm: () {
+              AuthService().logout();
+              AppProvider.of(parentContext).logout();
+              clearAndNavigateBackToLogin(context);
+            },
+            cancelLabel: "Cancel",
+            confirmLabel: "Log Out",
+            danger: true));
   }
 
   @override
