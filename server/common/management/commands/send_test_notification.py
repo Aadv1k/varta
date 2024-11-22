@@ -5,28 +5,38 @@ from accounts.models import User
 
 import uuid
 
+import firebase_admin 
+
+from firebase_admin import messaging, credentials
+
+from django.conf import settings 
+
+cred = credentials.Certificate(settings.GOOGLE_APPLICATION_CREDENTIALS)
+
 class Command(BaseCommand):
-    help = "Send a test announcement notification to all the registered devices"
+    help = "Send a test announcement notification to a particular device token"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            'public_user_id',
+            'device_token',
             type=str,
-            help='The public user ID to include in the announcement.'
+            help='The device token of a user.'
         )
 
     def handle(self, *args, **options):
-        public_user_id = options['public_user_id'].strip()
+        device_token = options['device_token'].strip()
         
         try:
-            announcement = Announcement.objects.create(
-                author=User.objects.get(public_id=uuid.UUID(str(public_user_id), version=4)),
-                title="Planned System Maintenance and New Portal Features Rollout",
-                body="In order to ensure a smooth and effective learning experience, the IT department has scheduled an upgrade of the school’s online learning management system, portals, and network infrastructure. The key objectives of this upgrade include\n- Enhancing platform speed and stability: Faster access to academic resources like assignments, lesson plans, and teacher communications.\n- Improving security: Ensuring that sensitive student and staff data remains safe with upgraded encryption and login protocols.  \n- Introducing new features: Including real-time assignment tracking, integrated video conferencing capabilities for virtual classrooms, and a centralized communication portal for students and parents.",
-            ).with_scope(AnnouncementScope.FilterType.EVERYONE)
-
-            send_notification(announcement.id)
-            self.stdout.write(self.style.SUCCESS('Successfully sent test announcement.'))
-
+            notification = messaging.Notification(
+                title="This is a maintainence systems test. Please ignore", 
+                body="You can ignore this notification. It is part of a routine maintainence test of Varta.",
+                image="https://res.cloudinary.com/dzx48hsih/image/upload/v1729516515/d8yurokidwexm6oxwk7u.png"
+            )
+            message = messaging.Message(
+                notification=notification,
+                token=device_token
+            )
+            response = messaging.send(message)
+            self.stdout.write(self.style.SUCCESS('Successfully sent sample notification.'))
         except Exception as e:
             raise CommandError(f'Error sending announcement: {e}')
