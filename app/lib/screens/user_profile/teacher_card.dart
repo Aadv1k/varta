@@ -135,7 +135,7 @@ class TeacherCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  "${user.firstName}\n${user.lastName.isEmpty ? (user.middleName != null ? "${user.middleName}." : "") : user.lastName}",
+                  "${user.firstName}\n${user.lastName.isEmpty ? (user.middleName != null ? "${user.middleName}" : "") : user.lastName}",
                   style: Theme.of(context).textTheme.displayMedium!.copyWith(
                         color: AppColor.heading,
                         fontWeight: FontWeight.w900,

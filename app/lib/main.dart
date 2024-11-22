@@ -1,12 +1,10 @@
 import 'package:app/common/const.dart';
 import 'package:app/common/varta_theme.dart';
-import 'package:app/firebase_options.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
 import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/services/notification_service.dart';
 import 'package:app/services/token_service.dart';
-import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
@@ -21,10 +19,19 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
+
+  Firebase.initializeApp(
+      name: "VartaFirebaseApp",
+      options: FirebaseOptions(
+          apiKey: firebaseConfig["apiKey"]!,
+          authDomain: firebaseConfig["authDomain"]!,
+          storageBucket: firebaseConfig["storageBucket"]!,
+          appId: firebaseConfig["appId"]!,
+          messagingSenderId: firebaseConfig["messagingSenderId"]!,
+          projectId: firebaseConfig["projectId"]!));
 
   runApp(const VartaApp());
 }
@@ -42,15 +49,6 @@ class _VartaAppState extends State<VartaApp> {
   late Future<AppState?> _initializedApp;
 
   Future<AppState?> _initializeApp() async {
-    await Firebase.initializeApp(
-        options: FirebaseOptions(
-            apiKey: firebaseConfig["apiKey"]!,
-            authDomain: firebaseConfig["authDomain"]!,
-            storageBucket: firebaseConfig["storageBucket"]!,
-            appId: firebaseConfig["appId"]!,
-            messagingSenderId: firebaseConfig["messagingSenderId"]!,
-            projectId: firebaseConfig["projectId"]!));
-
     var tokenService = TokenService();
     final accessToken = await tokenService.getAccessToken();
 
@@ -74,7 +72,7 @@ class _VartaAppState extends State<VartaApp> {
         }
       }
     } catch (exc) {
-      /* PASS */
+      return null;
     }
 
     return appState;

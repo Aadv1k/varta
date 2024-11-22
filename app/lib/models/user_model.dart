@@ -25,7 +25,7 @@ class UserModel {
 
   String getFriendlyName() {
     if (lastName.isEmpty) {
-      return "$firstName ${middleName != null ? "$middleName." : ""}";
+      return "$firstName ${middleName != null ? "$middleName" : ""}";
     }
 
     return "$firstName $lastName";
