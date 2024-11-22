@@ -5,6 +5,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError
+from botocore.client import Config
 
 from typing import Optional
 
@@ -25,7 +26,7 @@ class GenericBucketStore(ABC):
 
 class S3BucketStore(GenericBucketStore):
     def __init__(self):
-        self.client = boto3.client("s3")
+        self.client = boto3.client("s3", config=Config(signature_version='s3v4'))
         self.s3_bucket = "varta-bucket"
 
     def upload(self, file_content: bytes, object_key: str) -> Optional[str]:
