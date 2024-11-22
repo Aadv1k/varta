@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:app/common/colors.dart';
+import 'package:app/common/download.dart';
 import 'package:app/common/sizes.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/user_model.dart';
@@ -29,7 +31,6 @@ class UserProfileScreen extends StatelessWidget {
     // TODO: weird case where the rawImage is null
     Uint8List? rawImage = await _screenshotController.capture(
       delay: const Duration(milliseconds: 100),
-      pixelRatio: 1.5,
     );
 
     if (rawImage == null) {
@@ -37,9 +38,8 @@ class UserProfileScreen extends StatelessWidget {
     }
 
     if (kIsWeb) {
-      await Share.shareXFiles([
-        XFile.fromData(rawImage, name: "varta-card.png", mimeType: "image/png")
-      ]);
+      await download(
+          "data:image/png;base64,${base64Encode(rawImage)}", "varta-card.png");
       return;
     }
 
@@ -110,7 +110,8 @@ class UserProfileScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           )),
-                      icon: const Icon(Icons.ios_share,
+                      icon: const Icon(
+                          kIsWeb ? Icons.download : Icons.ios_share,
                           size: IconSizes.iconMd,
                           color: AppColor.inactiveChipFg),
                       onPressed: () {

@@ -6,6 +6,7 @@ import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
 import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/services/notification_service.dart';
 import 'package:app/services/token_service.dart';
+import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
@@ -50,9 +51,6 @@ class _VartaAppState extends State<VartaApp> {
             messagingSenderId: firebaseConfig["messagingSenderId"]!,
             projectId: firebaseConfig["projectId"]!));
 
-    // FirebaseMessaging.onMessage.listen((RemoteMessage message) { });
-    // FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async { });
-
     var tokenService = TokenService();
     final accessToken = await tokenService.getAccessToken();
 
@@ -61,9 +59,8 @@ class _VartaAppState extends State<VartaApp> {
       return null;
     }
 
+    AppState appState = await AppState.initialize();
     try {
-      var appState = await AppState.initialize();
-
       NotificationService service = NotificationService();
 
       final settings =
@@ -76,10 +73,11 @@ class _VartaAppState extends State<VartaApp> {
               .initNotifications(appState.user!.contacts.first.contactData);
         }
       }
-      return appState;
     } catch (exc) {
-      return null;
+      /* PASS */
     }
+
+    return appState;
   }
 
   @override

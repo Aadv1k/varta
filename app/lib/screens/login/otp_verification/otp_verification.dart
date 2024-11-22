@@ -9,6 +9,7 @@ import 'package:app/repository/user_repo.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
 import 'package:app/services/notification_service.dart';
 import 'package:app/services/simple_cache_service.dart';
+import 'package:app/widgets/error_snackbar.dart';
 import 'package:app/widgets/providers/app_provider.dart';
 import 'package:app/widgets/providers/login_provider.dart';
 import 'package:app/screens/login/otp_verification/timed_text_button.dart';
@@ -59,14 +60,21 @@ class _OTPVerificationState extends State<OTPVerification> {
 
       final appState = await AppState.initialize(user: user);
 
-      final notificationService = NotificationService();
+      try {
+        final notificationService = NotificationService();
 
-      final settings =
-          await notificationService.firebaseMessaging.getNotificationSettings();
+        final settings = await notificationService.firebaseMessaging
+            .getNotificationSettings();
 
-      if ({AuthorizationStatus.notDetermined, AuthorizationStatus.denied}
-          .contains(settings.authorizationStatus)) {
-        await notificationService.initNotifications(loginData.inputData!);
+        if ({AuthorizationStatus.notDetermined, AuthorizationStatus.denied}
+            .contains(settings.authorizationStatus)) {
+          await notificationService.initNotifications(loginData.inputData!);
+        }
+      } catch (_) {
+        const VartaSnackbar(
+          innerText: "Couldn't initialize notifications.",
+          snackBarVariant: VartaSnackBarVariant.warning,
+        ).show(context);
       }
 
       Navigator.pushAndRemoveUntil(

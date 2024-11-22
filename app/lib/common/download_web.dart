@@ -3,6 +3,7 @@ import 'dart:html';
 
 Future<void> download(String url, String fileName) async {
   final element = AnchorElement(href: url);
-  element.download = url;
+  element.href = url;
+  element.download = fileName;
   element.click();
 }
