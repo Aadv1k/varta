@@ -28,11 +28,23 @@ def send_notification(announcement_id: str):
                     body=announcement.body,
                     image="https://res.cloudinary.com/dzx48hsih/image/upload/v1729516515/d8yurokidwexm6oxwk7u.png"
                 )
-                message = messaging.Message(
+                message = messaging.MulticastMessage(
                     notification=notification,
-                    token=user_device.device_token
+                    tokens=[user_device.device_token],
+                    webpush=messaging.WebpushConfig(
+                        data={
+                            "url": "https://varta.aadvikpandey.com/"
+                        },
+                        notification=messaging.WebpushNotification(
+                            title=announcement.title, 
+                            body=announcement.body,
+                            icon="https://res.cloudinary.com/dzx48hsih/image/upload/v1729516515/d8yurokidwexm6oxwk7u.png",
+                        ),
+                        fcm_options=messaging.WebpushFCMOptions(
+                        link="https://varta.aadvikpandey.com/",
+                    ))
                 )
-                response = messaging.send(message)
+                response = messaging.send_each_for_multicast(message)
             except firebase_admin.messaging.UnregisteredError:
                 print("EXPIRED TOKEN. Deleting")
                 user_device.delete()

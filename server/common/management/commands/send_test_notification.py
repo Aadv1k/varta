@@ -32,11 +32,23 @@ class Command(BaseCommand):
                 body="You can ignore this notification. It is part of a routine maintainence test of Varta.",
                 image="https://res.cloudinary.com/dzx48hsih/image/upload/v1729516515/d8yurokidwexm6oxwk7u.png"
             )
-            message = messaging.Message(
+            message = messaging.MulticastMessage(
                 notification=notification,
-                token=device_token
+                tokens=[device_token],
+                webpush=messaging.WebpushConfig(
+                    data={
+                        "url": "https://varta.aadvikpandey.com/"
+                    },
+                    notification=messaging.WebpushNotification(
+                        title="This is a maintainence systems test. Please ignore", 
+                        body="You can ignore this notification. It is part of a routine maintainence test of Varta.",
+                        icon="https://res.cloudinary.com/dzx48hsih/image/upload/v1729516515/d8yurokidwexm6oxwk7u.png",
+                    ),
+                    fcm_options=messaging.WebpushFCMOptions(
+                    link="https://varta.aadvikpandey.com/",
+                ))
             )
-            response = messaging.send(message)
+            response = messaging.send_each_for_multicast(message)
             self.stdout.write(self.style.SUCCESS('Successfully sent sample notification.'))
         except Exception as e:
             raise CommandError(f'Error sending announcement: {e}')
