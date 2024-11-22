@@ -1,5 +1,6 @@
 import 'package:app/common/const.dart';
 import 'package:app/common/varta_theme.dart';
+import 'package:app/firebase_options.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
 import 'package:app/screens/welcome/welcome.dart';
@@ -12,26 +13,28 @@ import 'package:app/widgets/state/app_state.dart';
 import 'package:app/widgets/state/login_state.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform
+      // options: FirebaseOptions(
+      //     apiKey: firebaseConfig["apiKey"]!,
+      //     authDomain: firebaseConfig["authDomain"]!,
+      //     storageBucket: firebaseConfig["storageBucket"]!,
+      //     appId: firebaseConfig["appId"]!,
+      //     messagingSenderId: firebaseConfig["messagingSenderId"]!,
+      //     projectId: firebaseConfig["projectId"]!)
+
+      );
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-
-  Firebase.initializeApp(
-      name: "VartaFirebaseApp",
-      options: FirebaseOptions(
-          apiKey: firebaseConfig["apiKey"]!,
-          authDomain: firebaseConfig["authDomain"]!,
-          storageBucket: firebaseConfig["storageBucket"]!,
-          appId: firebaseConfig["appId"]!,
-          messagingSenderId: firebaseConfig["messagingSenderId"]!,
-          projectId: firebaseConfig["projectId"]!));
 
   runApp(const VartaApp());
 }
@@ -51,13 +54,18 @@ class _VartaAppState extends State<VartaApp> {
   Future<AppState?> _initializeApp() async {
     var tokenService = TokenService();
     final accessToken = await tokenService.getAccessToken();
+    final refreshToken = await tokenService.getRefreshToken();
 
-    if (accessToken == null ||
-        tokenService.tokenExpiredOrInvalid(accessToken)) {
+    if ((accessToken == null ||
+            tokenService.tokenExpiredOrInvalid(accessToken)) &&
+        (refreshToken == null ||
+            tokenService.tokenExpiredOrInvalid(refreshToken))) {
+      // show user the login screen
       return null;
     }
 
     AppState appState = await AppState.initialize();
+
     try {
       NotificationService service = NotificationService();
 
@@ -71,9 +79,7 @@ class _VartaAppState extends State<VartaApp> {
               .initNotifications(appState.user!.contacts.first.contactData);
         }
       }
-    } catch (exc) {
-      return null;
-    }
+    } catch (exc) {}
 
     return appState;
   }

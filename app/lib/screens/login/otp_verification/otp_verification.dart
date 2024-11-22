@@ -70,7 +70,12 @@ class _OTPVerificationState extends State<OTPVerification> {
             .contains(settings.authorizationStatus)) {
           await notificationService.initNotifications(loginData.inputData!);
         }
-      } catch (_) {
+      } catch (exc) {
+        print("=============");
+        print("=============");
+        print(exc);
+        print("=============");
+        print("=============");
         const VartaSnackbar(
           innerText: "Couldn't initialize notifications.",
           snackBarVariant: VartaSnackBarVariant.warning,

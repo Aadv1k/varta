@@ -43,6 +43,7 @@ class VartaSnackbar {
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(color: fg)),
         elevation: 2.5,
+        width: 420,
         margin: const EdgeInsets.only(
             bottom: Spacing.lg, left: Spacing.md, right: Spacing.md),
         behavior: SnackBarBehavior.floating,
