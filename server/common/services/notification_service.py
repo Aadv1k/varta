@@ -26,7 +26,7 @@ def send_notification(announcement_id: str):
                 notification = messaging.Notification(
                     title=announcement.title, 
                     body=announcement.body,
-                    image="https://res.cloudinary.com/dzx48hsih/image/upload/v1729516515/d8yurokidwexm6oxwk7u.png"
+                    image="https://res.cloudinary.com/dzx48hsih/image/upload/v1732352844/irgpnzkk3qyzoa9esasg.png"
                 )
                 message = messaging.MulticastMessage(
                     notification=notification,
@@ -38,7 +38,7 @@ def send_notification(announcement_id: str):
                         notification=messaging.WebpushNotification(
                             title=announcement.title, 
                             body=announcement.body,
-                            icon="https://res.cloudinary.com/dzx48hsih/image/upload/v1729516515/d8yurokidwexm6oxwk7u.png",
+                            icon="https://res.cloudinary.com/dzx48hsih/image/upload/v1732352844/irgpnzkk3qyzoa9esasg.png",
                         ),
                         fcm_options=messaging.WebpushFCMOptions(
                         link="https://varta.aadvikpandey.com/",
