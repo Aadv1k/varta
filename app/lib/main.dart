@@ -13,7 +13,6 @@ import 'package:app/widgets/state/app_state.dart';
 import 'package:app/widgets/state/login_state.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

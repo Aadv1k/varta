@@ -22,17 +22,17 @@ class VartaSnackbar {
     switch (snackBarVariant) {
       case VartaSnackBarVariant.error:
         bg = TWColor.red100;
-        fg = TWColor.red600;
+        fg = TWColor.red700;
         icon = Icon(Icons.error, color: fg, size: IconSizes.iconMd);
         break;
       case VartaSnackBarVariant.info:
         bg = TWColor.green100;
-        fg = TWColor.green600;
+        fg = TWColor.green700;
         icon = Icon(Icons.info, color: fg, size: IconSizes.iconMd);
         break;
       case VartaSnackBarVariant.warning:
         bg = TWColor.yellow100;
-        fg = TWColor.yellow600;
+        fg = TWColor.yellow700;
         icon = Icon(Icons.warning, color: fg, size: IconSizes.iconMd);
         break;
     }
@@ -43,7 +43,6 @@ class VartaSnackbar {
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(color: fg)),
         elevation: 2.5,
-        width: 420,
         margin: const EdgeInsets.only(
             bottom: Spacing.lg, left: Spacing.md, right: Spacing.md),
         behavior: SnackBarBehavior.floating,
@@ -60,19 +59,19 @@ class VartaSnackbar {
                     .bodyMedium!
                     .copyWith(color: fg, fontWeight: FontWeight.w500),
               ),
-              const Spacer(),
-              IconButton(
-                enableFeedback: false,
-                style: IconButton.styleFrom(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                padding: EdgeInsets.zero,
-                icon: const Icon(Icons.close,
-                    color: AppColor.body, size: IconSizes.iconMd),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                },
-              ),
+              // const Spacer(),
+              // IconButton(
+              //   enableFeedback: false,
+              //   style: IconButton.styleFrom(
+              //     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              //   ),
+              //   padding: EdgeInsets.zero,
+              //   icon: const Icon(Icons.close,
+              //       color: AppColor.body, size: IconSizes.iconMd),
+              //   onPressed: () {
+              //     ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              //   },
+              // ),
             ],
           ),
         ));

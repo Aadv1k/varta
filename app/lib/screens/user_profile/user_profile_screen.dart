@@ -28,7 +28,6 @@ class UserProfileScreen extends StatelessWidget {
   UserProfileScreen({super.key});
 
   Future<void> _handleShareButtonPressed() async {
-    // TODO: weird case where the rawImage is null
     Uint8List? rawImage = await _screenshotController.capture(
       delay: const Duration(milliseconds: 100),
     );
@@ -37,8 +36,10 @@ class UserProfileScreen extends StatelessWidget {
       return;
     }
 
-    if (kIsWeb) {
-      await download(
+    if (kIsWeb &&
+        !(defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android)) {
+      download(
           "data:image/png;base64,${base64Encode(rawImage)}", "varta-card.png");
       return;
     }
@@ -78,6 +79,10 @@ class UserProfileScreen extends StatelessWidget {
     AppState appState = AppProvider.of(context).state;
     bool isTeacher = appState.user?.userType == UserType.teacher;
 
+    bool isMobileWeb = kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android);
+
     return Scaffold(
       appBar: const VartaAppBar(
         actions: [],
@@ -102,22 +107,22 @@ class UserProfileScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   const SizedBox(width: Spacing.sm),
-                  IconButton.filled(
-                      // splashColor: PaletteNeutral.shade100,
-                      highlightColor: PaletteNeutral.shade050,
-                      style: IconButton.styleFrom(
-                          backgroundColor: AppColor.inactiveChipBg,
-                          fixedSize: const Size(48, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          )),
-                      icon: const Icon(
-                          kIsWeb ? Icons.download : Icons.ios_share,
-                          size: IconSizes.iconMd,
-                          color: AppColor.inactiveChipFg),
-                      onPressed: () {
-                        _handleShareButtonPressed();
-                      }),
+                  if (!isMobileWeb)
+                    IconButton.filled(
+                        highlightColor: PaletteNeutral.shade050,
+                        style: IconButton.styleFrom(
+                            backgroundColor: AppColor.inactiveChipBg,
+                            fixedSize: const Size(48, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            )),
+                        icon: const Icon(
+                            kIsWeb ? Icons.download : Icons.ios_share,
+                            size: IconSizes.iconMd,
+                            color: AppColor.inactiveChipFg),
+                        onPressed: () {
+                          _handleShareButtonPressed();
+                        }),
                   const SizedBox(width: Spacing.sm),
                 ],
               ),
@@ -130,7 +135,7 @@ class UserProfileScreen extends StatelessWidget {
                 fullWidth: true,
               ),
               const SizedBox(height: Spacing.md),
-              Text("Made with ❤️ by Aadv1k\n<github.com/aadv1k>",
+              Text("Made with ❤️ by Aadvik Pandey\n<github.com/aadv1k>",
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
