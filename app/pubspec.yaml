@@ -42,12 +42,12 @@ dev_dependencies:
   flutter_launcher_icons: "^0.14.1"
 
 flutter_native_splash:
-  color: "#191919"
-  image: assets/images/varta-logo-medium.png
+  color: "#000000"
+  image: "assets/logo/varta-square-icon.png"
 
 flutter_launcher_icons:
   android: "launcher_icon"
-  image_path: "assets/images/varta-logo-medium.png"
+  image_path: "assets/logo/varta-square-icon.png"
   ios: true
 
 flutter:

@@ -136,7 +136,7 @@ class _ScopeSelectionBottomSheetState extends State<ScopeSelectionBottomSheet> {
         height: MediaQuery.sizeOf(context).height * 0.80,
         width: double.infinity,
         padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.lg, vertical: Spacing.lg),
+            horizontal: Spacing.md, vertical: Spacing.md),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -171,19 +171,6 @@ class _ScopeSelectionBottomSheetState extends State<ScopeSelectionBottomSheet> {
             spacing: Spacing.sm,
             runSpacing: Spacing.sm,
             children: [
-              VartaChip(
-                variant: VartaChipVariant.secondary,
-                text: "All Students",
-                onPressed: () {
-                  handleScopeSubmit(_scopeSelectionData.copyWith(
-                    scopeFilterData: "",
-                    scopeFilterType: GenericFilterType.all,
-                    scopeContext: ScopeContext.student,
-                    isClassTeacher: false,
-                    isSubjectTeacher: false,
-                  ));
-                },
-              ),
               VartaChip(
                 variant: VartaChipVariant.secondary,
                 text: "All Teachers",
