@@ -3,7 +3,7 @@ description: A one-way multi-channel school communications app
 
 publish_to: 'none'
 
-version: 1.1.0+2
+version: 1.1.1+3
 
 environment:
   sdk: '>=3.4.3 <4.0.0'

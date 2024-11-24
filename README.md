@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./app/assets/images/varta-logo-largest.png", height="76">
+    <img src="./app/assets/logo/varta-square-icon.png", height="76">
     <h1 align="center">Varta</h1>
   </a>
 </p>
