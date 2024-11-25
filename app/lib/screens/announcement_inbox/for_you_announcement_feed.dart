@@ -173,10 +173,10 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
         clearAndNavigateBackToLogin(context);
         return;
       }
-      const VartaSnackbar(
-              snackBarVariant: VartaSnackBarVariant.error,
-              innerText: "Couldn't load more announcements.")
-          .show(context);
+      // const VartaSnackbar(
+      //         snackBarVariant: VartaSnackBarVariant.error,
+      //         innerText: "Couldn't load more announcements.")
+      //     .show(context);
     } finally {
       setState(() => _isLoading = false);
     }

@@ -252,7 +252,8 @@ class AnnouncementsRepository {
       if (response.statusCode != 200) {
         throw ApiException.fromResponse(response);
       }
-      final List<dynamic> data = json.decode(response.body)["data"]["results"];
+
+      final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes))["data"]["results"];
       return data.map((json) => AnnouncementModel.fromJson(json)).toList();
     } on ApiClientException catch (_) {
       rethrow;
