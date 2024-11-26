@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:app/common/const.dart';
 import 'package:app/common/exceptions.dart';
+import 'package:app/common/sizes.dart';
 import 'package:app/common/utils.dart';
 import 'package:app/models/announcement_model.dart';
 import 'package:app/repository/announcements_repo.dart';
@@ -30,20 +32,22 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   final AnnouncementsRepository _announcementRepo = AnnouncementsRepository();
   late Timer _pollingTimer;
   final ScrollController _scrollController = ScrollController();
-  bool _hasError = false;
+  bool _hasSecondaryError = false;
+  bool _hasPrimaryError = false;
   bool _isLoading = true;
   int _currentPage = 1;
-  bool cantFetchMore = false;
+  bool cannotPageFurther = false;
 
   @override
   void initState() {
     _fetchInitial();
-    _pollingTimer =
-        Timer.periodic(const Duration(seconds: 5), (_) => _handlePoll());
+    _pollingTimer = Timer.periodic(
+        const Duration(seconds: pollingDurationInSeconds),
+        (_) => _handlePoll());
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+          (_scrollController.position.maxScrollExtent)) {
         _handlePage();
       }
     });
@@ -60,17 +64,14 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
         .where((announcement) => !changes.deleted.contains(announcement))
         .toList();
     initialAnnouncements = initialAnnouncements.map((announcement) {
-      var updated = changes.updated
-          .firstWhereOrNull((updatedAnn) => updatedAnn == announcement);
-      if (updated != null) return updated;
-      return announcement;
+      final updatedAnnouncement = changes.updated
+          .firstWhereOrNull((updatedAnn) => updatedAnn.id == announcement.id);
+      return updatedAnnouncement ?? announcement;
     }).toList();
-
     final List<AnnouncementModel> finalAnnouncements = [
       ...changes.created,
       ...initialAnnouncements
     ];
-
     return finalAnnouncements;
   }
 
@@ -78,6 +79,11 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       var state = AppProvider.of(context).state;
       SimpleCacheService cacheService = SimpleCacheService();
+
+      setState(() {
+        _isLoading = true;
+        _hasPrimaryError = false;
+      });
 
       final cachedAnnouncements =
           await cacheService.fetchOrNull("announcements");
@@ -97,7 +103,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
           clearAndNavigateBackToLogin(context);
           return;
         }
-        setState(() => _hasError = true);
+        setState(() => _hasPrimaryError = true);
       } finally {
         setState(() => _isLoading = false);
       }
@@ -106,11 +112,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
 
   void _handlePoll() async {
     if (_isLoading) setState(() => _isLoading = false);
-    if (!context.mounted) return;
-
-    setState(() {
-      _hasError = false;
-    });
+    if (!context.mounted || _hasSecondaryError) return;
 
     var cacheService = SimpleCacheService();
 
@@ -133,29 +135,21 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
               state.announcements.map((elem) => elem.toJson()).toList()));
 
       if (!_pollingTimer.isActive) {
-        _pollingTimer =
-            Timer.periodic(const Duration(seconds: 5), (_) => _handlePoll());
+        _pollingTimer = Timer.periodic(
+            const Duration(seconds: pollingDurationInSeconds),
+            (_) => _handlePoll());
       }
     } catch (exc) {
       if (exc is ApiTokenExpiredException) {
         clearAndNavigateBackToLogin(context);
         return;
       }
-      if (exc is ApiClientException) {
-        setState(() {
-          _hasError = true;
-        });
-        return;
-      }
-      const VartaSnackbar(
-              snackBarVariant: VartaSnackBarVariant.error,
-              innerText: "Couldn't fetch new announcements.")
-          .show(context);
+      setState(() => _hasSecondaryError = true);
     }
   }
 
   void _handlePage() async {
-    if (!context.mounted || cantFetchMore) return;
+    if (!context.mounted || cannotPageFurther) return;
 
     AppState appState = AppProvider.of(context).state;
 
@@ -172,7 +166,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
         return;
       }
       setState(() {
-        cantFetchMore = true;
+        cannotPageFurther = true;
       });
       const VartaSnackbar(
         snackBarVariant: VartaSnackBarVariant.warning,
@@ -191,50 +185,47 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
     super.dispose();
   }
 
-  Widget _showErrorGraphic(AppState state) {
-    if (_hasError && state.announcements.isEmpty) {
+  Widget _showInitialGraphic(AppState state) {
+    if (_hasPrimaryError) {
       return Center(
-        heightFactor: 0.75,
-        child: GenericErrorBox(
-            onTryAgain: () {
-              setState(() {
-                _hasError = false;
-                _isLoading = true;
-              });
-              _fetchInitial();
-            },
+          heightFactor: 0.85,
+          child: GenericErrorBox(
             size: ErrorSize.medium,
+            svgPath: "crashed-error.svg",
+            onTryAgain: _fetchInitial,
+            onTryAgainLabel: "Retry",
             errorMessage:
-                "Whoops! it looks like something went wrong, please check your connection and try again."),
-      );
-    } else {
-      return Center(
-        heightFactor: 0.85,
-        child: GenericErrorBox(
-            size: ErrorSize.medium,
-            svgPath: "relax.svg",
-            onTryAgain: _handlePoll,
-            onTryAgainLabel: "Refresh",
-            errorMessage:
-                "Nothing here yet. Announcements for you will show up here."),
-      );
+                "We couldn’t load the announcements. Please check your connection and try again.",
+          ));
     }
+
+    return const Center(
+      heightFactor: 0.85,
+      child: GenericErrorBox(
+          size: ErrorSize.medium,
+          svgPath: "relax.svg",
+          errorMessage:
+              "Nothing here yet. Announcements for you will show up here."),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     var state = AppProvider.of(context).state;
 
-    // TODO: this is a bit sus
     return ListenableBuilder(
       listenable: state,
-      builder: (context, _) => (_hasError || state.announcements.isEmpty) &&
+      builder: (context, _) => (state.announcements.isEmpty ||
+                  _hasPrimaryError) &&
               !_isLoading
-          ? _showErrorGraphic(state)
+          ? _showInitialGraphic(state)
           : RefreshIndicator(
               color: AppColor.primaryColor,
               backgroundColor: PaletteNeutral.shade000,
               onRefresh: () async {
+                setState(() {
+                  _hasSecondaryError = false;
+                });
                 _pollingTimer.cancel();
                 return _handlePoll();
               },
@@ -242,6 +233,40 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
                   physics: const BouncingScrollPhysics(),
                   controller: _scrollController,
                   slivers: [
+                    if (_hasSecondaryError)
+                      SliverToBoxAdapter(
+                        child: Container(
+                          color: TWColor.red50,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: Spacing.md, vertical: Spacing.sm),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  "Couldn't fetch new announcements. Check your connection and try again later.",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .copyWith(color: TWColor.red700),
+                                ),
+                              ),
+                              const SizedBox(width: Spacing.sm),
+                              IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _hasSecondaryError = false;
+                                    });
+                                    _pollingTimer.cancel();
+                                    return _handlePoll();
+                                  },
+                                  icon: const Icon(Icons.refresh,
+                                      color: TWColor.red600,
+                                      size: IconSizes.iconMd))
+                            ],
+                          ),
+                        ),
+                      ),
                     Skeletonizer.sliver(
                       enabled: _isLoading,
                       effect: const ShimmerEffect(
