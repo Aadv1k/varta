@@ -78,6 +78,11 @@ class AnnouncementScope(models.Model):
             return False
 
         if user.user_type == User.UserType.TEACHER:
+            # this makes sure all the student announcements are visible to the teachers 
+            # NOTE: we could also make sure that announcements are only visible within the same STD_DIV, currently this is the simplest approach
+            if self.filter in { self.FilterType.STU_STANDARD,  self.FilterType.STU_STANDARD_DIVISION }:
+                return True
+
             if self.filter == self.FilterType.ALL_TEACHERS:
                 return True
             if self.filter == self.FilterType.T_SUBJECT_TEACHER_OF_STANDARD_DIVISION:

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/common/const.dart';
 import 'package:app/common/varta_theme.dart';
 import 'package:app/firebase_options.dart';
@@ -5,6 +7,7 @@ import 'package:app/models/login_data.dart';
 import 'package:app/screens/announcement_inbox/mobile/announcement_inbox.dart';
 import 'package:app/screens/welcome/welcome.dart';
 import 'package:app/services/notification_service.dart';
+import 'package:app/services/simple_cache_service.dart';
 import 'package:app/services/token_service.dart';
 import 'package:app/widgets/generic_error_box.dart';
 import 'package:app/widgets/providers/app_provider.dart';
@@ -72,7 +75,12 @@ class _VartaAppState extends State<VartaApp> {
           await service.firebaseMessaging.getNotificationSettings();
 
       if (settings.authorizationStatus != AuthorizationStatus.denied) {
-        if (appState.user?.contacts != null &&
+        final loginThrough =
+            await SimpleCacheService().fetchOrNull("loggedInThrough");
+
+        if (loginThrough != null) {
+          await service.initNotifications(jsonDecode(loginThrough.data));
+        } else if (appState.user?.contacts != null &&
             appState.user!.contacts.isNotEmpty) {
           await service
               .initNotifications(appState.user!.contacts.first.contactData);

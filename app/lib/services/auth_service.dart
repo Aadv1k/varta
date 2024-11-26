@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app/common/exceptions.dart';
 import 'package:app/models/login_data.dart';
 import 'package:app/services/api_service.dart';
+import 'package:app/services/simple_cache_service.dart';
 import 'package:app/services/token_service.dart';
 import 'package:flutter/foundation.dart';
 
@@ -54,7 +55,19 @@ class AuthService {
     }
   }
 
-  void logout() {
+  void logout() async {
+    final cachedLogin =
+        await SimpleCacheService().fetchOrNull("loggedInThrough");
+
+    if (cachedLogin != null) {
+      try {
+        deregisterDevice(jsonDecode(cachedLogin.data));
+      } catch (_) {
+      } finally {
+        await SimpleCacheService().delete("loggedInThrough");
+      }
+    }
+
     _tokenService.removeAllTokens();
   }
 
@@ -64,6 +77,22 @@ class AuthService {
 
   Future<void> renewToken() {
     throw UnimplementedError("AUTH SERVICE RENWEW TOKEN NOT IMPLEMENTED");
+  }
+
+  Future<void> deregisterDevice(String contactData) async {
+    try {
+      final response = await _apiService.makeRequest(
+        HTTPMethod.DELETE,
+        "/me/device/$contactData",
+        isAuthenticated: true,
+      );
+
+      if (response.statusCode != 204) {
+        throw ApiException.fromResponse(response);
+      }
+    } on ApiClientException catch (_) {
+      rethrow;
+    }
   }
 
   Future<void> registerDevice(String token, String contactData) async {

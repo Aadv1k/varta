@@ -1,3 +1,4 @@
+import 'package:app/services/auth_service.dart';
 import 'package:app/services/simple_cache_service.dart';
 import 'package:app/widgets/state/app_state.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,8 @@ class AppProvider extends InheritedWidget {
 
   void logout() async {
     SimpleCacheService cacheService = SimpleCacheService();
+
+    AuthService().logout();
 
     state.setUser(null);
     state.setAnnouncements([]);

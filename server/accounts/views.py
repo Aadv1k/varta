@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 
 from .serializers import UserLoginSerializer, UserVerificationSerializer, UserDeviceSerializer, UserSerializer
 
-from .models import UserContact
+from .models import UserContact, UserDevice
 
 from django.conf import settings
 
@@ -160,23 +160,38 @@ def user_refresh(request):
 @api_view(["POST"])
 @permission_classes([IsJWTAuthenticated])
 def user_device(request):
-    serializer = UserDeviceSerializer(data={
-        "user": request.user.id,
-        **request.data
-    })
+        serializer = UserDeviceSerializer(data={
+            "user": request.user.id,
+            **request.data
+        })
 
-    if not serializer.is_valid():
+        if not serializer.is_valid():
+            return ErrorResponseBuilder() \
+                    .set_code(400)        \
+                    .set_message("We couldn't register your device. Please check the details you entered and try again.") \
+                    .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
+                    .build()
+        
+        serializer.save()
+
+        return SuccessResponseBuilder() \
+                    .set_code(200) \
+                    .set_message("Your device was successfully registered") \
+                    .build()
+
+@api_view(["DELETE"])
+@permission_classes([IsJWTAuthenticated])
+def user_deregister_device(request, contact_data):
+    try:
+        user_device = UserDevice.objects.get(user__id=request.user.id, logged_in_through__contact_data=contact_data)
+        user_device.delete()
+    except:
         return ErrorResponseBuilder() \
                 .set_code(400)        \
-                .set_message("We couldn't register your device. Please check the details you entered and try again.") \
-                .set_details([{"field": key, "error": str(value.pop())} for key, value in serializer.errors.items() if key != "non_field_errors"]) \
                 .build()
-    
-    serializer.save()
 
     return SuccessResponseBuilder() \
-                .set_code(200) \
-                .set_message("Your device was successfully registered") \
+                .set_code(204) \
                 .build()
 
 

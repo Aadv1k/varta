@@ -157,7 +157,6 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         return announcement
     
     def update(self, instance, validated_data):
-        print("NOW UPADTING")
         instance.title = validated_data.get("title", instance.title)
         instance.body = validated_data.get("body", instance.body)
 
@@ -171,7 +170,6 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         instance.updated_at = datetime.now(timezone.utc)
 
         new_attachments = validated_data.get("attachments", [])
-        print(new_attachments)
 
         if len(new_attachments) == 0:
             for attachment in instance.attachments.all():

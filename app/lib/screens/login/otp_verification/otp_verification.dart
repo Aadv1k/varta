@@ -57,6 +57,7 @@ class _OTPVerificationState extends State<OTPVerification> {
       SimpleCacheService cacheService = SimpleCacheService();
 
       cacheService.store("user", jsonEncode(user.toJson()));
+      cacheService.store("loggedInThrough", jsonEncode(loginData.inputData!));
 
       final appState = await AppState.initialize(user: user);
 
@@ -66,8 +67,7 @@ class _OTPVerificationState extends State<OTPVerification> {
         final settings = await notificationService.firebaseMessaging
             .getNotificationSettings();
 
-        if ({AuthorizationStatus.notDetermined, AuthorizationStatus.denied}
-            .contains(settings.authorizationStatus)) {
+        if (AuthorizationStatus.denied != settings.authorizationStatus) {
           await notificationService.initNotifications(loginData.inputData!);
         }
       } catch (exc) {

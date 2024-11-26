@@ -64,8 +64,7 @@ class UserProfileScreen extends StatelessWidget {
                 'You’ll be signed out of your account. Any unsaved progress may be lost.  Would you like to continue?',
             primaryAction: GenericConfirmatonDialogAction.confirm,
             onCancel: () => Navigator.pop(context),
-            onConfirm: () {
-              AuthService().logout();
+            onConfirm: () async {
               AppProvider.of(parentContext).logout();
               clearAndNavigateBackToLogin(context);
             },

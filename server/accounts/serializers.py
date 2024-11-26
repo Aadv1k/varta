@@ -76,7 +76,6 @@ class UserDeviceSerializer(serializers.ModelSerializer):
         # We handle the validation for it in the save method. This is done to reduce complexity and validation logic
         return value
 
-
     def save(self, **kwargs):
         logged_in_through = self.validated_data.pop("logged_in_through")
         contact_instance = UserContact.objects.get(user=self.validated_data["user"], contact_data=logged_in_through)
