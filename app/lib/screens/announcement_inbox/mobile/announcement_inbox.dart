@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/repository/announcements_repo.dart';
@@ -73,8 +75,8 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
     var initialAnnouncements =
         List<AnnouncementModel>.from(appState.userAnnouncements);
 
-    appState
-        .addAnnouncements([optimisticAnnouncement], isUserAnnouncement: true);
+    appState.setAnnouncements([optimisticAnnouncement, ...initialAnnouncements],
+        isUserAnnouncement: true);
 
     try {
       AnnouncementModel announcementModel =

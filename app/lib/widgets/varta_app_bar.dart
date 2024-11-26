@@ -38,7 +38,10 @@ class VartaAppBar extends StatelessWidget implements PreferredSizeWidget {
             style: IconButton.styleFrom(
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             onPressed: () {
-              onNavigateBack?.call();
+              if (onNavigateBack != null) {
+                onNavigateBack!();
+                return;
+              }
               Navigator.pop(context);
             },
             icon: const Icon(Icons.chevron_left)),

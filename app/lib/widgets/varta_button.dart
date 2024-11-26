@@ -75,7 +75,7 @@ class VartaButton extends StatelessWidget {
     }
 
     return Opacity(
-      opacity: shouldDisable ? 0.75 : 1.0,
+      opacity: shouldDisable ? 0.5 : 1.0,
       child: Container(
         width: fullWidth ? double.infinity : null,
         constraints: fullWidth ? const BoxConstraints(maxWidth: 420) : null,

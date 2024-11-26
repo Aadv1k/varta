@@ -240,38 +240,64 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
 
     return Scaffold(
       backgroundColor: AppColor.primaryBg,
-      appBar: VartaAppBar(actions: [
-        if (isCreateOrModify) ...[
-          if (isModify) ...[
-            IconButton(
-                style: const ButtonStyle(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: _handleDeleteAnnouncement,
-                icon: const Icon(Icons.delete,
-                    color: AppColor.subtitle, size: IconSizes.iconMd)),
+      appBar: VartaAppBar(
+        actions: [
+          if (isCreateOrModify) ...[
+            if (isModify) ...[
+              IconButton(
+                  style: const ButtonStyle(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: _handleDeleteAnnouncement,
+                  icon: const Icon(Icons.delete,
+                      color: AppColor.subtitle, size: IconSizes.iconMd)),
+              const SizedBox(width: Spacing.sm),
+            ],
+            SizedBox(
+              child: IconButton(
+                  style: const ButtonStyle(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: () => _handleAddAttachment(context),
+                  icon: const Icon(Icons.attachment,
+                      color: AppColor.subtitle, size: IconSizes.iconMd)),
+            ),
             const SizedBox(width: Spacing.sm),
-          ],
-          SizedBox(
-            child: IconButton(
-                style: const ButtonStyle(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () => _handleAddAttachment(context),
-                icon: const Icon(Icons.attachment,
-                    color: AppColor.subtitle, size: IconSizes.iconMd)),
-          ),
-          const SizedBox(width: Spacing.sm),
-          VartaButton(
-            onPressed: _announcementData.isValid()
-                ? (isModify
-                    ? _handleSaveAnnouncement
-                    : _handleCreateAnnouncement)
-                : null,
-            label: isModify ? "Save" : "Create",
-            variant: VartaButtonVariant.primary,
-            size: VartaButtonSize.small,
-          ),
-        ]
-      ]),
+            VartaButton(
+              onPressed: _announcementData.isValid()
+                  ? (isModify
+                      ? _handleSaveAnnouncement
+                      : _handleCreateAnnouncement)
+                  : null,
+              label: isModify ? "Save" : "Create",
+              variant: VartaButtonVariant.primary,
+              size: VartaButtonSize.small,
+            ),
+          ]
+        ],
+        onNavigateBack: () {
+          if (!isCreateOrModify) {
+            Navigator.pop(context);
+            return;
+          }
+          showDialog(
+              context: context,
+              builder: (context) {
+                return GenericConfirmationDialog(
+                  onConfirm: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  onCancel: () => Navigator.pop(context),
+                  title: "Discard Changes?",
+                  body:
+                      "Are you sure you want to go back? Any unsaved changes to this announcement will be lost.",
+                  confirmLabel: "Discard Changes",
+                  cancelLabel: "Keep Editing",
+                  primaryAction: GenericConfirmatonDialogAction.cancel,
+                  danger: true,
+                );
+              });
+        },
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
         child: SingleChildScrollView(
@@ -284,6 +310,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                 TextField(
                   minLines: 1,
                   maxLines: null,
+                  autofocus: true,
                   controller: _titleController,
                   style: Theme.of(context).textTheme.headlineLarge!.copyWith(
                       color: AppColor.heading, overflow: TextOverflow.ellipsis),
@@ -403,7 +430,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                   : null,
                               attachment: entry.value))
                           .toList()),
-                  const SizedBox(height: Spacing.sm),
+                  const SizedBox(height: Spacing.md),
                 ],
               )
             ],

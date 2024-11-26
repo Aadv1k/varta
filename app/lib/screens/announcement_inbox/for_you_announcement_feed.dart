@@ -207,7 +207,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
       );
     } else {
       return Center(
-        heightFactor: 0.75,
+        heightFactor: 0.85,
         child: GenericErrorBox(
             size: ErrorSize.medium,
             svgPath: "relax.svg",
