@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:app/common/const.dart';
 import 'package:app/common/sizes.dart';
+import 'package:app/common/utils.dart';
 import 'package:app/screens/announcement/attachment_preview_box.dart';
 import 'package:app/widgets/generic_confirmaton_dialog.dart';
 import 'package:app/widgets/varta_app_bar.dart';
@@ -331,6 +332,18 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                         .textTheme
                         .headlineLarge!
                         .copyWith(color: AppColor.heading)),
+              if (!isCreateOrModify) ...[
+                const SizedBox(height: Spacing.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(formatDate(widget.initialAnnouncement!.createdAt),
+                      textAlign: TextAlign.end,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .copyWith(color: AppColor.body)),
+                ),
+              ],
               const SizedBox(height: Spacing.sm),
               const Divider(height: 1, color: AppColor.subtitleLighter),
               const SizedBox(height: Spacing.md),
