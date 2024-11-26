@@ -57,13 +57,12 @@ class TeacherCard extends StatelessWidget {
                                 height: 0.8,
                                 fontWeight: FontWeight.w900,
                                 color: PaletteNeutral.shade100.withOpacity(0.5),
-                                fontSize: FontSize.text5xl * 2,
+                                fontSize: FontSize.text5xl * 1.5,
                               ),
                         )
-                      : const SizedBox(height: 60),
+                      : const SizedBox(height: 54),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: Spacing.md, right: Spacing.md),
+                    padding: const EdgeInsets.only(right: Spacing.sm),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -100,9 +99,9 @@ class TeacherCard extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.only(
-                left: Spacing.md, top: Spacing.md, right: Spacing.md),
-            height: 240,
+            padding: const EdgeInsets.symmetric(
+                vertical: Spacing.md, horizontal: Spacing.sm),
+            height: 260,
             width: double.infinity,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,31 +142,34 @@ class TeacherCard extends StatelessWidget {
                         fontSize: FontSize.text3xl,
                       ),
                 ),
-                const SizedBox(height: Spacing.md),
+                const SizedBox(height: Spacing.lg),
                 if (primaryPhoneNumber != null)
-                  Text(
-                    "PHONE $primaryPhoneNumber",
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          fontFamily: "GeistMono",
-                          color: AppColor.body,
-                          letterSpacing: 0.5,
-                        ),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Text(
+                      "PHONE $primaryPhoneNumber",
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            fontFamily: "GeistMono",
+                            color: AppColor.body,
+                            letterSpacing: 0.5,
+                          ),
+                    ),
                   ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    if (primaryEmail != null)
-                      Text(
-                        "EMAIL $primaryEmail",
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              fontFamily: "GeistMono",
-                              color: AppColor.body,
-                              letterSpacing: 0.5,
-                            ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: Spacing.sm),
+                if (primaryEmail != null)
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Text(
+                      "EMAIL $primaryEmail",
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            fontFamily: "GeistMono",
+                            color: AppColor.body,
+                            letterSpacing: 0.5,
+                          ),
+                    ),
+                  ),
+                const SizedBox(height: Spacing.md),
                 Row(
                   children: [
                     const Spacer(),

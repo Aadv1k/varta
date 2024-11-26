@@ -183,7 +183,7 @@ def user_device(request):
 @permission_classes([IsJWTAuthenticated])
 def user_deregister_device(request, contact_data):
     try:
-        user_device = UserDevice.objects.get(user__id=request.user.id, logged_in_through__contact_data=contact_data)
+        user_device = UserDevice.objects.get(user=request.user, logged_in_through__contact_data=contact_data)
         user_device.delete()
     except:
         return ErrorResponseBuilder() \

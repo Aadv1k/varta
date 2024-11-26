@@ -113,20 +113,19 @@ class StudentCard extends StatelessWidget {
                           letterSpacing: 0.5,
                         ),
                   ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    if (primaryEmail != null)
-                      Text(
-                        "EMAIL ${primaryEmail.contactData}",
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              fontFamily: "GeistMono",
-                              color: PaletteNeutral.shade040,
-                              letterSpacing: 0.5,
-                            ),
-                      ),
-                  ],
-                ),
+                if (primaryEmail != null)
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Text(
+                      "EMAIL ${primaryEmail.contactData}",
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            fontFamily: "GeistMono",
+                            color: PaletteNeutral.shade040,
+                            letterSpacing: 0.5,
+                          ),
+                    ),
+                  ),
                 const SizedBox(height: Spacing.sm),
                 Row(
                   children: [
