@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:app/models/announcement_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/repository/announcements_repo.dart';
@@ -193,14 +191,14 @@ class _AnnouncementInboxScreenState extends State<AnnouncementInboxScreen> {
           )
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(isTeacher ? 82 : 48),
+          preferredSize: Size.fromHeight(isTeacher ? 82 : 46),
           child: Container(
             padding: const EdgeInsets.only(
                 left: Spacing.md, right: Spacing.md, bottom: Spacing.sm),
             child: Column(
               children: [
                 const CustomSearchBar(navigational: true),
-                const SizedBox(height: Spacing.sm),
+                if (isTeacher) const SizedBox(height: Spacing.sm),
                 if (isTeacher)
                   Row(
                     children: [

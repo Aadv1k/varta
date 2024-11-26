@@ -33,12 +33,13 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
   bool _hasError = false;
   bool _isLoading = true;
   int _currentPage = 1;
+  bool cantFetchMore = false;
 
   @override
   void initState() {
     _fetchInitial();
     _pollingTimer =
-        Timer.periodic(const Duration(seconds: 6), (_) => _handlePoll());
+        Timer.periodic(const Duration(seconds: 5), (_) => _handlePoll());
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
@@ -130,40 +131,37 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
           "announcements",
           jsonEncode(
               state.announcements.map((elem) => elem.toJson()).toList()));
+
+      if (!_pollingTimer.isActive) {
+        _pollingTimer =
+            Timer.periodic(const Duration(seconds: 5), (_) => _handlePoll());
+      }
     } catch (exc) {
       if (exc is ApiTokenExpiredException) {
         clearAndNavigateBackToLogin(context);
         return;
       }
-
       if (exc is ApiClientException) {
         setState(() {
           _hasError = true;
         });
-      } else {
-        const VartaSnackbar(
-                snackBarVariant: VartaSnackBarVariant.error,
-                innerText: "Couldn't load more announcements.")
-            .show(context);
+        return;
       }
+      const VartaSnackbar(
+              snackBarVariant: VartaSnackBarVariant.error,
+              innerText: "Couldn't fetch new announcements.")
+          .show(context);
     }
   }
 
   void _handlePage() async {
-    if (!context.mounted) return;
+    if (!context.mounted || cantFetchMore) return;
 
     AppState appState = AppProvider.of(context).state;
 
     try {
       var data =
           await _announcementRepo.getAnnouncements(page: _currentPage + 1);
-
-      if (data.pageNumber == data.maxPages) {
-        // NOTE: yes, if the user keeps trying to fetch further, the app will
-        // make unnecessary calls. However it is safe to assume few users will
-        // reach here, and those who do will unlikely try to keep fetching
-        return;
-      }
 
       appState.addAnnouncements(data.data);
       setState(() => _currentPage = _currentPage + 1);
@@ -173,10 +171,14 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
         clearAndNavigateBackToLogin(context);
         return;
       }
-      // const VartaSnackbar(
-      //         snackBarVariant: VartaSnackBarVariant.error,
-      //         innerText: "Couldn't load more announcements.")
-      //     .show(context);
+      setState(() {
+        cantFetchMore = true;
+      });
+      const VartaSnackbar(
+        snackBarVariant: VartaSnackBarVariant.warning,
+        innerText:
+            "Couldn't fetch more announcements, you've reached the end of the list.",
+      ).show(context);
     } finally {
       setState(() => _isLoading = false);
     }
@@ -233,6 +235,7 @@ class _ForYouAnnouncementFeedState extends State<ForYouAnnouncementFeed> {
               color: AppColor.primaryColor,
               backgroundColor: PaletteNeutral.shade000,
               onRefresh: () async {
+                _pollingTimer.cancel();
                 return _handlePoll();
               },
               child: CustomScrollView(
